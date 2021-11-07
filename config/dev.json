@@ -1,0 +1,17 @@
+{
+  "appconfig":{
+    "middleware":{
+      "disablePoweredBy":true,
+      "compression":true,
+      "morgan":{"useDev":true,"useLogger":true},
+      "cors":{"origins":[],"preflightContinue":false,"credentials":true},
+      "cookieParser":{},
+      "bodyParser":{
+        "json":{"limit":"50mb"},
+        "urlencoded":{"extended":true},
+        "raw":{"type":"audio/wav","limit":"50mb"}
+      },
+      "flash":true
+    }
+  }
+}

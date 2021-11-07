@@ -1,5 +1,5 @@
-import {clear} from "./utils";
-import {allTests} from "./tests";
+import {J} from "./utils";
+import {obaExpressApiTests} from "./tests";
 
-clear();
-allTests();
+J.utils.clear();
+obaExpressApiTests();

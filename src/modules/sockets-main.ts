@@ -1,14 +1,15 @@
 import socketIo,{Socket} from "socket.io";
 import {Server} from "http";
-import {OBAExpressApiSocketsType,OBAExpressApiSocketsConfig,SocketActionCreator} from "./sockets-types";
+import {OBAExpressApiSocketsType,OBAExpressApiSocketsConfig} from "./sockets-types";
+import { Keys } from "@onebro/oba-common";
 
-export interface OBAExpressApiSockets extends OBAExpressApiSocketsType {}
-export class OBAExpressApiSockets {
-  constructor(config:OBAExpressApiSocketsConfig,server:Server){
+export interface OBAExpressApiSockets<Sockets> extends OBAExpressApiSocketsType {}
+export class OBAExpressApiSockets<Sockets> {
+  constructor(config:OBAExpressApiSocketsConfig<Sockets>,server:Server){
     const io = new socketIo.Server(server);
-    const {events} = config;
-    const createSocket = (s:Socket,action?:SocketActionCreator) => action?action(io,s):undefined;
-    io.on("connection",(socket:Socket) => events.forEach(({name,action}) => socket.on(name,createSocket(socket,action))));
-    return io;}}
+    io.on("connection",(s:Socket) => {for(const k in config) s.on(k,config[k as Keys<Sockets>](io,s));});
+    return io;
+  }
+}
 export default OBAExpressApiSockets;
 export * from "./sockets-types";

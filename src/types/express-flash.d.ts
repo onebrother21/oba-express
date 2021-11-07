@@ -8,6 +8,7 @@ interface Flash {
   id?:string;
   appname?:string;
   appuser?:any;
+  authtkn:any;
   ipdata?:any;
   warning?:any;
   error?:any;}

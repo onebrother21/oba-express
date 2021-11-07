@@ -1,9 +1,9 @@
-import {Request,Response} from "express";
-import {appLocals as locals} from "@onebro/oba-common";
-import * as ob from "@onebro/oba-common";
+import {Request} from "express";
+import OBA,{Strings,appLocals as locals} from "@onebro/oba-common";
+import { ApiUserID } from "./vars-types";
 
-export const morganMsgTokens:ob.TypedMethods<Request,string> = {
-  id:(req:Request) => {if(!req.id) req.id = ob.longId();return req.id;},
+export const morganMsgTokens:OBA.TypedMethods<Request,string> = {
+  id:(req:Request) => !req.id?OBA.longId():req.id,
   timestamp:() => new Date().toLocaleString("en-US",locals.dateFormat as any),
   hostname:(req:Request) => req.hostname,
   appName:(req:Request) => req.appname,
@@ -14,7 +14,7 @@ export const morganMsgTokens:ob.TypedMethods<Request,string> = {
   body:(req:Request) => req.body?JSON.stringify(req.body):"",
   errName:(req:Request) => req.error?req.error.name:"",
   errMsg:(req:Request) => req.error?req.error.message:"",
-  errWarning:(req:Request) => (req.error&&req.error.warning).toString(),
+  errWarning:(req:Request) => req.error&&req.error.warning?req.error.warning.toString():"",
   errCode:(req:Request) => req.error&&req.error.code?req.error.code.toString():"",
   errInfo:(req:Request) => req.error&&req.error.info?JSON.stringify(req.error.info):"",
   errErrors:(req:Request) => req.error&&req.error.errors?JSON.stringify(req.error.errors):"",
@@ -27,10 +27,10 @@ const accessMsgStr = `{
   user::remote-user,
   ip::remote-addr,
   referrer::referrer,
-  agent:":user-agent",
+  agent::user-agent,
   http::http-version,
   method::method,
-  path:":url",
+  path::url,
   res-status::status,
   res-size::res[content-length],
   res-time::response-time}`;
@@ -45,17 +45,13 @@ const errorMsgStr = `{
   info:":errInfo",
   errors:":errErrors",
   stack::errStack,}`;
-export const morganMsgFormats:ob.Strings = {access:accessMsgStr,warn:errorMsgStr,error:errorMsgStr};
-export const getAuthTknFromHeader = (req:Request) => {
-  const header = req.headers["authorization"];
-  const hasTkn = header && header.split(" ")[0] == "Token";
-  return hasTkn?header.split(" ")[1]:null;};
-export const checkWhitelist = (origin:string,whitelist:string[]) => {
-  const l = whitelist.length;
-  if(!l) return true;
-  else if(!origin) return false;
-  else{
-    for(let i=0;i<l;i++){if(ob.match(new RegExp(whitelist[i]),origin)){return true;}}
-    return false;
-  }
+export const morganMsgFormats:Strings = {access:accessMsgStr,warn:errorMsgStr,error:errorMsgStr};
+
+export type CheckCORS = Partial<{origin:string;origins:string[];whitelist:ApiUserID[];blacklist:ApiUserID[]}>;
+export const checkCORS = ({origin,origins,whitelist,blacklist}:CheckCORS) => {
+  if(!origin) return false;
+  if(origins) for(let i = 0,l = origins.length;i<l;i++) if(OBA.match(new RegExp(origins[i]),origin)) return true;
+  if(whitelist) for(let i = 0,l = whitelist.length;i<l;i++) if(OBA.match(new RegExp(whitelist[i].id),origin)) return true;
+  if(blacklist) for(let i = 0,l = blacklist.length;i<l;i++) if(OBA.match(new RegExp(blacklist[i].id),origin)) return false;
+  return false;
 };

@@ -1,0 +1,8 @@
+{
+  "appconfig":{
+    "middleware":{
+      "public":{},
+      "views":{"engine":"pug"}
+    }
+  }
+}

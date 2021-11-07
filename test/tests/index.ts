@@ -1,14 +1,16 @@
 import {J} from "../utils";
-import { obaCoreDBInitTests } from "./db";
-import { obaCoreEmitterInitTests } from "./emitter";
-import { obaCoreErrorFactoryInitTests } from "./error-factory";
-import { obaCoreLoggerInitTests } from "./logger";
-import { obaCoreVarsInitTests } from "./vars";
+import { OBAExpressServerInitTests } from "./api";
+import { OBAExpressCoreInitTests } from "./core";
 
-export const allTests = () => J.desc("All Tests",() => {
-  obaCoreVarsInitTests();
-  obaCoreEmitterInitTests();
-  obaCoreErrorFactoryInitTests();
-  obaCoreLoggerInitTests();
-  obaCoreDBInitTests();
+export const init = () => J.utils.desc("INIT",() => {
+  it("Init",async () => {await J.utils.refreshDb();},1E9);
+});
+export const wrapup = () => J.utils.desc("WRAPUP",() => {
+  it("Wrapup",async () => {console.log("complete");},1E9);
+});
+export const obaExpressApiTests = () => J.utils.desc("OBA Express Api",() => {
+  init();
+  OBAExpressCoreInitTests();
+  OBAExpressServerInitTests();
+  wrapup();
 });

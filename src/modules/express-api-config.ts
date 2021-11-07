@@ -1,42 +1,24 @@
 import config from "config";
-import deepmerge from "deepmerge";
-import { DeepPartial } from "@onebro/oba-common";
+import OBA,{ DeepPartial } from "@onebro/oba-common";
 import { coreConfig } from "@onebro/oba-core-api";
-import { OBAExpressApiConfig } from "./express-api-main";
-import { DefaultMainApp,DefaultCustomMiddlewares,DefaultSockets} from "./api-defaults";
+import { OBAExpressApiConfig } from "./express-api-config-type";
 
-const setDefaultConfigWithEnvironment = <EV>(envPrefix:string):OBAExpressApiConfig<EV> => {
-  const prefix = envPrefix.toLocaleUpperCase();
-  const getEnvVar = (s:string) => process.env[prefix + s];
+const setDefaultConfigWithEnvironment = <Ev,Sockets>(prefix:string):OBAExpressApiConfig<Ev,Sockets> => {
   const env = process.env.NODE_ENV.toLocaleUpperCase();
-  const host = getEnvVar("_HOST");
-  const port = Number(getEnvVar("_PORT"));
-  const origins = getEnvVar("_ORIGINS")?getEnvVar("_ORIGINS").split(","):[];
-  const providers = JSON.parse(getEnvVar("_PROVIDERS"));
-  const consumers = JSON.parse(getEnvVar("_CONSUMERS"));
+  const host = OBA.envvar(prefix,"_HOST");
+  const port = Number(OBA.envvar(prefix,"_PORT"));
+  const origins = OBA.envvar(prefix,"_ORIGINS")?OBA.envvar(prefix,"_ORIGINS").split(","):[];
+  const providers = JSON.parse(OBA.envvar(prefix,"_PROVIDERS"));
+  const consumers = JSON.parse(OBA.envvar(prefix,"_CONSUMERS"));
   const settings = {checkConn:false};
-  const initial:OBAExpressApiConfig<EV> = config.get("appconfig");
-  const coreRuntime = coreConfig(envPrefix);
-  const atRuntime:DeepPartial<OBAExpressApiConfig<EV>> = {
-    ...coreRuntime,
-    vars_app:{host,port,providers,consumers,settings},
-    main:DefaultMainApp,
-    middleware:{
-      cors:{origins},
-      session:{
-        name:getEnvVar("_SESSION_ID"),
-        secret:getEnvVar("_SESSION_SECRET"),
-        store:{
-          collectionName:`${envPrefix.toLocaleLowerCase()}sessions`,
-          mongoUrl:coreRuntime.db.connections[prefix],
-        }
-      },
-      main:{},
-      custom:DefaultCustomMiddlewares,
-    },
-    sockets:{events:DefaultSockets},
+  const initial:OBAExpressApiConfig<Ev,Sockets> = config.get("appconfig");
+  const coreRuntime = coreConfig<Ev>(prefix);
+  const atRuntime:DeepPartial<OBAExpressApiConfig<Ev,Sockets>> = {
+    ...coreRuntime as any,
+    vars:{...coreRuntime.vars,host,port,providers,consumers,settings},
+    middleware:{cors:{origins}},
   };
-  const expressConfig = deepmerge(initial,atRuntime) as OBAExpressApiConfig<EV>;
+  const expressConfig = OBA.merge(initial,atRuntime) as OBAExpressApiConfig<Ev,Sockets>;
   return expressConfig;
 };
 export {setDefaultConfigWithEnvironment as expressConfig};

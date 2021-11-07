@@ -1,0 +1,25 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.expressConfig = void 0;
+const config_1 = __importDefault(require("config"));
+const oba_common_1 = __importDefault(require("@onebro/oba-common"));
+const oba_core_api_1 = require("@onebro/oba-core-api");
+const setDefaultConfigWithEnvironment = (prefix) => {
+    const env = process.env.NODE_ENV.toLocaleUpperCase();
+    const host = oba_common_1.default.envvar(prefix, "_HOST");
+    const port = Number(oba_common_1.default.envvar(prefix, "_PORT"));
+    const origins = oba_common_1.default.envvar(prefix, "_ORIGINS") ? oba_common_1.default.envvar(prefix, "_ORIGINS").split(",") : [];
+    const providers = JSON.parse(oba_common_1.default.envvar(prefix, "_PROVIDERS"));
+    const consumers = JSON.parse(oba_common_1.default.envvar(prefix, "_CONSUMERS"));
+    const settings = { checkConn: false };
+    const initial = config_1.default.get("appconfig");
+    const coreRuntime = (0, oba_core_api_1.coreConfig)(prefix);
+    const atRuntime = Object.assign(Object.assign({}, coreRuntime), { vars: Object.assign(Object.assign({}, coreRuntime.vars), { host, port, providers, consumers, settings }), middleware: { cors: { origins } } });
+    const expressConfig = oba_common_1.default.merge(initial, atRuntime);
+    return expressConfig;
+};
+exports.expressConfig = setDefaultConfigWithEnvironment;
+//# sourceMappingURL=express-api-config.js.map
