@@ -87,12 +87,6 @@ export declare type BodyParserOpts = {
     };
 };
 export declare type PassportOpts = {};
-export declare type SendReqOpts = {
-    url: string;
-    method: "get" | "put" | "post" | "delete";
-    headers: any;
-    body: any;
-};
 export declare type OBAExpressApiMiddlewareBaseConfig = Partial<{
     disablePoweredBy: AnyBoolean;
     flash: AnyBoolean;

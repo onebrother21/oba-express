@@ -7,8 +7,8 @@ export interface OBAExpressApi<Ev, Sockets> extends OBAExpressApiBaseType<Ev, So
 export declare class OBAExpressApi<Ev, Sockets> {
     config: OBAExpressApiConfig<Ev, Sockets>;
     constructor(config: OBAExpressApiConfig<Ev, Sockets>);
-    init: () => void;
-    createRouter(): import("express-serve-static-core").Express;
+    init: () => Promise<void>;
+    createRouter: () => Promise<import("express-serve-static-core").Express>;
     get routes(): RouterEndpoint[];
     start: (db?: AnyBoolean, server?: AnyBoolean) => Promise<void>;
     private startDb;

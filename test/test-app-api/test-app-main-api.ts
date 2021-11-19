@@ -3,35 +3,40 @@ import { body } from "express-validator";
 import { TestAppMainApi } from "./test-app-types";
 import {
   Handler,
-  handleReqValidation,
-  getAuthTkn,
-  validateAuthTkn,
   generateTkn,
+  getApiUserCreds,
+  validateApiUserCreds,
+  refreshApiUserCreds,
+  handleReqValidation,
+  handleApiAction,
+  handleApiResponse,
 } from "../../src";
 
-const TestAppMainApi:TestAppMainApi = api => {
+const TestAppMainApi:TestAppMainApi = async api => {
   const c$ = api.config.middleware["auth"].cookie;
   const s$ = api.config.middleware["auth"].secret;
-  const a1 = getAuthTkn(s$);
-  const a2 = validateAuthTkn();
+  const a1 = getApiUserCreds(c$,s$,s$);
+  const a2 = validateApiUserCreds();
+  const a3 = refreshApiUserCreds(c$,s$,s$);
   const v1 = handleReqValidation([
     body("admin").exists(),
     body("admin").equals("ObAuth")
   ]);
-  const ready:Handler = async (req,res,next) => res.json({ready:true});
-  const readyTkn:Handler = async (req,res,next) => res.json({ready:true,token:generateTkn({user:"jack",yessir:12},s$)});
-  const renderView:Handler = async (req,res,next) => res.render("index");
-  const sendConfig:Handler = async (req,res,next) => res.json({config:api.events.values["config"].toString()});
-  const printTkn:Handler = async (req,res,next) => {console.log((<any>req).authtkn);next();};
+  const h1 = handleApiAction(async (req) => ({data:{ready:true}}),200);
+  const h2 = handleApiAction(async (req) => ({data:{config:api.events.values["config"].toString()}}),200);
+  const h3 = handleApiAction(async (req) => ({data:{test:10},auth:true,user:"jackswift"}),200);
+  const h4 = handleApiAction(async (req) => ({data:{test:11},auth:true,user:"jackswift"}),200);
+  const r1 = handleApiResponse();
+  const r2:Handler = async (req,res,next) => res.render("index");
   
   const router = Router();
-  router.get("/",ready);
-  router.get("/test-only",ready);
-  router.post("/test-only",v1,sendConfig);
-  router.get("/oba-express/v1/en/test-only",ready);
-  router.post("/oba-express/v1/en/test-only",v1,readyTkn);
-  router.get("/oba-express/v1/en/test-tkn",a1,a2,printTkn,readyTkn);
-  router.get("/sample",renderView);
+  const entry = "/oba-express/v1/en";
+  router.get("/",h1,r1);
+  router.get("/sample",r2);
+  router.get("/test-only",h1,r1);
+  router.post("/test-only",v1,h2,r1);
+  router.post(entry+"/test-tkn",v1,h3,a3,r1);
+  router.get(entry+"/test-tkn",a1,a2,h4,a3,r1);
   return router;
 };
 export {TestAppMainApi};

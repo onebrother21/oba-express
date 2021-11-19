@@ -8,7 +8,6 @@ const config_1 = __importDefault(require("config"));
 const oba_common_1 = __importDefault(require("@onebro/oba-common"));
 const oba_core_api_1 = require("@onebro/oba-core-api");
 const setDefaultConfigWithEnvironment = (prefix) => {
-    const env = process.env.NODE_ENV.toLocaleUpperCase();
     const host = oba_common_1.default.envvar(prefix, "_HOST");
     const port = Number(oba_common_1.default.envvar(prefix, "_PORT"));
     const origins = oba_common_1.default.envvar(prefix, "_ORIGINS") ? oba_common_1.default.envvar(prefix, "_ORIGINS").split(",") : [];

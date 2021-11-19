@@ -8,6 +8,7 @@ export type DefaultEvents = Enum<boolean,"init"|"shutdown"> & {
   serverOK:Enum<string,"name"|"env"|"host"> & {port:number;};
   dbOK:{name:string,uri:string};
   test:number;
+  test2:number;
 };
 
 export type SocketUser = {id:string;username:string;role:string;};

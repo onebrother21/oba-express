@@ -1,10 +1,10 @@
+import { Request } from "express";
 import fs from "fs";
 import path from "path";
 import jwt from "jsonwebtoken";
 import {ValidationChain,validationResult} from "express-validator";
-import OBA,{encrypt,decrypt,Strings,AppError} from "@onebro/oba-common";
-import {Handler} from "./middleware-handler-types";
-import {SendReqOpts} from "./middleware-base-types";
+import OBA,{encrypt,decrypt,Strings,AppError, AnyBoolean, Enum} from "@onebro/oba-common";
+import {Handler,SendReqOpts} from "./middleware-handler-types";
 
 export const readCert = () => {
   const certFile = path.resolve(__dirname, "ssl/client.crt");
@@ -27,17 +27,15 @@ export const verifyTkn = (header:string,secret:string) => {
   if(!token) return null;
   return jwt.verify(token,secret);
 };
-export const getAuthTkn = (secret:string) => {
+export const getApiUserCreds = (cookieName:string,cookieSecret:string,authSecret:string) => {
   const handler:Handler = async (req,res,next) => {
-    try{
-      req.authtkn = verifyTkn(req.headers.authorization,secret);
-      return next();
-    }
-    catch(e){return next(e);}
-  };
+    const cookie = req.cookies[cookieName]  as string;
+    req.appuser = cookie||null;//?decrypt(cookieSecret,cookie):null;
+    req.authtkn = verifyTkn(req.headers.authorization,authSecret);
+    return next();};
   return handler;
 };
-export const validateAuthTkn = () => {
+export const validateApiUserCreds = () => {
   const handler:Handler = async (req,res,next) => req.authtkn?next():next(new AppError({
     message:"Not Authorized",
     status:401
@@ -54,11 +52,36 @@ export const handleReqValidation = (validators:ValidationChain[]) => {
   };
   return [...validators,handler];
 };
-export const handleApiAction = (action:Function,statusOK:number = 200) => {
+export type ActionResponse = {
+  data:Enum<any,string>;
+  user?:string;
+  auth?:AnyBoolean;
+  status?:number;
+  token?:string;
+};
+export const handleApiAction = (action:(req:Request) => Promise<ActionResponse>,statusOK:number = 200) => {
   const handler:Handler = async (req,res,next) => {
     try {
-      res.locals.actionResult = await action(req);
-      res.locals.actionStatus = statusOK;
+      const {user,data,auth} = await action(req);
+      res.locals.user = user,
+      res.locals.data = data,
+      res.locals.auth = auth,
+      res.locals.status = statusOK;
+      return next();
+    }
+    catch(e){return next(e);}
+  };
+  return handler;
+};
+export const refreshApiUserCreds = (cookieName:string,cookieSecret:string,authSecret:string) => {
+  const handler:Handler = async (req,res,next) => {
+  try{
+      const appuser = res.locals.user||req.appuser;
+      const appuserEnc = appuser||null;//?encrypt(cookieSecret,appuser):null;
+      const token = res.locals.auth?generateTkn({appuser,okto:"use-api",role:"USER"},authSecret):null;
+      console.log({appuserEnc,token});
+      appuserEnc?res.cookie(cookieName,appuserEnc,{maxAge:900000,httpOnly:true}):null;
+      res.locals.token = token;
       return next();
     }
     catch(e){return next(e);}
@@ -66,10 +89,7 @@ export const handleApiAction = (action:Function,statusOK:number = 200) => {
   return handler;
 };
 export const handleApiResponse = () => {
-  const handler:Handler = async (req,res,next) => {
-    if(!res.locals.actionResult) return next();
-    res.status(res.locals.actionStatus).json(res.locals.actionResult);
-  };
+  const handler:Handler = async (req,res,next) => res.status(res.locals.status).json(res.locals);
   return handler;
 };
 export const sendreq = async <T>(o:SendReqOpts):Promise<T> => {
@@ -84,19 +104,6 @@ export const sendreq = async <T>(o:SendReqOpts):Promise<T> => {
   catch(e){OBA.error(e.message,e.code);throw e;}
 };
 /*
-export const validateAppUser = (cookieName:string,key:string) => {
-  const handler:Handler = async (req,res,next) => {
-    const cookie = req.cookies[cookieName]  as string;
-    if(cookie) req.appuser = decrypt(key,cookie);
-    return next();};
-  return handler;};
-export const refreshAppUser = (cookieName:string,key:string) => {
-  const handler:Handler = async (req,res,next) => {
-    if(res.locals.actionResult){
-      const usernameEnc = encrypt(key,res.locals.actionResult.username||req.appuser);
-      res.cookie(cookieName,usernameEnc,{maxAge:900000,httpOnly:true});}
-    return next();};
-  return handler;};
 export const mapUserRole = (K:Strings,k?:string) => !k?"G":Object.keys(K).find(s => K[s] == k);
 export const validateUserRole = (roles?:string[]) => {
   const R = roles || ["USER","GUEST"];

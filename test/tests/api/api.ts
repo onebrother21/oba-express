@@ -2,7 +2,7 @@ import {J,ResponseData} from "../../utils";
 import {SuperTest,Test,Response} from "supertest";
 
 export const OBAExpressApiTests = () => J.utils.desc("OBA EXPRESS TEST API",() => {
-  let app:SuperTest<Test>,data:ResponseData = J.utils.newResponseData();
+  let app:SuperTest<Test>,res_:ResponseData = J.utils.newResponseData();
   it("init w/o errors",async () => {
     app = (await J.utils.init("OBA_EXPRESS",true)).app;
     J.is(app);
@@ -12,7 +12,7 @@ export const OBAExpressApiTests = () => J.utils.desc("OBA EXPRESS TEST API",() =
     .get("/")
     .expect(403)
     .expect((res:Response) => {
-      J.utils.handleResponse(data,res);
+      J.utils.handleResponse(res_,res);
       J.true(/cors/i.test(res.body.message));
     })
     .catch(e => {console.error(e);throw e;});
@@ -23,7 +23,7 @@ export const OBAExpressApiTests = () => J.utils.desc("OBA EXPRESS TEST API",() =
     .set("Origin","https://oihihih.com")
     .expect(403)
     .expect((res:Response) => {
-      J.utils.handleResponse(data,res);
+      J.utils.handleResponse(res_,res);
       J.true(/cors/i.test(res.body.message));
     })
     .catch(e => {console.error(e);throw e;});
@@ -34,12 +34,12 @@ export const OBAExpressApiTests = () => J.utils.desc("OBA EXPRESS TEST API",() =
     .set("Origin","https://oba-dev-apps.com")
     .expect(200)
     .expect((res:Response) => {
-      J.utils.handleResponse(data,res);
-      J.is(data.cookies["_bc_0"]);
-      J.is(data.cookies["_somesession"]);
-      J.is(data.cookies["_csrf"]);
-      J.is(data.cookies["XSRF-TOKEN"]);
-      //console.log(data);
+      J.utils.handleResponse(res_,res);
+      J.is(res_.cookies["_bc_0"]);
+      J.is(res_.cookies["_somesession"]);
+      J.is(res_.cookies["_csrf"]);
+      J.is(res_.cookies["XSRF-TOKEN"]);
+      J.is(res_.body.data.ready);
     })
     .catch(e => {console.error(e);throw e;});
   },1E9);
@@ -47,12 +47,12 @@ export const OBAExpressApiTests = () => J.utils.desc("OBA EXPRESS TEST API",() =
     await app
     .get("/test-only")
     .set("Origin","https://oba-dev-apps.com")
-    .set("Cookie",data.cookieArr)
+    .set("Cookie",res_.cookieArr)
     .expect("Content-Type",/json/)
     .expect(200)
     .expect((res:Response) => {
-      J.is(res.body.ready);
-      J.utils.handleResponse(data,res);
+      J.utils.handleResponse(res_,res);
+      J.is(res_.body.data.ready);
     })
     .catch(e => {console.error(e);throw e;});
   },1E9);
@@ -60,12 +60,12 @@ export const OBAExpressApiTests = () => J.utils.desc("OBA EXPRESS TEST API",() =
     await app
     .get("/test-only1")
     .set("Origin","https://oba-dev-apps.com")
-    .set("Cookie",data.cookieArr)
+    .set("Cookie",res_.cookieArr)
     .expect("Content-Type",/json/)
     .expect(404)
     .expect((res:Response) => {
-      J.utils.handleResponse(data,res);
-      J.true(/not found/.test(res.body.message));
+      J.utils.handleResponse(res_,res);
+      J.true(/not found/.test(res_.body.message));
     })
     .catch(e => {console.error(e);throw e;});
   },1E9); 
@@ -74,13 +74,13 @@ export const OBAExpressApiTests = () => J.utils.desc("OBA EXPRESS TEST API",() =
     .post("/test-only")
     .send({admin:"ObAuth"})
     .set("Origin","https://oba-dev-apps.com")
-    .set("Cookie",data.cookieArr)
+    .set("Cookie",res_.cookieArr)
     .expect("Content-Type",/json/)
     .expect(403)
     .expect((res:Response) => {
-      J.utils.handleResponse(data,res);
-      J.true(/access denied/i.test(res.body.message));
-      J.true(/csrf/i.test(res.body.info));
+      J.utils.handleResponse(res_,res);
+      J.true(/access denied/i.test(res_.body.message));
+      J.true(/csrf/i.test(res_.body.info));
     })
     .catch(e => {console.error(e);throw e;});
   },1E9);
@@ -90,13 +90,13 @@ export const OBAExpressApiTests = () => J.utils.desc("OBA EXPRESS TEST API",() =
     .send({admin:"ObAuth"})
     .set("Origin","https://oba-dev-apps.com")
     .set("XSRF-TOKEN","snickerdoodle")
-    .set("Cookie",data.cookieArr)
+    .set("Cookie",res_.cookieArr)
     .expect("Content-Type",/json/)
     .expect(403)
     .expect((res:Response) => {
-      J.utils.handleResponse(data,res);
-      J.true(/access denied/i.test(res.body.message));
-      J.true(/csrf/i.test(res.body.info));
+      J.utils.handleResponse(res_,res);
+      J.true(/access denied/i.test(res_.body.message));
+      J.true(/csrf/i.test(res_.body.info));
     })
     .catch(e => {console.error(e);throw e;});
   },1E9);
@@ -105,15 +105,15 @@ export const OBAExpressApiTests = () => J.utils.desc("OBA EXPRESS TEST API",() =
     .post("/test-only")
     .send({admi:"ObAuth"})
     .set("Origin","https://oba-dev-apps.com")
-    .set("XSRF-TOKEN",data.csrfToken)
-    .set("Cookie",data.cookieArr)
+    .set("XSRF-TOKEN",res_.csrfToken)
+    .set("Cookie",res_.cookieArr)
     .set("Accept","application/json")
     .expect("Content-Type",/json/)
     .expect(422)
     .expect((res:Response) => {
-      J.utils.handleResponse(data,res);
-      J.true(/Check data/.test(res.body.message));
-      J.true(/invalid/i.test(res.body.errors[0].admin));
+      J.utils.handleResponse(res_,res);
+      J.true(/Check data/.test(res_.body.message));
+      J.true(/invalid/i.test(res_.body.errors[0].admin));
     })
     .catch(e => {console.error(e);throw e;});
   },1E9);
@@ -122,15 +122,15 @@ export const OBAExpressApiTests = () => J.utils.desc("OBA EXPRESS TEST API",() =
     .post("/test-only")
     .send({admin:"ObAuth1"})
     .set("Origin","https://oba-dev-apps.com")
-    .set("XSRF-TOKEN",data.csrfToken)
-    .set("Cookie",data.cookieArr)
+    .set("XSRF-TOKEN",res_.csrfToken)
+    .set("Cookie",res_.cookieArr)
     .set("Accept","application/json")
     .expect("Content-Type",/json/)
     .expect(422)
     .expect((res:Response) => {
-      J.utils.handleResponse(data,res);
-      J.true(/Check data/.test(res.body.message));
-      J.true(/invalid/i.test(res.body.errors[0].admin));
+      J.utils.handleResponse(res_,res);
+      J.true(/Check data/.test(res_.body.message));
+      J.true(/invalid/i.test(res_.body.errors[0].admin));
     })
     .catch(e => {console.error(e);throw e;});
   },1E9);
@@ -139,72 +139,65 @@ export const OBAExpressApiTests = () => J.utils.desc("OBA EXPRESS TEST API",() =
     .post("/test-only")
     .send({admin:"ObAuth"})
     .set("Origin","https://oba-dev-apps.com")
-    .set("XSRF-TOKEN",data.csrfToken)
-    .set("Cookie",data.cookieArr)
+    .set("XSRF-TOKEN",res_.csrfToken)
+    .set("Cookie",res_.cookieArr)
     .set("Accept","application/json")
     .expect("Content-Type",/json/)
     .expect(200)
     .expect((res:Response) => {
-      J.utils.handleResponse(data,res);
-      console.log(res.body);
+      J.utils.handleResponse(res_,res);
+      J.is(res_.body.data.config);
     })
     .catch(e => {console.error(e);throw e;});
   },1E9);
-  it("Api Test: GET /oba-express/v1/en/test-only [401 - No Api Creds]",async () => {
+  it("Api Test: POST /oba-express/v1/en/test-tkn [401 - No Api Creds]",async () => {
     await app
-    .get("/oba-express/v1/en/test-only")
+    .post("/oba-express/v1/en/test-tkn")
+    .send({admin:"ObAuth"})
     .set("Origin","https://oba-dev-apps.com")
+    .set("XSRF-TOKEN",res_.csrfToken)
+    .set("Cookie",res_.cookieArr)
     .expect(401)
     .expect((res:Response) => {
-      J.utils.handleResponse(data,res);
-      J.true(/not provided/i.test(res.body.message));
-      J.true(/cred/i.test(res.body.message));
+      J.utils.handleResponse(res_,res);
+      J.true(/not provided/i.test(res_.body.message));
+      J.true(/cred/i.test(res_.body.message));
     })
     .catch(e => {console.error(e);throw e;});
   },1E9);
-  it("Api Test: GET /oba-express/v1/en/test-only [401 - Bad Api Creds]",async () => {
+  it("Api Test: POST /oba-express/v1/en/test-tkn [401 - Bad Api Creds]",async () => {
     await app
-    .get("/oba-express/v1/en/test-only")
+    .post("/oba-express/v1/en/test-tkn")
+    .send({admin:"ObAuth"})
     .set("Origin","https://oba-dev-apps.com")
     .set("OBA-CLIENT-ID","00-obA-express")
     .set("OBA-CLIENT-KEY","uenuvenv")
+    .set("XSRF-TOKEN",res_.csrfToken)
+    .set("Cookie",res_.cookieArr)
     .expect(401)
     .expect((res:Response) => {
-      J.utils.handleResponse(data,res);
-      J.true(/invalid/i.test(res.body.message));
-      J.true(/cred/i.test(res.body.message));
+      J.utils.handleResponse(res_,res);
+      J.true(/invalid/i.test(res_.body.message));
+      J.true(/cred/i.test(res_.body.message));
     })
     .catch(e => {console.error(e);throw e;});
   },1E9);
-  it("Api Test: GET /oba-express/v1/en/test-only [200 - Api Creds OK]",async () => {
+  it("Api Test: POST /oba-express/v1/en/test-tkn [200 - Api Creds OK, Get Auth Tkn, Get Auth Cookie]",async () => {
     await app
-    .get("/oba-express/v1/en/test-only")
-    .set("Origin","https://oba-dev-apps.com")
-    .set("OBA-CLIENT-ID","00-obA-express")
-    .set("OBA-CLIENT-KEY","1873487748")
-    .expect("Content-Type",/json/)
-    .expect(200)
-    .expect((res:Response) => {
-      J.is(res.body.ready);
-      J.utils.handleResponse(data,res);
-    })
-    .catch(e => {console.error(e);throw e;});
-  },1E9);
-  it("Api Test: POST /oba-express/v1/en/test-only [200 - Get Tkn]",async () => {
-    await app
-    .post("/oba-express/v1/en/test-only")
+    .post("/oba-express/v1/en/test-tkn")
     .send({admin:"ObAuth"})
     .set("Origin","https://oba-dev-apps.com")
     .set("OBA-CLIENT-ID","00-obA-express")
     .set("OBA-CLIENT-KEY","1873487748")
-    .set("XSRF-TOKEN",data.csrfToken)
-    .set("Cookie",data.cookieArr)
-    .set("Accept","application/json")
+    .set("XSRF-TOKEN",res_.csrfToken)
+    .set("Cookie",res_.cookieArr)
     .expect("Content-Type",/json/)
     .expect(200)
     .expect((res:Response) => {
-      J.utils.handleResponse(data,res);
-      console.log(res.body);
+      J.utils.handleResponse(res_,res);
+      J.is(res_.cookies["_ob_auth_11"]);
+      J.is(res_.authToken);
+      J.is(res_.body.data.test,10);
     })
     .catch(e => {console.error(e);throw e;});
   },1E9);
@@ -217,7 +210,7 @@ export const OBAExpressApiTests = () => J.utils.desc("OBA EXPRESS TEST API",() =
     .expect("Content-Type",/json/)
     .expect(401)
     .expect((res:Response) => {
-      J.utils.handleResponse(data,res);
+      J.utils.handleResponse(res_,res);
     })
     .catch(e => {console.error(e);throw e;});
   },1E9);
@@ -227,11 +220,11 @@ export const OBAExpressApiTests = () => J.utils.desc("OBA EXPRESS TEST API",() =
     .set("Origin","https://oba-dev-apps.com")
     .set("OBA-CLIENT-ID","00-obA-express")
     .set("OBA-CLIENT-KEY","1873487748")
-    .set("Authorization","Bobo "+data.authToken)
+    .set("Authorization","Bobo "+res_.authToken)
     .expect("Content-Type",/json/)
     .expect(401)
     .expect((res:Response) => {
-      J.utils.handleResponse(data,res);
+      J.utils.handleResponse(res_,res);
     })
     .catch(e => {console.error(e);throw e;});
   },1E9);
@@ -241,12 +234,15 @@ export const OBAExpressApiTests = () => J.utils.desc("OBA EXPRESS TEST API",() =
     .set("Origin","https://oba-dev-apps.com")
     .set("OBA-CLIENT-ID","00-obA-express")
     .set("OBA-CLIENT-KEY","1873487748")
-    .set("Authorization","Bearer "+data.authToken)
+    .set("Authorization","Bearer "+res_.authToken)
     .expect("Content-Type",/json/)
     .expect(200)
     .expect((res:Response) => {
-      J.is(res.body.token);
-      J.utils.handleResponse(data,res);
+      J.utils.handleResponse(res_,res);
+      J.is(res_.cookies["_ob_auth_11"]);
+      J.is(res_.authToken);
+      J.is(res_.body.data.test,11);
+      console.log(res_.body);
     })
     .catch(e => {console.error(e);throw e;});
   },1E9);

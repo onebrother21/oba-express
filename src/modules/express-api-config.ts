@@ -4,7 +4,6 @@ import { coreConfig } from "@onebro/oba-core-api";
 import { OBAExpressApiConfig } from "./express-api-config-type";
 
 const setDefaultConfigWithEnvironment = <Ev,Sockets>(prefix:string):OBAExpressApiConfig<Ev,Sockets> => {
-  const env = process.env.NODE_ENV.toLocaleUpperCase();
   const host = OBA.envvar(prefix,"_HOST");
   const port = Number(OBA.envvar(prefix,"_PORT"));
   const origins = OBA.envvar(prefix,"_ORIGINS")?OBA.envvar(prefix,"_ORIGINS").split(","):[];

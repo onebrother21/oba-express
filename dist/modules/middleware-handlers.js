@@ -42,7 +42,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sendreq = exports.handleApiResponse = exports.handleApiAction = exports.handleReqValidation = exports.validateAuthTkn = exports.getAuthTkn = exports.verifyTkn = exports.generateTkn = exports.readCert = void 0;
+exports.sendreq = exports.handleApiResponse = exports.refreshApiUserCreds = exports.handleApiAction = exports.handleReqValidation = exports.validateApiUserCreds = exports.getApiUserCreds = exports.verifyTkn = exports.generateTkn = exports.readCert = void 0;
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
@@ -74,20 +74,17 @@ const verifyTkn = (header, secret) => {
     return jsonwebtoken_1.default.verify(token, secret);
 };
 exports.verifyTkn = verifyTkn;
-const getAuthTkn = (secret) => {
+const getApiUserCreds = (cookieName, cookieSecret, authSecret) => {
     const handler = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-        try {
-            req.authtkn = (0, exports.verifyTkn)(req.headers.authorization, secret);
-            return next();
-        }
-        catch (e) {
-            return next(e);
-        }
+        const cookie = req.cookies[cookieName];
+        req.appuser = cookie || null; //?decrypt(cookieSecret,cookie):null;
+        req.authtkn = (0, exports.verifyTkn)(req.headers.authorization, authSecret);
+        return next();
     });
     return handler;
 };
-exports.getAuthTkn = getAuthTkn;
-const validateAuthTkn = () => {
+exports.getApiUserCreds = getApiUserCreds;
+const validateApiUserCreds = () => {
     const handler = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         return req.authtkn ? next() : next(new oba_common_1.AppError({
             message: "Not Authorized",
@@ -96,7 +93,7 @@ const validateAuthTkn = () => {
     });
     return handler;
 };
-exports.validateAuthTkn = validateAuthTkn;
+exports.validateApiUserCreds = validateApiUserCreds;
 const handleReqValidation = (validators) => {
     const handler = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         const errors = (0, express_validator_1.validationResult)(req);
@@ -112,8 +109,11 @@ exports.handleReqValidation = handleReqValidation;
 const handleApiAction = (action, statusOK = 200) => {
     const handler = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            res.locals.actionResult = yield action(req);
-            res.locals.actionStatus = statusOK;
+            const { user, data, auth } = yield action(req);
+            res.locals.user = user,
+                res.locals.data = data,
+                res.locals.auth = auth,
+                res.locals.status = statusOK;
             return next();
         }
         catch (e) {
@@ -123,12 +123,26 @@ const handleApiAction = (action, statusOK = 200) => {
     return handler;
 };
 exports.handleApiAction = handleApiAction;
-const handleApiResponse = () => {
+const refreshApiUserCreds = (cookieName, cookieSecret, authSecret) => {
     const handler = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-        if (!res.locals.actionResult)
+        try {
+            const appuser = res.locals.user || req.appuser;
+            const appuserEnc = appuser || null; //?encrypt(cookieSecret,appuser):null;
+            const token = res.locals.auth ? (0, exports.generateTkn)({ appuser, okto: "use-api", role: "USER" }, authSecret) : null;
+            console.log({ appuserEnc, token });
+            appuserEnc ? res.cookie(cookieName, appuserEnc, { maxAge: 900000, httpOnly: true }) : null;
+            res.locals.token = token;
             return next();
-        res.status(res.locals.actionStatus).json(res.locals.actionResult);
+        }
+        catch (e) {
+            return next(e);
+        }
     });
+    return handler;
+};
+exports.refreshApiUserCreds = refreshApiUserCreds;
+const handleApiResponse = () => {
+    const handler = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () { return res.status(res.locals.status).json(res.locals); });
     return handler;
 };
 exports.handleApiResponse = handleApiResponse;
@@ -153,19 +167,6 @@ const sendreq = (o) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.sendreq = sendreq;
 /*
-export const validateAppUser = (cookieName:string,key:string) => {
-  const handler:Handler = async (req,res,next) => {
-    const cookie = req.cookies[cookieName]  as string;
-    if(cookie) req.appuser = decrypt(key,cookie);
-    return next();};
-  return handler;};
-export const refreshAppUser = (cookieName:string,key:string) => {
-  const handler:Handler = async (req,res,next) => {
-    if(res.locals.actionResult){
-      const usernameEnc = encrypt(key,res.locals.actionResult.username||req.appuser);
-      res.cookie(cookieName,usernameEnc,{maxAge:900000,httpOnly:true});}
-    return next();};
-  return handler;};
 export const mapUserRole = (K:Strings,k?:string) => !k?"G":Object.keys(K).find(s => K[s] == k);
 export const validateUserRole = (roles?:string[]) => {
   const R = roles || ["USER","GUEST"];

@@ -38,18 +38,56 @@ const sockets_main_1 = require("./sockets-main");
 class OBAExpressApi {
     constructor(config) {
         this.config = config;
-        this.init = () => {
+        this.init = () => __awaiter(this, void 0, void 0, function* () {
             const core = new oba_core_api_1.default(this.config);
             core.init();
             const { config } = core, core_ = __rest(core, ["config"]);
             Object.assign(this, core_);
-            this.app = this.createRouter();
+            this.app = yield this.createRouter();
             this.server = this.app ? (0, http_1.createServer)(this.app) : null;
             const isSocketServer = this.config.sockets && this.server;
             if (isSocketServer)
                 this.io = new sockets_main_1.OBAExpressApiSockets(this.config.sockets, this.server);
             //this.events.emit("config",c);
-        };
+        });
+        this.createRouter = () => __awaiter(this, void 0, void 0, function* () {
+            const app = (0, express_1.default)();
+            const middleware = new middleware_main_1.OBAExpressApiMiddleware();
+            const { middleware: middlewareConfig } = this.config;
+            const noMiddleware = !middlewareConfig || oba_common_1.default.empty(middlewareConfig);
+            const custom = (middlewareConfig || {}).custom;
+            const main = (middlewareConfig || {}).main;
+            const mainSetter = () => __awaiter(this, void 0, void 0, function* () {
+                main ?
+                    app.use(this.vars.entry, yield main(this)) :
+                    app.get(this.vars.entry, (req, res) => res.json({ ready: true }));
+            });
+            const setCustomMiddleware = (k, b) => __awaiter(this, void 0, void 0, function* () {
+                if (custom)
+                    for (const m in custom) {
+                        const handler = custom[m];
+                        handler.active ?
+                            handler.before == k && b ? app.use(yield handler.func(this)) :
+                                handler.after == k && !b ? app.use(yield handler.func(this)) :
+                                    null : null;
+                    }
+            });
+            if (noMiddleware)
+                yield mainSetter();
+            else
+                for (const k in middlewareConfig)
+                    if (k != "custom") {
+                        const k1 = k;
+                        const opts = middlewareConfig[k1];
+                        const setter = middleware[k1];
+                        yield setCustomMiddleware(k, 1);
+                        k == "main" ? yield mainSetter() : setter ? setter(app, opts, this) : null;
+                        yield setCustomMiddleware(k, 0);
+                    }
+            middleware.pageNotFound(app, null, this);
+            middleware.finalHandler(app, null, this);
+            return app;
+        });
         this.start = (db, server) => __awaiter(this, void 0, void 0, function* () {
             yield this.monitor();
             if (db)
@@ -59,44 +97,6 @@ class OBAExpressApi {
         });
         this.startDb = () => __awaiter(this, void 0, void 0, function* () { return yield this.db.start(); });
         this.startServer = () => __awaiter(this, void 0, void 0, function* () { return new Promise(done => this.server.listen(this.vars.port, () => done())); });
-    }
-    createRouter() {
-        const app = (0, express_1.default)();
-        const middleware = new middleware_main_1.OBAExpressApiMiddleware();
-        const { middleware: middlewareConfig } = this.config;
-        const noMiddleware = !middlewareConfig || oba_common_1.default.empty(middlewareConfig);
-        const custom = (middlewareConfig || {}).custom;
-        const main = (middlewareConfig || {}).main;
-        const mainSetter = () => {
-            main ?
-                app.use(this.vars.entry, main(this)) :
-                app.get(this.vars.entry, (req, res) => res.json({ ready: true }));
-        };
-        const setCustomMiddleware = (k, b) => {
-            if (custom)
-                for (const m in custom) {
-                    const handler = custom[m];
-                    handler.active ?
-                        handler.before == k && b ? app.use(handler.func(this)) :
-                            handler.after == k && !b ? app.use(handler.func(this)) :
-                                null : null;
-                }
-        };
-        if (noMiddleware)
-            mainSetter();
-        else
-            for (const k in middlewareConfig)
-                if (k != "custom") {
-                    const k1 = k;
-                    const opts = middlewareConfig[k1];
-                    const setter = middleware[k1];
-                    setCustomMiddleware(k, 1);
-                    k == "main" ? mainSetter() : setter ? setter(app, opts, this) : null;
-                    setCustomMiddleware(k, 0);
-                }
-        middleware.pageNotFound(app, null, this);
-        middleware.finalHandler(app, null, this);
-        return app;
     }
     get routes() { return (0, express_list_endpoints_1.default)(this.app); }
     monitor() {

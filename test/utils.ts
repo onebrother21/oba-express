@@ -21,7 +21,7 @@ export const utils = {
   init:async (s:string,withTestApp?:AnyBoolean) => {
     try{
       const {api} = await testAppApiConfig(s);
-      api.init();
+      await api.init();
       const badsignals = ["SIGUSR2","SIGINT","SIGTERM","exit"];
       for(const i of badsignals) process.on(i,() => OBA.warn("SYSTEM TERMINATING ::",i) && api.events.emit("shutdown",true));
       api.events.emit("config",api.config);

@@ -12,7 +12,7 @@ export const TestMiddlewares:TestAppApiHandlers = {
   showOrigin:{
     active:false,
     before:"cors",
-    func:() => async (req,res,next) => {
+    func:async () => async (req,res,next) => {
       OBA.log(req.headers["origin"]);
       return next();
     }
@@ -20,7 +20,7 @@ export const TestMiddlewares:TestAppApiHandlers = {
   appShake:{
     active:true,
     after:"session",
-    func:() => async (req,res,next) => {
+    func:async () => async (req,res,next) => {
       switch(true){
         case req.cookies._caOB:{
           let randomNumber = Math.random().toString();
@@ -47,7 +47,7 @@ export const TestMiddlewares:TestAppApiHandlers = {
   apiGuard:{
     active:true,
     after:"cors",
-    func:api => async (req,res,next) => {
+    func:async api => async (req,res,next) => {
       const consumers = api.vars.consumers;
       if(consumers){
         const name = req.url.split("/").slice(1)[0];
@@ -67,7 +67,7 @@ export const TestMiddlewares:TestAppApiHandlers = {
   reqCounter:{
     active:false,
     after:"session",
-    func:() => async (req,res,next) => {
+    func:async () => async (req,res,next) => {
       const session = req.session as any;
       const within1Min = session.lastReq?((Date.now() - session.lastReq)/1000) <= 60:true;
       if(within1Min) session.visits = (session.visits||0)+1;
@@ -82,7 +82,7 @@ export const TestMiddlewares:TestAppApiHandlers = {
   ipData:{
     active:false,
     after:"session",
-    func:api => async (req,res,next) => {
+    func:async api => async (req,res,next) => {
       const session = req.session as any;
       if(session && !session.ipdata){
         const consumerkey = api.vars.providers["ip-data"];
@@ -98,7 +98,7 @@ export const TestMiddlewares:TestAppApiHandlers = {
   addUserToLocals:{
     active:false,
     after:"session",
-    func:() => async (req,res,next) => {
+    func:async () => async (req,res,next) => {
       res.locals.user = (req as any).appuser;
       return next();
     },

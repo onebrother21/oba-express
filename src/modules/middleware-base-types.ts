@@ -58,12 +58,6 @@ export type BodyParserOpts = {
   raw?:{type?:string;limit?:string;};
 };
 export type PassportOpts = {};
-export type SendReqOpts = {
-  url:string;
-  method:"get"|"put"|"post"|"delete";
-  headers:any;
-  body:any;
-};
 
 export type OBAExpressApiMiddlewareBaseConfig = Partial<{
   disablePoweredBy:AnyBoolean;
