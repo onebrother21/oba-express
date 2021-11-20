@@ -8,17 +8,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __rest = (this && this.__rest) || function (s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-                t[p[i]] = s[p[i]];
-        }
-    return t;
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -41,8 +30,8 @@ class OBAExpressApi {
         this.init = () => __awaiter(this, void 0, void 0, function* () {
             const core = new oba_core_api_1.default(this.config);
             core.init();
-            const { config } = core, core_ = __rest(core, ["config"]);
-            Object.assign(this, core_);
+            delete core.config;
+            Object.assign(this, core);
             this.app = yield this.createRouter();
             this.server = this.app ? (0, http_1.createServer)(this.app) : null;
             const isSocketServer = this.config.sockets && this.server;

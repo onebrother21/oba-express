@@ -17,12 +17,12 @@ import {OBAExpressApiSockets} from "./sockets-main";
 
 export interface OBAExpressApi<Ev,Sockets> extends OBAExpressApiBaseType<Ev,Sockets> {}
 export class OBAExpressApi<Ev,Sockets> {
-  constructor(public config:OBAExpressApiConfig<Ev,Sockets>) {}
+  constructor(public config:OBAExpressApiConfig<Ev,Sockets>){}
   init = async () => {
     const core = new OBACoreApi<Ev>(this.config);
     core.init();
-    const {config,...core_} = core;
-    Object.assign(this,core_);
+    delete core.config;
+    Object.assign(this,core);
     this.app = await this.createRouter();
     this.server = this.app?createServer(this.app):null;
     const isSocketServer = this.config.sockets && this.server;
