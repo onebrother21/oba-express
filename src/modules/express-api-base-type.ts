@@ -8,12 +8,16 @@ import { RouterEndpoint } from "./middleware-handler-types";
 import { AnyBoolean } from "@onebro/oba-common";
 
 export type OBAExpressApiBaseTypeMethods = {
-  init:() => Promise<void>;
-  createRouter:() => Promise<express.Application>;
-  routes:RouterEndpoint[];
-  start:(db?:AnyBoolean,server?:AnyBoolean) => Promise<void>;
+  monitor:() => Promise<any>;
+  createApp:() => Promise<express.Application>;
+  startDB:() => Promise<void>;
+  startServer:() => Promise<void>;
+  initCore:(startDb?:AnyBoolean) => Promise<void>;
+  initServer:(startServer?:AnyBoolean) => Promise<void>;
+  init:(db?:AnyBoolean,server?:AnyBoolean) => Promise<void>;
 };
 export type OBAExpressApiBaseType<Ev,Sockets> = OBAExpressApiBaseTypeMethods & {
+  routes:RouterEndpoint[];
   config:OBAExpressApiConfig<Ev,Sockets>;
   vars:OBACoreApi<Ev>["vars"] & OBAExpressApiVars;
   logger:OBACoreApi<Ev>["logger"];

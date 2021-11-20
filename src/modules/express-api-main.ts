@@ -18,18 +18,10 @@ import {OBAExpressApiSockets} from "./sockets-main";
 export interface OBAExpressApi<Ev,Sockets> extends OBAExpressApiBaseType<Ev,Sockets> {}
 export class OBAExpressApi<Ev,Sockets> {
   constructor(public config:OBAExpressApiConfig<Ev,Sockets>){}
-  init = async () => {
-    const core = new OBACoreApi<Ev>(this.config);
-    core.init();
-    delete core.config;
-    Object.assign(this,core);
-    this.app = await this.createRouter();
-    this.server = this.app?createServer(this.app):null;
-    const isSocketServer = this.config.sockets && this.server;
-    if(isSocketServer) this.io = new OBAExpressApiSockets(this.config.sockets,this.server);
-    //this.events.emit("config",c);
-  };
-  createRouter = async () => {
+  get routes():RouterEndpoint[]{return listEndpoints(this.app);}
+  startDB = async () => await this.db.start();
+  startServer = async () => new Promise<void>(done => this.server.listen(this.vars.port,() => done()));
+  createApp = async () => {
     const app = express();
     const middleware = new OBAExpressApiMiddleware<Ev,Sockets>();
     const {middleware:middlewareConfig} = this.config;
@@ -63,15 +55,23 @@ export class OBAExpressApi<Ev,Sockets> {
     middleware.finalHandler(app,null,this);
     return app;
   };
-  get routes():RouterEndpoint[]{return listEndpoints(this.app);}
-  start = async (db?:AnyBoolean,server?:AnyBoolean):Promise<void> => {
-    await this.monitor();
-    if(db) await this.startDb();
-    if(server) await this.startServer();
-  }
-  private startDb = async ():Promise<void> => await this.db.start();
-  private startServer = async ():Promise<void> => new Promise(done => this.server.listen(this.vars.port,() => done()));
-  async monitor(){
+  initCore = async (start?:AnyBoolean) => {
+    const core = new OBACoreApi<Ev>(this.config);
+    core.init();
+    delete core.config;
+    Object.assign(this,core);
+    if(start) await this.startDB();
+  };
+  initServer = async (start?:AnyBoolean) => {
+    this.app = await this.createApp();
+    this.server = this.app?createServer(this.app):null;
+    const isSocketServer = this.config.sockets && this.server;
+    const checkConn = this.server && this.vars.settings && this.vars.settings.checkConn;
+    if(isSocketServer) this.io = new OBAExpressApiSockets(this.config.sockets,this.server);
+    if(checkConn) await this.monitor();
+    if(start) await this.startServer();
+  };
+  monitor = async () => {
     const check = this.vars.settings.checkConn;
     const errCtrl = this.e;
     const events = this.events;
@@ -90,6 +90,10 @@ export class OBAExpressApi<Ev,Sockets> {
           live = false;})));
       return loop.subscribe();
     }
-  }
+  };
+  init = async (db?:AnyBoolean,server?:AnyBoolean):Promise<void> => {
+    await this.initCore(db);
+    await this.initServer(server);
+  };
 }
 export default OBAExpressApi;

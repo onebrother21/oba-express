@@ -27,19 +27,9 @@ const sockets_main_1 = require("./sockets-main");
 class OBAExpressApi {
     constructor(config) {
         this.config = config;
-        this.init = () => __awaiter(this, void 0, void 0, function* () {
-            const core = new oba_core_api_1.default(this.config);
-            core.init();
-            delete core.config;
-            Object.assign(this, core);
-            this.app = yield this.createRouter();
-            this.server = this.app ? (0, http_1.createServer)(this.app) : null;
-            const isSocketServer = this.config.sockets && this.server;
-            if (isSocketServer)
-                this.io = new sockets_main_1.OBAExpressApiSockets(this.config.sockets, this.server);
-            //this.events.emit("config",c);
-        });
-        this.createRouter = () => __awaiter(this, void 0, void 0, function* () {
+        this.startDB = () => __awaiter(this, void 0, void 0, function* () { return yield this.db.start(); });
+        this.startServer = () => __awaiter(this, void 0, void 0, function* () { return new Promise(done => this.server.listen(this.vars.port, () => done())); });
+        this.createApp = () => __awaiter(this, void 0, void 0, function* () {
             const app = (0, express_1.default)();
             const middleware = new middleware_main_1.OBAExpressApiMiddleware();
             const { middleware: middlewareConfig } = this.config;
@@ -77,19 +67,27 @@ class OBAExpressApi {
             middleware.finalHandler(app, null, this);
             return app;
         });
-        this.start = (db, server) => __awaiter(this, void 0, void 0, function* () {
-            yield this.monitor();
-            if (db)
-                yield this.startDb();
-            if (server)
+        this.initCore = (start) => __awaiter(this, void 0, void 0, function* () {
+            const core = new oba_core_api_1.default(this.config);
+            core.init();
+            delete core.config;
+            Object.assign(this, core);
+            if (start)
+                yield this.startDB();
+        });
+        this.initServer = (start) => __awaiter(this, void 0, void 0, function* () {
+            this.app = yield this.createApp();
+            this.server = this.app ? (0, http_1.createServer)(this.app) : null;
+            const isSocketServer = this.config.sockets && this.server;
+            const checkConn = this.server && this.vars.settings && this.vars.settings.checkConn;
+            if (isSocketServer)
+                this.io = new sockets_main_1.OBAExpressApiSockets(this.config.sockets, this.server);
+            if (checkConn)
+                yield this.monitor();
+            if (start)
                 yield this.startServer();
         });
-        this.startDb = () => __awaiter(this, void 0, void 0, function* () { return yield this.db.start(); });
-        this.startServer = () => __awaiter(this, void 0, void 0, function* () { return new Promise(done => this.server.listen(this.vars.port, () => done())); });
-    }
-    get routes() { return (0, express_list_endpoints_1.default)(this.app); }
-    monitor() {
-        return __awaiter(this, void 0, void 0, function* () {
+        this.monitor = () => __awaiter(this, void 0, void 0, function* () {
             const check = this.vars.settings.checkConn;
             const errCtrl = this.e;
             const events = this.events;
@@ -108,7 +106,12 @@ class OBAExpressApi {
                 return loop.subscribe();
             }
         });
+        this.init = (db, server) => __awaiter(this, void 0, void 0, function* () {
+            yield this.initCore(db);
+            yield this.initServer(server);
+        });
     }
+    get routes() { return (0, express_list_endpoints_1.default)(this.app); }
 }
 exports.OBAExpressApi = OBAExpressApi;
 exports.default = OBAExpressApi;

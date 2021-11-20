@@ -21,13 +21,12 @@ export const utils = {
   init:async (s:string,withTestApp?:AnyBoolean) => {
     try{
       const {api} = await testAppApiConfig(s);
-      await api.init();
-      const badsignals = ["SIGUSR2","SIGINT","SIGTERM","exit"];
-      for(const i of badsignals) process.on(i,() => OBA.warn("SYSTEM TERMINATING ::",i) && api.events.emit("shutdown",true));
-      api.events.emit("config",api.config);
-      api.events.emit("init",true);
-      const {name,env,port,host} = api.vars;
-      await api.start(1).then(() => {
+      await api.init(1).then(() => {
+        const badsignals = ["SIGUSR2","SIGINT","SIGTERM","exit"];
+        for(const i of badsignals) process.on(i,() => OBA.warn("SYSTEM TERMINATING ::",i) && api.events.emit("shutdown",true));
+        api.events.emit("config",api.config);
+        api.events.emit("init",true);
+        const {name,env,port,host} = api.vars;
         api.events.emit("serverOK",{name,env,host,port});
         api.events.emit("ready",true as any);
       });
