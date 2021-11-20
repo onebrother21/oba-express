@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "@onebro/oba-common": "^2.7.2",
-    "@onebro/oba-core-api": "^2.7.5",
+    "@onebro/oba-core-api": "^2.7.6",
     "compression": "^1.7.4",
     "config": "^3.3.6",
     "connect-mongo": "^4.6.0",
