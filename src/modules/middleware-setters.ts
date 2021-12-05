@@ -15,39 +15,55 @@ import errorhandler from "errorhandler";
 import {Handler,ErrorHandler} from "./middleware-handler-types";
 import {OBAExpressApiMiddlewareType} from "./middleware-types";
 import {morganMsgFormats,morganMsgTokens,checkCORS} from "./middleware-utils";
-import OBA,{Keys,AppError} from "@onebro/oba-common";
+import OB,{Keys,AppError} from "@onebro/oba-common";
 
 export const getMiddlewares = <Ev,Sockets>():OBAExpressApiMiddlewareType<Ev,Sockets> => ({
   disablePoweredBy:(a,o)  => {o?a.disable("x-powered-by"):null;},
   compression:(a,o) => {o?a.use(compression()):null;},
   flash:(a,o) => {o?a.use(flash()):null;},
   errorhandler:(a,o) => {o?a.use(errorhandler()):null;},
-  morgan:(a,o,core) => {
+  morgan:(a,o,api) => {
     const {useDev,useLogger} = o;
-    const {logger} = core;
+    const {logger:{file:fileLogger,db:dbLogger}} = api;
     const formats = morganMsgFormats;
+    const formatFlags = {
+      "access":`{"type":"ACCESS"}`,
+      "warn":`{"type":"WARN"}`,
+      "error":`{"type":"ERROR"}`,
+      "info":`{"type":"INFO"}`,
+    };
+    const makeMorganOpts = (k:Keys<typeof formatFlags>):morgan.Options<any,any> => ({
+      skip:(req:Request) =>  k == "error"?!req.error:k == "warn"?!req.warning:false,
+      stream:{write:async (str:string) => {
+        const d = dbLogger.info;
+        const f = fileLogger[k].bind(fileLogger);
+        const flag = formatFlags[k] as any;
+        const meta = JSON.parse(str);
+        let info:any;
+        try{info = await d(flag,{meta});}//OB.here("l",info);}
+        catch(e){
+          OB.here("w",e);
+          try{info = f(str);}
+          catch(e_){throw e_;}
+        }
+      }}
+    });
     for(const k in morganMsgTokens) morgan.token(k,morganMsgTokens[k]);
     if(useDev) a.use(morgan("dev"));
-    if(useLogger && logger && logger.access){
-      for(const k in formats){
-        let o = {};
-        switch(k){
-          case "access":o = {stream:{write:logger.access.bind(logger)}};break;
-          case "warn":o = {skip:(req:Request) => !req.warning,stream:{write:logger.warn.bind(logger)}};break;
-          case "error":o = {skip:(req:Request) => !req.error,stream:{write:logger.error.bind(logger)}};break;
-        }
-        a.use(morgan(formats[k],o));
-      }
+    if(useLogger) for(const k in formats){
+      const K = k as Keys<typeof formatFlags>;
+      const opts = makeMorganOpts(K);
+      a.use(morgan(formats[K],opts));
     }
   },
-  cors:(a,o,core) => {
+  cors:(a,o,api) => {
     const {origins,preflightContinue,credentials} = o;
     const opts:CorsOptions = {
       preflightContinue,
       credentials,
       origin:(origin:string,done:Function) => {
-        //const whitelist = [...origins,...core.vars.whitelist];
-        checkCORS({origin,origins})?done():done(core.e.cors());
+        //const whitelist = [...origins,...api.vars.whitelist];
+        checkCORS({origin,origins})?done():done(api.e._.cors());
       }
     };
     a.use(cors(opts));
@@ -69,12 +85,12 @@ export const getMiddlewares = <Ev,Sockets>():OBAExpressApiMiddlewareType<Ev,Sock
   },
   lusca:(a,o) => {
     const csrfCookie = o.csrf && (<any>o.csrf).cookie?(<any>o.csrf).cookie:null;
-    const cookieName = OBA.str(csrfCookie)?csrfCookie:csrfCookie.name;
+    const cookieName = OB.str(csrfCookie)?csrfCookie:csrfCookie.name;
     const handler:Handler = async (req,res,next) => {
       const csrf = req.cookies[cookieName];
-      if(csrf) req.body && csrf?(req.body._csrf = csrf):null && OBA.trace({csrf});
+      if(csrf) req.body && csrf?(req.body._csrf = csrf):null && OB.here("t",{csrf});
       return next();};
-    //OBA.trace({csrfCookie});
+    //OB.trace({csrfCookie});
     csrfCookie?a.use(handler):null;
     a.use(lusca(o));
   },
@@ -87,18 +103,24 @@ export const getMiddlewares = <Ev,Sockets>():OBAExpressApiMiddlewareType<Ev,Sock
     a.set("views",path.join(o.dirname,"../views"));
     a.set("view engine",o.engine);
   },
-  pageNotFound:(a,o,core) => {a.use(async (req,res,next) => next(core.e.notfound()));},
-  finalHandler:(a,o,core) => {
+  pageNotFound:(a,o,api) => {a.use(async (req,res,next) => next(api.e._.notfound()));},
+  finalHandler:(a,o,api) => {
     const handler:ErrorHandler = (e,req,res,next) => {
       let _e:AppError;
       switch(true){
         case e instanceof AppError:_e = e as AppError;break;
-        case !!(e as Pick<AppError,"errors">).errors:_e = Object.assign(core.e.validation(),e);break;
-        default: _e = core.e.map(<Error>e);break;
+        case !!(e as Pick<AppError,"errors">).errors:_e = Object.assign(api.e._.validation(),e);break;
+        default:_e = api.e.map(<Error>e);break;
       }
-      if(_e.status >= 500) OBA.traceError(_e);
-      req.error = _e;
-      if(res.headersSent){OBA.warn("response already sent",_e.message);return;}
+      if(_e.warning){
+        OB.here("w",_e);
+        req.warning = _e;
+      }
+      else if(_e.status >= 500){
+        OB.here("e",_e);
+        req.error = _e;
+      }
+      if(res.headersSent){OB.here("w","response already sent",_e.message);return;}
       res.status(_e.status).json({
         name:_e.name,
         message:_e.message,

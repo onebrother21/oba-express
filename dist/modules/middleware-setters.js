@@ -52,40 +52,57 @@ const getMiddlewares = () => ({
     compression: (a, o) => { o ? a.use((0, compression_1.default)()) : null; },
     flash: (a, o) => { o ? a.use((0, express_flash_1.default)()) : null; },
     errorhandler: (a, o) => { o ? a.use((0, errorhandler_1.default)()) : null; },
-    morgan: (a, o, core) => {
+    morgan: (a, o, api) => {
         const { useDev, useLogger } = o;
-        const { logger } = core;
+        const { logger: { file: fileLogger, db: dbLogger } } = api;
         const formats = middleware_utils_1.morganMsgFormats;
+        const formatFlags = {
+            "access": `{"type":"ACCESS"}`,
+            "warn": `{"type":"WARN"}`,
+            "error": `{"type":"ERROR"}`,
+            "info": `{"type":"INFO"}`,
+        };
+        const makeMorganOpts = (k) => ({
+            skip: (req) => k == "error" ? !req.error : k == "warn" ? !req.warning : false,
+            stream: { write: (str) => __awaiter(void 0, void 0, void 0, function* () {
+                    const d = dbLogger.info;
+                    const f = fileLogger[k].bind(fileLogger);
+                    const flag = formatFlags[k];
+                    const meta = JSON.parse(str);
+                    let info;
+                    try {
+                        info = yield d(flag, { meta });
+                    } //OB.here("l",info);}
+                    catch (e) {
+                        oba_common_1.default.here("w", e);
+                        try {
+                            info = f(str);
+                        }
+                        catch (e_) {
+                            throw e_;
+                        }
+                    }
+                }) }
+        });
         for (const k in middleware_utils_1.morganMsgTokens)
             morgan_1.default.token(k, middleware_utils_1.morganMsgTokens[k]);
         if (useDev)
             a.use((0, morgan_1.default)("dev"));
-        if (useLogger && logger && logger.access) {
+        if (useLogger)
             for (const k in formats) {
-                let o = {};
-                switch (k) {
-                    case "access":
-                        o = { stream: { write: logger.access.bind(logger) } };
-                        break;
-                    case "warn":
-                        o = { skip: (req) => !req.warning, stream: { write: logger.warn.bind(logger) } };
-                        break;
-                    case "error":
-                        o = { skip: (req) => !req.error, stream: { write: logger.error.bind(logger) } };
-                        break;
-                }
-                a.use((0, morgan_1.default)(formats[k], o));
+                const K = k;
+                const opts = makeMorganOpts(K);
+                a.use((0, morgan_1.default)(formats[K], opts));
             }
-        }
     },
-    cors: (a, o, core) => {
+    cors: (a, o, api) => {
         const { origins, preflightContinue, credentials } = o;
         const opts = {
             preflightContinue,
             credentials,
             origin: (origin, done) => {
-                //const whitelist = [...origins,...core.vars.whitelist];
-                (0, middleware_utils_1.checkCORS)({ origin, origins }) ? done() : done(core.e.cors());
+                //const whitelist = [...origins,...api.vars.whitelist];
+                (0, middleware_utils_1.checkCORS)({ origin, origins }) ? done() : done(api.e._.cors());
             }
         };
         a.use((0, cors_1.default)(opts));
@@ -112,10 +129,10 @@ const getMiddlewares = () => ({
         const handler = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
             const csrf = req.cookies[cookieName];
             if (csrf)
-                req.body && csrf ? (req.body._csrf = csrf) : null && oba_common_1.default.trace({ csrf });
+                req.body && csrf ? (req.body._csrf = csrf) : null && oba_common_1.default.here("t", { csrf });
             return next();
         });
-        //OBA.trace({csrfCookie});
+        //OB.trace({csrfCookie});
         csrfCookie ? a.use(handler) : null;
         a.use((0, lusca_1.default)(o));
     },
@@ -128,8 +145,8 @@ const getMiddlewares = () => ({
         a.set("views", path_1.default.join(o.dirname, "../views"));
         a.set("view engine", o.engine);
     },
-    pageNotFound: (a, o, core) => { a.use((req, res, next) => __awaiter(void 0, void 0, void 0, function* () { return next(core.e.notfound()); })); },
-    finalHandler: (a, o, core) => {
+    pageNotFound: (a, o, api) => { a.use((req, res, next) => __awaiter(void 0, void 0, void 0, function* () { return next(api.e._.notfound()); })); },
+    finalHandler: (a, o, api) => {
         const handler = (e, req, res, next) => {
             let _e;
             switch (true) {
@@ -137,17 +154,22 @@ const getMiddlewares = () => ({
                     _e = e;
                     break;
                 case !!e.errors:
-                    _e = Object.assign(core.e.validation(), e);
+                    _e = Object.assign(api.e._.validation(), e);
                     break;
                 default:
-                    _e = core.e.map(e);
+                    _e = api.e.map(e);
                     break;
             }
-            if (_e.status >= 500)
-                oba_common_1.default.traceError(_e);
-            req.error = _e;
+            if (_e.warning) {
+                oba_common_1.default.here("w", _e);
+                req.warning = _e;
+            }
+            if (_e.status >= 500) {
+                oba_common_1.default.here("e", _e);
+                req.error = _e;
+            }
             if (res.headersSent) {
-                oba_common_1.default.warn("response already sent", _e.message);
+                oba_common_1.default.here("w", "response already sent", _e.message);
                 return;
             }
             res.status(_e.status).json({

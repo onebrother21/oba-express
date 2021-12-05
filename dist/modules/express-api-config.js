@@ -15,9 +15,12 @@ const setDefaultConfigWithEnvironment = (prefix) => {
     const consumers = JSON.parse(oba_common_1.default.envvar(prefix, "_CONSUMERS"));
     const settings = { checkConn: false };
     const initial = config_1.default.get("appconfig");
-    const coreRuntime = (0, oba_core_api_1.coreConfig)(prefix);
-    const atRuntime = Object.assign(Object.assign({}, coreRuntime), { vars: Object.assign(Object.assign({}, coreRuntime.vars), { host, port, providers, consumers, settings }), middleware: { cors: { origins } } });
-    const expressConfig = oba_common_1.default.merge(initial, atRuntime);
+    const coreRuntime = oba_common_1.default.mergeObj(initial, (0, oba_core_api_1.coreConfig)(prefix));
+    const atRuntime = {
+        vars: { host, port, providers, consumers, settings },
+        middleware: { cors: { origins } },
+    };
+    const expressConfig = oba_common_1.default.mergeObj(coreRuntime, atRuntime);
     return expressConfig;
 };
 exports.expressConfig = setDefaultConfigWithEnvironment;

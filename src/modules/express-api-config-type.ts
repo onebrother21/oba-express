@@ -3,13 +3,8 @@ import {OBAExpressApiVars} from "./vars-types";
 import {OBAExpressApiMiddlewareConfig} from "./middleware-types";
 import {OBAExpressApiSocketsConfig} from "./sockets-main";
 
-export type OBAExpressApiConfig<Ev,Sockets> = Partial<{
-  vars:OBACoreConfig<Ev>["vars"] & OBAExpressApiVars;
-  logger:OBACoreConfig<Ev>["logger"];
-  errors:OBACoreConfig<Ev>["errors"];
-  e:OBACoreConfig<Ev>["errors"];
-  events:OBACoreConfig<Ev>["events"];
-  db:OBACoreConfig<Ev>["db"];
+export type OBAExpressApiConfig<Ev,Sockets> = OBACoreConfig & Partial<{
+  vars:OBAExpressApiVars;
   middleware:OBAExpressApiMiddlewareConfig<Ev,Sockets>;
   sockets:OBAExpressApiSocketsConfig<Sockets>;
 }>;

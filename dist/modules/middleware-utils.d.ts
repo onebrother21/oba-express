@@ -1,8 +1,8 @@
 import { Request } from "express";
-import OBA, { Strings } from "@onebro/oba-common";
+import OB, { Enum } from "@onebro/oba-common";
 import { ApiUserID } from "./vars-types";
-export declare const morganMsgTokens: OBA.TypedMethods<Request, string>;
-export declare const morganMsgFormats: Strings;
+export declare const morganMsgTokens: OB.TypedMethods<Request, string>;
+export declare const morganMsgFormats: Enum<string, undefined, "access" | "warn" | "error" | "info">;
 export declare type CheckCORS = Partial<{
     origin: string;
     origins: string[];

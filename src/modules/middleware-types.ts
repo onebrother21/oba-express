@@ -6,7 +6,7 @@ import {CustomHandlers,MainApiConstructor} from "./middleware-handler-types";
 
 export type OBAExpressApiMiddlewareCustom<Ev,Sockets> = {custom?:CustomHandlers<Ev,Sockets>;};
 export type OBAExpressApiMiddlewareMain<Ev,Sockets> = {main?:MainApiConstructor<Ev,Sockets>;};
-export type OBAExpressApiMiddlewareAuth<Ev,Sockets> = {auth?:Enum<string,"cookie"|"secret">;};
+export type OBAExpressApiMiddlewareAuth<Ev,Sockets> = {auth?:Enum<string,"cookie"|"secret"|"ekey">;};
 export type OBAExpressApiMiddlewareConfig<Ev,Sockets> =
 OBAExpressApiMiddlewareBaseConfig &
 OBAExpressApiMiddlewareMain<Ev,Sockets> &

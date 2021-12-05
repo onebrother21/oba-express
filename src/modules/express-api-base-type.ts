@@ -16,15 +16,10 @@ export type OBAExpressApiBaseTypeMethods = {
   initServer:(startServer?:AnyBoolean) => Promise<void>;
   init:(db?:AnyBoolean,server?:AnyBoolean) => Promise<void>;
 };
-export type OBAExpressApiBaseType<Ev,Sockets> = OBAExpressApiBaseTypeMethods & {
+export type OBAExpressApiBaseType<Ev,Sockets> = Omit<OBACoreApi<Ev>,"config"> & OBAExpressApiBaseTypeMethods & {
   routes:RouterEndpoint[];
   config:OBAExpressApiConfig<Ev,Sockets>;
-  vars:OBACoreApi<Ev>["vars"] & OBAExpressApiVars;
-  logger:OBACoreApi<Ev>["logger"];
-  errors:OBACoreApi<Ev>["e"];
-  e:OBACoreApi<Ev>["e"];
-  events:OBACoreApi<Ev>["events"];
-  db:OBACoreApi<Ev>["db"];
+  vars:OBAExpressApiVars;
   app:express.Express;
   server:Server;
   io:OBAExpressApiSockets<Sockets>;

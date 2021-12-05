@@ -13,17 +13,18 @@ import {
 } from "../../src";
 
 const TestAppMainApi:TestAppMainApi = async api => {
+  const k$ = api.config.middleware["auth"].ekey;
   const c$ = api.config.middleware["auth"].cookie;
   const s$ = api.config.middleware["auth"].secret;
-  const a1 = getApiUserCreds(c$,s$,s$);
+  const a1 = getApiUserCreds(c$,k$,s$);
   const a2 = validateApiUserCreds();
-  const a3 = refreshApiUserCreds(c$,s$,s$);
+  const a3 = refreshApiUserCreds(c$,k$,s$);
   const v1 = handleReqValidation([
     body("admin").exists(),
     body("admin").equals("ObAuth")
   ]);
   const h1 = handleApiAction(async (req) => ({data:{ready:true}}),200);
-  const h2 = handleApiAction(async (req) => ({data:{config:api.events.values["config"].toString()}}),200);
+  const h2 = handleApiAction(async (req) => ({data:{config:api.config.toString()}}),200);
   const h3 = handleApiAction(async (req) => ({data:{test:10},auth:true,user:"jackswift"}),200);
   const h4 = handleApiAction(async (req) => ({data:{test:11},auth:true,user:"jackswift"}),200);
   const r1 = handleApiResponse();

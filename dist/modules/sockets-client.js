@@ -27,7 +27,7 @@ const messageInput = document.querySelector("#my-message");
 const sendButton = document.querySelector("#send");
 
 chatMessageEvent.on((message) => messageList.appendChild(`<p>${message}</p>` as any));
-chatMessageEvent.off((message) => console.log(message));
+chatMessageEvent.off((message) => OB.here("l",message));
 chatMessageEvent.emit("Hey Doc!");
 sendButton.addEventListener("click",() => chatMessageEvent.emit((messageInput as any).value));
 */ 

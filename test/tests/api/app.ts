@@ -1,6 +1,7 @@
 import {J} from "../../utils";
 import {TestAppApi} from "../../test-app-api";
 import supertest,{SuperTest,Test} from "supertest";
+import OB from "@onebro/oba-common";
 
 export const OBAExpressAppInitTests = () => J.utils.desc("AM App Init",() => {
   let api:TestAppApi,app:SuperTest<Test>;
@@ -12,7 +13,7 @@ export const OBAExpressAppInitTests = () => J.utils.desc("AM App Init",() => {
   },1E9);
   it("has app",async () => J.is(api.app));
   it("has routes",async () => {
-    console.log("Routes:",api.routes);
+    OB.here("l","Routes:",api.routes);
     J.arr(api.routes);
     J.gt(api.routes.length,0);
   });

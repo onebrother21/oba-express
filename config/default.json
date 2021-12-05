@@ -9,30 +9,47 @@
       "version":1.1,
       "entry":"/"
     },
-    "events":{},
     "errors":{
-      "notfound":{"status":404,"message":"Requested resource not found"},
       "cors":{"status":403,"message":"CORS is not allowed"},
-      "unauthorized":{"status":401,"message":"%s not authorized"},
-      "existing":{"status":404,"message":"%s already exists"},
-      "doesNotExist":{"status":404,"message":"%s does not exist"},
-      "invalid":{"status":404,"message":"Invalid %s"},
-      "missing":{"status":404,"message":"Missing %s"},
-      "mismatch":{"status":404,"message":"%s mismatch"},
-      "uploadValidation":{"status":404,"message":"Upload Request Validation Failed"},
-      "uploadFail":{"status":404,"message":"Error uploading file - %s"},
-      "uploadNoName":{"status":404,"message":"No msg file \"name\" in request body"},
-      "uploadNoInfo":{"status":404,"message":"No msg file info in request body"},
-      "uploadBadInfo":{"status":404,"message":"Invalid msg file info"},
-      "uploadBadId":{
-        "status":404,
-        "message":"Invalid trackID in URL parameter. Must be string of 12 bytes or 24 hex characters"},
       "csrf":{"status":403,"message":"Access denied"},
+      "unauthorized":{"status":401,"message":"%s not authorized"},
+      "notfound":{"status":404,"message":"Requested resource not found"},
+      "doesNotExist":{"status":404,"message":"%s does not exist"},
+      "existing":{"status":425,"message":"%s already exists"},
+      "invalid":{"status":422,"message":"Invalid %s"},
+      "missing":{"status":422,"message":"Missing %s"},
+      "mismatch":{"status":422,"message":"%s mismatch"},
+      "uploadValidation":{"status":422,"message":"Upload Request Validation Failed"},
+      "uploadFail":{"status":422,"message":"Error uploading file - %s"},
+      "uploadNoName":{"status":422,"message":"No msg file \"name\" in request body"},
+      "uploadNoInfo":{"status":422,"message":"No msg file info in request body"},
+      "uploadBadInfo":{"status":422,"message":"Invalid msg file info"},
+      "uploadBadId":{
+        "status":422,
+        "message":"Invalid trackID in URL parameter. Must be string of 12 bytes or 24 hex characters"},
       "validation":{"status":422,"message":"Action not permitted. Check data in try again"},
       "castError":{"status":422,"message":"Action not permitted. Check data in try again"},
       "someError":{"status":500,"message":"Oops, something went wrong."}
     },
-    "logger":{"levels":["access","info","warn","error"]},
+    "logger":{
+      "db":[
+        {
+          "level":"info",
+          "collection":"server_activity_log",
+          "options":{"useUnifiedTopology":true},
+          "metaKey":"meta",
+          "decolorize":true,
+          "tryReconnect":true,
+          "expireAfterSeconds":120
+        }
+      ],
+      "file":[
+        {"level":"error"},
+        {"level":"access"},
+        {"level":"info"},
+        {"level":"warn"}
+      ]
+    },
     "db":{
       "opts":{
         "autoIndex":true,

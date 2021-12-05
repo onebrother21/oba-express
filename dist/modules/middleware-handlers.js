@@ -74,10 +74,10 @@ const verifyTkn = (header, secret) => {
     return jsonwebtoken_1.default.verify(token, secret);
 };
 exports.verifyTkn = verifyTkn;
-const getApiUserCreds = (cookieName, cookieSecret, authSecret) => {
+const getApiUserCreds = (cookieName, ekey, authSecret) => {
     const handler = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         const cookie = req.cookies[cookieName];
-        req.appuser = cookie || null; //?decrypt(cookieSecret,cookie):null;
+        req.appuser = cookie ? (0, oba_common_1.decrypt)(ekey, cookie) : null;
         req.authtkn = (0, exports.verifyTkn)(req.headers.authorization, authSecret);
         return next();
     });
@@ -123,13 +123,12 @@ const handleApiAction = (action, statusOK = 200) => {
     return handler;
 };
 exports.handleApiAction = handleApiAction;
-const refreshApiUserCreds = (cookieName, cookieSecret, authSecret) => {
+const refreshApiUserCreds = (cookieName, ekey, authSecret) => {
     const handler = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const appuser = res.locals.user || req.appuser;
-            const appuserEnc = appuser || null; //?encrypt(cookieSecret,appuser):null;
+            const appuserEnc = appuser ? (0, oba_common_1.encrypt)(ekey, appuser) : null;
             const token = res.locals.auth ? (0, exports.generateTkn)({ appuser, okto: "use-api", role: "USER" }, authSecret) : null;
-            console.log({ appuserEnc, token });
             appuserEnc ? res.cookie(cookieName, appuserEnc, { maxAge: 900000, httpOnly: true }) : null;
             res.locals.token = token;
             return next();
@@ -161,7 +160,7 @@ const sendreq = (o) => __awaiter(void 0, void 0, void 0, function* () {
             return data;
     }
     catch (e) {
-        oba_common_1.default.error(e.message, e.code);
+        oba_common_1.default.here("e", e.message, e.code);
         throw e;
     }
 });
@@ -175,6 +174,6 @@ export const validateUserRole = (roles?:string[]) => {
     return next();};
   return handler;};
 export type OBNotificationData = {method:string;type:string;user:string;data:any};
-export const notifyUser = async (o:OBNotificationData,doSend?:boolean|number) => doSend?OBA.ok(o):null;
+export const notifyUser = async (o:OBNotificationData,doSend?:boolean|number) => doSend?OB.ok(o):null;
 */
 //# sourceMappingURL=middleware-handlers.js.map

@@ -3,7 +3,7 @@ import fs from "fs";
 import path from "path";
 import jwt from "jsonwebtoken";
 import {ValidationChain,validationResult} from "express-validator";
-import OBA,{encrypt,decrypt,Strings,AppError, AnyBoolean, Enum} from "@onebro/oba-common";
+import OB,{encrypt,decrypt,Strings,AppError, AnyBoolean, Enum} from "@onebro/oba-common";
 import {Handler,SendReqOpts} from "./middleware-handler-types";
 
 export const readCert = () => {
@@ -27,10 +27,10 @@ export const verifyTkn = (header:string,secret:string) => {
   if(!token) return null;
   return jwt.verify(token,secret);
 };
-export const getApiUserCreds = (cookieName:string,cookieSecret:string,authSecret:string) => {
+export const getApiUserCreds = (cookieName:string,ekey:string,authSecret:string) => {
   const handler:Handler = async (req,res,next) => {
     const cookie = req.cookies[cookieName]  as string;
-    req.appuser = cookie||null;//?decrypt(cookieSecret,cookie):null;
+    req.appuser = cookie?decrypt(ekey,cookie):null;
     req.authtkn = verifyTkn(req.headers.authorization,authSecret);
     return next();};
   return handler;
@@ -73,13 +73,12 @@ export const handleApiAction = (action:(req:Request) => Promise<ActionResponse>,
   };
   return handler;
 };
-export const refreshApiUserCreds = (cookieName:string,cookieSecret:string,authSecret:string) => {
+export const refreshApiUserCreds = (cookieName:string,ekey:string,authSecret:string) => {
   const handler:Handler = async (req,res,next) => {
   try{
       const appuser = res.locals.user||req.appuser;
-      const appuserEnc = appuser||null;//?encrypt(cookieSecret,appuser):null;
+      const appuserEnc = appuser?encrypt(ekey,appuser):null;
       const token = res.locals.auth?generateTkn({appuser,okto:"use-api",role:"USER"},authSecret):null;
-      console.log({appuserEnc,token});
       appuserEnc?res.cookie(cookieName,appuserEnc,{maxAge:900000,httpOnly:true}):null;
       res.locals.token = token;
       return next();
@@ -101,7 +100,7 @@ export const sendreq = async <T>(o:SendReqOpts):Promise<T> => {
     if(!res.ok) throw res.text();
     else return data;
   }
-  catch(e){OBA.error(e.message,e.code);throw e;}
+  catch(e){OB.here("e",e.message,e.code);throw e;}
 };
 /*
 export const mapUserRole = (K:Strings,k?:string) => !k?"G":Object.keys(K).find(s => K[s] == k);
@@ -112,5 +111,5 @@ export const validateUserRole = (roles?:string[]) => {
     return next();};
   return handler;};
 export type OBNotificationData = {method:string;type:string;user:string;data:any};
-export const notifyUser = async (o:OBNotificationData,doSend?:boolean|number) => doSend?OBA.ok(o):null;
+export const notifyUser = async (o:OBNotificationData,doSend?:boolean|number) => doSend?OB.ok(o):null;
 */

@@ -10,7 +10,7 @@ export declare type OBAExpressApiMiddlewareMain<Ev, Sockets> = {
     main?: MainApiConstructor<Ev, Sockets>;
 };
 export declare type OBAExpressApiMiddlewareAuth<Ev, Sockets> = {
-    auth?: Enum<string, "cookie" | "secret">;
+    auth?: Enum<string, "cookie" | "secret" | "ekey">;
 };
 export declare type OBAExpressApiMiddlewareConfig<Ev, Sockets> = OBAExpressApiMiddlewareBaseConfig & OBAExpressApiMiddlewareMain<Ev, Sockets> & OBAExpressApiMiddlewareCustom<Ev, Sockets> & OBAExpressApiMiddlewareAuth<Ev, Sockets>;
 export declare type OBAExpressApiMiddlewareKeys<Ev, Sockets> = Keys<OBAExpressApiMiddlewareConfig<Ev, Sockets>>;

@@ -6,7 +6,7 @@ import dns from "dns";
 import {interval,of} from "rxjs";
 import {takeWhile,tap,catchError} from "rxjs/operators";
 
-import OBA,{AnyBoolean} from "@onebro/oba-common";
+import OB,{Component,AnyBoolean} from "@onebro/oba-common";
 import OBACoreApi from "@onebro/oba-core-api";
 import {OBAExpressApiConfig} from "./express-api-config-type";
 import {OBAExpressApiBaseType} from "./express-api-base-type";
@@ -15,17 +15,18 @@ import {OBAExpressApiMiddlewareKeys} from "./middleware-types";
 import {OBAExpressApiMiddleware} from "./middleware-main";
 import {OBAExpressApiSockets} from "./sockets-main";
 
-export interface OBAExpressApi<Ev,Sockets> extends OBAExpressApiBaseType<Ev,Sockets> {}
-export class OBAExpressApi<Ev,Sockets> {
-  constructor(public config:OBAExpressApiConfig<Ev,Sockets>){}
+export interface OBAExpressApi<Ev,Sockets> extends Component<OBAExpressApiConfig<Ev,Sockets>,Ev>,OBAExpressApiBaseType<Ev,Sockets> {}
+export class OBAExpressApi<Ev,Sockets> extends Component<OBAExpressApiConfig<Ev,Sockets>,Ev> {
+  get e(){return this.errors;}
+  get v(){return this.vars;}
+  set v(vars:OBAExpressApi<Ev,Sockets>["vars"]){this.vars = vars;}
   get routes():RouterEndpoint[]{return listEndpoints(this.app);}
-  startDB = async () => await this.db.start();
   startServer = async () => new Promise<void>(done => this.server.listen(this.vars.port,() => done()));
   createApp = async () => {
     const app = express();
     const middleware = new OBAExpressApiMiddleware<Ev,Sockets>();
     const {middleware:middlewareConfig} = this.config;
-    const noMiddleware = !middlewareConfig||OBA.empty(middlewareConfig);
+    const noMiddleware = !middlewareConfig||OB.empty(middlewareConfig);
     const custom = (middlewareConfig||{}).custom;
     const main = (middlewareConfig||{}).main;
     const mainSetter = async () => {
@@ -57,10 +58,9 @@ export class OBAExpressApi<Ev,Sockets> {
   };
   initCore = async (start?:AnyBoolean) => {
     const core = new OBACoreApi<Ev>(this.config);
-    core.init();
+    await core.init(start);
     delete core.config;
     Object.assign(this,core);
-    if(start) await this.startDB();
   };
   initServer = async (start?:AnyBoolean) => {
     this.app = await this.createApp();
@@ -73,21 +73,22 @@ export class OBAExpressApi<Ev,Sockets> {
   };
   monitor = async () => {
     const check = this.vars.settings.checkConn;
-    const errCtrl = this.e;
-    const events = this.events;
     if(check){
       let live = true;
-      const source = interval(1000 * (OBA.bool(check)?10:<number>check));
+      const source = interval(1000 * (OB.bool(check)?10:<number>check));
       const loop = source.pipe(
         takeWhile(() => live),
         tap(async() => {
           const isConnected = util.promisify(dns.lookupService);
           const connected = await isConnected("8.8.8.8",53);
-          OBA.ok("Network Connection OK");}),
+          OB.here("k","Network Connection OK");
+        }),
         catchError((e:Error) => of((e:Error) => {
-          //events.emit("error",errCtrl.map(e));
-          OBA.warn("No Network Connection");
-          live = false;})));
+          //events.emit("error",errCtrl.map(e)); <- MISIMPLEMENTATION
+          OB.here("w","No Network Connection");
+          live = false;
+        }))
+      );
       return loop.subscribe();
     }
   };

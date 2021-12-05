@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import supertest,{Response} from "supertest";
-import OBA,{AnyBoolean,Enum} from "@onebro/oba-common";
+import OB,{AnyBoolean,Enum} from "@onebro/oba-common";
 import {testAppApiConfig} from "./test-app-api/test-app-config";
 
 export type ResponseData = {
@@ -15,20 +15,22 @@ export const utils = {
   clear:() => process.stdout.write("\x1Bc"),
   desc:describe,
   refreshDb:async () => {
-    const db = await mongoose.createConnection("mongodb://localhost:27017/ob1").asPromise();
+    const db = await mongoose.createConnection("mongodb://localhost:27017/oba-dev").asPromise();
     await db.dropDatabase();
   },
   init:async (s:string,withTestApp?:AnyBoolean) => {
     try{
       const {api} = await testAppApiConfig(s);
+      //OB.here("l",api.config.logger);
       await api.init(1).then(() => {
-        const badsignals = ["SIGUSR2","SIGINT","SIGTERM","exit"];
-        for(const i of badsignals) process.on(i,() => OBA.warn("SYSTEM TERMINATING ::",i) && api.events.emit("shutdown",true));
+        /*const badsignals = ["SIGUSR2","SIGINT","SIGTERM","exit"];
+        for(const i of badsignals) process.on(i,() => OB.warn("SYSTEM TERMINATING ::",i) && api.events.emit("shutdown",true));
         api.events.emit("config",api.config);
         api.events.emit("init",true);
         const {name,env,port,host} = api.vars;
         api.events.emit("serverOK",{name,env,host,port});
         api.events.emit("ready",true as any);
+        */
       });
       const app = supertest(api.app);
       return {api,...withTestApp?{app}:null};

@@ -2,11 +2,11 @@ import OBA from "@onebro/oba-common";
 import { TestAppApiConfig,TestAppApi } from "./test-app-types";
 
 
-export const getListeners = (api:TestAppApi):Partial<TestAppApiConfig["events"]> => ({
-  //"config":c => console.log(c),
-  //"init":b => OBA.ok("Running @...",Date.now()),
-  //"dbOK":o => console.log(o),
+export const getListeners = (api:TestAppApi) => ({
+  //"config":c => OB.here("l",c),
+  //"init":b => OB.ok("Running @...",Date.now()),
+  //"dbOK":o => OB.here("l",o),
   //"shutdown":o => api.db.shutdown(),
-  //"test":b => console.log({test:b}),
-  //"serverOK":o => console.log(`${o.name} is now running on ${o.host}:${o.port} @ ${Date.now()}`),
+  //"test":b => OB.here("l",{test:b}),
+  //"serverOK":o => OB.here("l",`${o.name} is now running on ${o.host}:${o.port} @ ${Date.now()}`),
 });
