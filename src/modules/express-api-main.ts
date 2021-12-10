@@ -81,11 +81,11 @@ export class OBAExpressApi<Ev,Sockets> extends Component<OBAExpressApiConfig<Ev,
         tap(async() => {
           const isConnected = util.promisify(dns.lookupService);
           const connected = await isConnected("8.8.8.8",53);
-          OB.here("k","Network Connection OK");
+          OB.ok("Network Connection OK");
         }),
         catchError((e:Error) => of((e:Error) => {
           //events.emit("error",errCtrl.map(e)); <- MISIMPLEMENTATION
-          OB.here("w","No Network Connection");
+          OB.warn("No Network Connection");
           live = false;
         }))
       );

@@ -111,10 +111,10 @@ class OBAExpressApi extends oba_common_1.Component {
                 const loop = source.pipe((0, operators_1.takeWhile)(() => live), (0, operators_1.tap)(() => __awaiter(this, void 0, void 0, function* () {
                     const isConnected = util_1.default.promisify(dns_1.default.lookupService);
                     const connected = yield isConnected("8.8.8.8", 53);
-                    oba_common_1.default.here("k", "Network Connection OK");
+                    oba_common_1.default.ok("Network Connection OK");
                 })), (0, operators_1.catchError)((e) => (0, rxjs_1.of)((e) => {
                     //events.emit("error",errCtrl.map(e)); <- MISIMPLEMENTATION
-                    oba_common_1.default.here("w", "No Network Connection");
+                    oba_common_1.default.warn("No Network Connection");
                     live = false;
                 })));
                 return loop.subscribe();

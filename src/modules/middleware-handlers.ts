@@ -3,7 +3,7 @@ import fs from "fs";
 import path from "path";
 import jwt from "jsonwebtoken";
 import {ValidationChain,validationResult} from "express-validator";
-import OB,{encrypt,decrypt,Strings,AppError, AnyBoolean, Enum} from "@onebro/oba-common";
+import OB,{encrypt,decrypt,Keys,Values,Strings,AppError,AnyBoolean,Enum} from "@onebro/oba-common";
 import {Handler,SendReqOpts} from "./middleware-handler-types";
 
 export const readCert = () => {
@@ -100,16 +100,22 @@ export const sendreq = async <T>(o:SendReqOpts):Promise<T> => {
     if(!res.ok) throw res.text();
     else return data;
   }
-  catch(e){OB.here("e",e.message,e.code);throw e;}
+  catch(e){OB.error(e.message,e.code);throw e;}
 };
-/*
-export const mapUserRole = (K:Strings,k?:string) => !k?"G":Object.keys(K).find(s => K[s] == k);
-export const validateUserRole = (roles?:string[]) => {
-  const R = roles || ["USER","GUEST"];
+export const mapUserRole = <R extends Strings>(roles:R,role?:Values<R>) => {
+  const keys = Object.keys(roles);
+  if(!role) return keys[0];
+  else return keys.find(r => roles[r] == role);
+};
+export const validateUserRole = <R extends Strings>(roles:R) => {
+  const keys = Object.keys(roles);
   const handler:Handler = async (req,res,next) => {
-    if(!R.includes(req.authtkn.role)) return next(new AppError({message:"unauthorized",status:401}));
-    return next();};
-  return handler;};
+    const {role} = req.authtkn;
+    const badRole = !keys.includes(role);
+    if(badRole) return next(new AppError({message:"unauthorized",status:401}));
+    return next();
+  };
+  return handler;
+};
 export type OBNotificationData = {method:string;type:string;user:string;data:any};
 export const notifyUser = async (o:OBNotificationData,doSend?:boolean|number) => doSend?OB.ok(o):null;
-*/

@@ -72,9 +72,9 @@ const getMiddlewares = () => ({
                     let info;
                     try {
                         info = yield d(flag, { meta });
-                    } //OB.here("l",info);}
+                    } //OB.log(info);}
                     catch (e) {
-                        oba_common_1.default.here("w", e);
+                        oba_common_1.default.warn(e);
                         try {
                             info = f(str);
                         }
@@ -129,7 +129,7 @@ const getMiddlewares = () => ({
         const handler = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
             const csrf = req.cookies[cookieName];
             if (csrf)
-                req.body && csrf ? (req.body._csrf = csrf) : null && oba_common_1.default.here("t", { csrf });
+                req.body && csrf ? (req.body._csrf = csrf) : null && oba_common_1.default.trace({ csrf });
             return next();
         });
         //OB.trace({csrfCookie});
@@ -161,15 +161,15 @@ const getMiddlewares = () => ({
                     break;
             }
             if (_e.warning) {
-                oba_common_1.default.here("w", _e);
+                oba_common_1.default.warn(_e);
                 req.warning = _e;
             }
-            if (_e.status >= 500) {
-                oba_common_1.default.here("e", _e);
+            else if (_e.status >= 500) {
+                oba_common_1.default.error(_e);
                 req.error = _e;
             }
             if (res.headersSent) {
-                oba_common_1.default.here("w", "response already sent", _e.message);
+                oba_common_1.default.warn("response already sent", _e.message);
                 return;
             }
             res.status(_e.status).json({

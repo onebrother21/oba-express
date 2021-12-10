@@ -10,18 +10,33 @@ export type ResponseData = {
   authToken?:string;
   body?:any;
 };
-export const utils = {
-  sleep:(n:number) => new Promise(done => setTimeout(done,n)),
-  clear:() => process.stdout.write("\x1Bc"),
+export const J = {
   desc:describe,
+  type:(a:any,b:string) => expect(typeof a).toBe(b),
+  instance:(a:any,b:any) => expect(a instanceof b).toBe(true),
+  arr:(a:any) => expect(Array.isArray(a)).toBe(true),
+  gt:(a:number,b:number) => expect(a).toBeGreaterThan(b),
+  eq:(a:number,b:number,c:number=2) => expect(a).toBeCloseTo(b,c),
+  ne:(a:number,b:number,c?:number) => expect(a).not.toBeCloseTo(b,c||2),
+  is:(a:any,b?:any) => b!==undefined?expect(a).toBe(b):expect(a).toBeDefined(),
+  not:(a:any,b?:any) => b!==undefined?expect(a).not.toBe(b):expect(a).not.toBeDefined(),
+  match:(a:string,b:RegExp) => expect(a).toMatch(b),
+  has:(a:string,b:string) => expect(a).toContain(b),
+  includes:(a:any[],b:any) => expect(a.indexOf(b) > -1).toBe(true),
+  prop:(a:any,b:any) => expect(a).toHaveProperty(b),
+  true:(o:any) => expect(o).toBeTruthy(),
+  throws:(o:Function) => expect(o()).toThrow(),
+  doesNotThrow:(o:Function) => expect(o()).not.toThrow(),
+  error:(o:any) => expect(o).toBeInstanceOf(Error),
+  noterror:(o:any) => expect(o).not.toBeInstanceOf(Error),
   refreshDb:async () => {
     const db = await mongoose.createConnection("mongodb://localhost:27017/oba-dev").asPromise();
     await db.dropDatabase();
   },
-  init:async (s:string,withTestApp?:AnyBoolean) => {
+  initApp:async (s:string,withTestApp?:AnyBoolean) => {
     try{
       const {api} = await testAppApiConfig(s);
-      //OB.here("l",api.config.logger);
+      //OB.log(api.config.logger);
       await api.init(1).then(() => {
         /*const badsignals = ["SIGUSR2","SIGINT","SIGTERM","exit"];
         for(const i of badsignals) process.on(i,() => OB.warn("SYSTEM TERMINATING ::",i) && api.events.emit("shutdown",true));
@@ -61,7 +76,7 @@ export const utils = {
       if(!(arr&&arr.length)){return data;}
       else {
         for(let i=0;i<arr.length;i++){
-          const {name,cookie} = utils.parseCookie(arr[i]);
+          const {name,cookie} = J.parseCookie(arr[i]);
           cookie.index = i;
           cookieNames.push(name);
           data.cookies = Object.assign({},data.cookies,{[name]:cookie});
@@ -82,40 +97,12 @@ export const utils = {
       }
     catch(e){console.error(e);throw e;}
   },
-  parseDelimitedString:(str:string,d:string = ",") => {
-    const o:{[k:string]:string} = {};
-    return str.split(d).reduce((o,v) => {
-      const arr = v.split(":");
-      o[arr[0]] = arr[1];
-      return o;
-    },o);
-  },
   newResponseData:():ResponseData => ({cookieArr:[],cookies:{},csrfToken:"",authToken:"",body:{}}),
   handleResponse:(data:ResponseData,res:Response) => {
-    utils.parseCookieArray(data,res.header["set-cookie"]);
+    J.parseCookieArray(data,res.header["set-cookie"]);
     data.cookies["XSRF-TOKEN"]?data.csrfToken =  data.cookies["XSRF-TOKEN"].value:null;
     res.body && res.body.token?data.authToken = res.body.token:null;
     data.body = res.body;
     return data;
   }
-};
-export const J = {
-  utils,
-  type:(a:any,b:string) => expect(typeof a).toBe(b),
-  instance:(a:any,b:any) => expect(a instanceof b).toBe(true),
-  arr:(a:any) => expect(Array.isArray(a)).toBe(true),
-  gt:(a:number,b:number) => expect(a).toBeGreaterThan(b),
-  eq:(a:number,b:number,c:number=2) => expect(a).toBeCloseTo(b,c),
-  ne:(a:number,b:number,c?:number) => expect(a).not.toBeCloseTo(b,c||2),
-  is:(a:any,b?:any) => b!==undefined?expect(a).toBe(b):expect(a).toBeDefined(),
-  not:(a:any,b?:any) => b!==undefined?expect(a).not.toBe(b):expect(a).not.toBeDefined(),
-  match:(a:string,b:RegExp) => expect(a).toMatch(b),
-  has:(a:string,b:string) => expect(a).toContain(b),
-  includes:(a:any[],b:any) => expect(a.indexOf(b) > -1).toBe(true),
-  prop:(a:any,b:any) => expect(a).toHaveProperty(b),
-  true:(o:any) => expect(o).toBeTruthy(),
-  throws:(o:Function) => expect(o()).toThrow(),
-  doesNotThrow:(o:Function) => expect(o()).not.toThrow(),
-  error:(o:any) => expect(o).toBeInstanceOf(Error),
-  noterror:(o:any) => expect(o).not.toBeInstanceOf(Error),
 };

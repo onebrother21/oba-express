@@ -1,0 +1,18 @@
+{
+  "appconfig":{
+    "middleware":{
+      "session":{
+        "resave":false,
+        "saveUninitialized":true,
+        "cookie":{"maxAge":36000000},
+        "store":{
+          "autoRemove":"interval",
+          "autoRemoveInterval":10,
+          "autoReconnect":true
+        }
+      },
+      "csrf":{"cookie":true},
+      "passport":{}
+    }
+  }
+}

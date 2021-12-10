@@ -40,9 +40,9 @@ export const getMiddlewares = <Ev,Sockets>():OBAExpressApiMiddlewareType<Ev,Sock
         const flag = formatFlags[k] as any;
         const meta = JSON.parse(str);
         let info:any;
-        try{info = await d(flag,{meta});}//OB.here("l",info);}
+        try{info = await d(flag,{meta});}//OB.log(info);}
         catch(e){
-          OB.here("w",e);
+          OB.warn(e);
           try{info = f(str);}
           catch(e_){throw e_;}
         }
@@ -88,7 +88,7 @@ export const getMiddlewares = <Ev,Sockets>():OBAExpressApiMiddlewareType<Ev,Sock
     const cookieName = OB.str(csrfCookie)?csrfCookie:csrfCookie.name;
     const handler:Handler = async (req,res,next) => {
       const csrf = req.cookies[cookieName];
-      if(csrf) req.body && csrf?(req.body._csrf = csrf):null && OB.here("t",{csrf});
+      if(csrf) req.body && csrf?(req.body._csrf = csrf):null && OB.trace({csrf});
       return next();};
     //OB.trace({csrfCookie});
     csrfCookie?a.use(handler):null;
@@ -113,14 +113,14 @@ export const getMiddlewares = <Ev,Sockets>():OBAExpressApiMiddlewareType<Ev,Sock
         default:_e = api.e.map(<Error>e);break;
       }
       if(_e.warning){
-        OB.here("w",_e);
+        OB.warn(_e);
         req.warning = _e;
       }
       else if(_e.status >= 500){
-        OB.here("e",_e);
+        OB.error(_e);
         req.error = _e;
       }
-      if(res.headersSent){OB.here("w","response already sent",_e.message);return;}
+      if(res.headersSent){OB.warn("response already sent",_e.message);return;}
       res.status(_e.status).json({
         name:_e.name,
         message:_e.message,

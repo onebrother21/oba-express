@@ -1,5 +1,5 @@
-import {J} from "./utils";
-import {obaExpressApiTests} from "./tests";
+import {OBAExpressApiTests} from "./tests";
+import * as OB from "@onebro/oba-common";
 
-J.utils.clear();
-obaExpressApiTests();
+OB.clear();
+OBAExpressApiTests();

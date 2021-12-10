@@ -42,7 +42,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sendreq = exports.handleApiResponse = exports.refreshApiUserCreds = exports.handleApiAction = exports.handleReqValidation = exports.validateApiUserCreds = exports.getApiUserCreds = exports.verifyTkn = exports.generateTkn = exports.readCert = void 0;
+exports.notifyUser = exports.validateUserRole = exports.mapUserRole = exports.sendreq = exports.handleApiResponse = exports.refreshApiUserCreds = exports.handleApiAction = exports.handleReqValidation = exports.validateApiUserCreds = exports.getApiUserCreds = exports.verifyTkn = exports.generateTkn = exports.readCert = void 0;
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
@@ -160,20 +160,31 @@ const sendreq = (o) => __awaiter(void 0, void 0, void 0, function* () {
             return data;
     }
     catch (e) {
-        oba_common_1.default.here("e", e.message, e.code);
+        oba_common_1.default.error(e.message, e.code);
         throw e;
     }
 });
 exports.sendreq = sendreq;
-/*
-export const mapUserRole = (K:Strings,k?:string) => !k?"G":Object.keys(K).find(s => K[s] == k);
-export const validateUserRole = (roles?:string[]) => {
-  const R = roles || ["USER","GUEST"];
-  const handler:Handler = async (req,res,next) => {
-    if(!R.includes(req.authtkn.role)) return next(new AppError({message:"unauthorized",status:401}));
-    return next();};
-  return handler;};
-export type OBNotificationData = {method:string;type:string;user:string;data:any};
-export const notifyUser = async (o:OBNotificationData,doSend?:boolean|number) => doSend?OB.ok(o):null;
-*/
+const mapUserRole = (roles, role) => {
+    const keys = Object.keys(roles);
+    if (!role)
+        return keys[0];
+    else
+        return keys.find(r => roles[r] == role);
+};
+exports.mapUserRole = mapUserRole;
+const validateUserRole = (roles) => {
+    const keys = Object.keys(roles);
+    const handler = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+        const { role } = req.authtkn;
+        const badRole = !keys.includes(role);
+        if (badRole)
+            return next(new oba_common_1.AppError({ message: "unauthorized", status: 401 }));
+        return next();
+    });
+    return handler;
+};
+exports.validateUserRole = validateUserRole;
+const notifyUser = (o, doSend) => __awaiter(void 0, void 0, void 0, function* () { return doSend ? oba_common_1.default.ok(o) : null; });
+exports.notifyUser = notifyUser;
 //# sourceMappingURL=middleware-handlers.js.map

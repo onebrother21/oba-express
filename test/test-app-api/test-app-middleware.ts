@@ -21,7 +21,7 @@ export const TestMiddlewares:TestAppApiHandlers = {
     active:false,
     before:"cors",
     func:async () => async (req,res,next) => {
-      OB.here("l",req.headers["origin"]);
+      OB.log(req.headers["origin"]);
       return next();
     }
   },
@@ -116,13 +116,13 @@ export const getMiddleware = (s:string,api:TestAppApi):DeepPartial<TestAppApiCon
   //public:{dirname:path.join(__dirname,"/../../public")},
   //views:{dirname:path.join(__dirname,"/../../views")},
   auth:{
-    ekey:OB.envvar(s,"_EKEY"),
-    cookie:OB.envvar(s,"_AUTH_COOKIE"),
-    secret:OB.envvar(s,"_AUTH_SECRET"),
+    ekey:OB.evar(s,"_EKEY"),
+    cookie:OB.evar(s,"_AUTH_COOKIE"),
+    secret:OB.evar(s,"_AUTH_SECRET"),
   },
   session:{
-    name:OB.envvar(s,"_SESSION_ID"),
-    secret:OB.envvar(s,"_SESSION_SECRET"),
+    name:OB.evar(s,"_SESSION_ID"),
+    secret:OB.evar(s,"_SESSION_SECRET"),
     store:{
       collectionName:`${s.toLocaleLowerCase()}sessions`,
       mongoUrl:api.config.db.connections[api.config.vars.name],

@@ -19,5 +19,5 @@ export const testAppApiConfig = async (s:string) => {
     api.config.middleware = OB.mergeObj(api.config.middleware,getMiddleware(s,api)) as any;
     return {api};
   }
-  catch(e){OB.here("e",e);throw e;}
+  catch(e){OB.error(e);throw e;}
 };
