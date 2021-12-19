@@ -13,47 +13,30 @@ import flash from "express-flash";
 import passport from "passport";
 import errorhandler from "errorhandler";
 import {Handler,ErrorHandler} from "./middleware-handler-types";
-import {OBAExpressApiMiddlewareType} from "./middleware-types";
-import {morganMsgFormats,morganMsgTokens,checkCORS} from "./middleware-utils";
+import {
+  MorganLoggerTypes,
+  morganMsgFormats,
+  morganMsgFormatFlags,
+  morganMsgTokens,
+  makeMorganOpts,
+  checkCORS} from "./middleware-utils";
 import OB,{Keys,AppError} from "@onebro/oba-common";
+import { OBAExpressApiMiddlewareSetters } from "./middleware-types";
 
-export const getMiddlewares = <Ev,Sockets>():OBAExpressApiMiddlewareType<Ev,Sockets> => ({
+export const getCommonMiddlewares = ():Partial<OBAExpressApiMiddlewareSetters> => ({
   disablePoweredBy:(a,o)  => {o?a.disable("x-powered-by"):null;},
   compression:(a,o) => {o?a.use(compression()):null;},
   flash:(a,o) => {o?a.use(flash()):null;},
   errorhandler:(a,o) => {o?a.use(errorhandler()):null;},
   morgan:(a,o,api) => {
     const {useDev,useLogger} = o;
-    const {logger:{file:fileLogger,db:dbLogger}} = api;
-    const formats = morganMsgFormats;
-    const formatFlags = {
-      "access":`{"type":"ACCESS"}`,
-      "warn":`{"type":"WARN"}`,
-      "error":`{"type":"ERROR"}`,
-      "info":`{"type":"INFO"}`,
-    };
-    const makeMorganOpts = (k:Keys<typeof formatFlags>):morgan.Options<any,any> => ({
-      skip:(req:Request) =>  k == "error"?!req.error:k == "warn"?!req.warning:false,
-      stream:{write:async (str:string) => {
-        const d = dbLogger.info;
-        const f = fileLogger[k].bind(fileLogger);
-        const flag = formatFlags[k] as any;
-        const meta = JSON.parse(str);
-        let info:any;
-        try{info = await d(flag,{meta});}//OB.log(info);}
-        catch(e){
-          OB.warn(e);
-          try{info = f(str);}
-          catch(e_){throw e_;}
-        }
-      }}
-    });
+    const {logger} = api;
     for(const k in morganMsgTokens) morgan.token(k,morganMsgTokens[k]);
-    if(useDev) a.use(morgan("dev"));
-    if(useLogger) for(const k in formats){
-      const K = k as Keys<typeof formatFlags>;
-      const opts = makeMorganOpts(K);
-      a.use(morgan(formats[K],opts));
+    if(useDev && OB.debug()) a.use(morgan("dev"));
+    if(useLogger) for(const k in morganMsgFormats){
+      const K = k as MorganLoggerTypes;
+      const opts = makeMorganOpts(logger,K);
+      a.use(morgan(morganMsgFormats[K],opts));
     }
   },
   cors:(a,o,api) => {

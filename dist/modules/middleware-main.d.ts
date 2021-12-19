@@ -1,7 +1,4 @@
-import { OBAExpressApiMiddlewareType } from "./middleware-types";
-export interface OBAExpressApiMiddleware<Ev, Sockets> extends OBAExpressApiMiddlewareType<Ev, Sockets> {
-}
-export declare class OBAExpressApiMiddleware<Ev, Sockets> {
-    constructor();
+export declare class OBAExpressApiMiddleware {
+    static init: () => Partial<import("./middleware-types").OBAExpressApiMiddlewareSetters>;
 }
 export default OBAExpressApiMiddleware;

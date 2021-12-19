@@ -1,10 +1,11 @@
-import {J,ResponseData} from "../utils";
+import {J,ResponseData} from "../../utils";
 import {SuperTest,Test,Response} from "supertest";
 import OB from "@onebro/oba-common";
 
 export const OBAExpressApiInitTests = () => J.desc("OBA EXPRESS TEST API",() => {
   let app:SuperTest<Test>,res_:ResponseData = J.newResponseData();
   it("init w/o errors",async () => {
+    await J.refreshDb("OBA_EXPRESS");
     app = (await J.initApp("OBA_EXPRESS",true)).app;
     J.is(app);
   },1E9);                    
@@ -101,7 +102,7 @@ export const OBAExpressApiInitTests = () => J.desc("OBA EXPRESS TEST API",() => 
     })
     .catch(e => {OB.error(e);throw e;});
   },1E9);
-  it("Test: POST /test-only [422 - Req Validation - Body Missing Prop]",async () => {
+  it("Test: POST /test-only [400 - Req Validation - Body Missing Prop]",async () => {
     await app
     .post("/test-only")
     .send({admi:"ObAuth"})
@@ -110,7 +111,7 @@ export const OBAExpressApiInitTests = () => J.desc("OBA EXPRESS TEST API",() => 
     .set("Cookie",res_.cookieArr)
     .set("Accept","application/json")
     .expect("Content-Type",/json/)
-    .expect(422)
+    .expect(400)
     .expect((res:Response) => {
       J.handleResponse(res_,res);
       J.true(/Check data/.test(res_.body.message));
@@ -118,7 +119,7 @@ export const OBAExpressApiInitTests = () => J.desc("OBA EXPRESS TEST API",() => 
     })
     .catch(e => {OB.error(e);throw e;});
   },1E9);
-  it("Test: POST /test-only [422 - Req Validation - Body Invalid Prop]",async () => {
+  it("Test: POST /test-only [400 - Req Validation - Body Invalid Prop]",async () => {
     await app
     .post("/test-only")
     .send({admin:"ObAuth1"})
@@ -127,7 +128,7 @@ export const OBAExpressApiInitTests = () => J.desc("OBA EXPRESS TEST API",() => 
     .set("Cookie",res_.cookieArr)
     .set("Accept","application/json")
     .expect("Content-Type",/json/)
-    .expect(422)
+    .expect(400)
     .expect((res:Response) => {
       J.handleResponse(res_,res);
       J.true(/Check data/.test(res_.body.message));
@@ -208,6 +209,8 @@ export const OBAExpressApiInitTests = () => J.desc("OBA EXPRESS TEST API",() => 
     .set("Origin","https://oba-dev-apps.com")
     .set("OBA-CLIENT-ID","00-obA-express")
     .set("OBA-CLIENT-KEY","1873487748")
+    .set("XSRF-TOKEN",res_.csrfToken)
+    .set("Cookie",res_.cookieArr)
     .expect("Content-Type",/json/)
     .expect(401)
     .expect((res:Response) => {J.handleResponse(res_,res);})
@@ -220,6 +223,8 @@ export const OBAExpressApiInitTests = () => J.desc("OBA EXPRESS TEST API",() => 
     .set("OBA-CLIENT-ID","00-obA-express")
     .set("OBA-CLIENT-KEY","1873487748")
     .set("Authorization","Bobo "+res_.authToken)
+    .set("XSRF-TOKEN",res_.csrfToken)
+    .set("Cookie",res_.cookieArr)
     .expect("Content-Type",/json/)
     .expect(401)
     .expect((res:Response) => {J.handleResponse(res_,res);})
@@ -232,6 +237,8 @@ export const OBAExpressApiInitTests = () => J.desc("OBA EXPRESS TEST API",() => 
     .set("OBA-CLIENT-ID","00-obA-express")
     .set("OBA-CLIENT-KEY","1873487748")
     .set("Authorization","Bearer "+res_.authToken)
+    .set("XSRF-TOKEN",res_.csrfToken)
+    .set("Cookie",res_.cookieArr)
     .expect("Content-Type",/json/)
     .expect(200)
     .expect((res:Response) => {

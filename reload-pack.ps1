@@ -1,4 +1,3 @@
-
 function runAPI {
   param(
     [Parameter(Mandatory)] [System.Collections.IDictionary] $Environment,
@@ -34,6 +33,6 @@ $myscript1 = "/k npm run build && git add . && git commit -m `"$msgUpd`" && "
 $myscript2 = "npm version `"$versionUpd`" && echo 'onebro\n' | git push origin master && npm publish --access public"
 $myscript = $myscript1 + $myscript2;
 runAPI $env {
-  Set-Location "D:\ob\dev\oba-express-api"
+  Set-Location "D:\oba\apps\oba-express-api"
   Start-Process "cmd" -ArgumentList "`"$myscript`""
 }

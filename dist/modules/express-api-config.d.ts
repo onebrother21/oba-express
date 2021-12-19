@@ -1,3 +1,3 @@
-import { OBAExpressApiConfig } from "./express-api-config-type";
-declare const setDefaultConfigWithEnvironment: <Ev, Sockets>(prefix: string) => OBAExpressApiConfig<Ev, Sockets>;
+import { OBAExpressApiConfig } from "./express-api-main";
+declare const setDefaultConfigWithEnvironment: <Sockets = undefined>(prefix: string) => OBAExpressApiConfig<Sockets>;
 export { setDefaultConfigWithEnvironment as expressConfig };

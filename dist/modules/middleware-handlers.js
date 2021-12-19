@@ -77,7 +77,7 @@ exports.verifyTkn = verifyTkn;
 const getApiUserCreds = (cookieName, ekey, authSecret) => {
     const handler = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         const cookie = req.cookies[cookieName];
-        req.appuser = cookie ? (0, oba_common_1.decrypt)(ekey, cookie) : null;
+        req.appuser = cookie ? oba_common_1.default.decrypt(ekey, cookie) : null;
         req.authtkn = (0, exports.verifyTkn)(req.headers.authorization, authSecret);
         return next();
     });
@@ -127,7 +127,7 @@ const refreshApiUserCreds = (cookieName, ekey, authSecret) => {
     const handler = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const appuser = res.locals.user || req.appuser;
-            const appuserEnc = appuser ? (0, oba_common_1.encrypt)(ekey, appuser) : null;
+            const appuserEnc = appuser ? oba_common_1.default.encrypt(ekey, appuser) : null;
             const token = res.locals.auth ? (0, exports.generateTkn)({ appuser, okto: "use-api", role: "USER" }, authSecret) : null;
             appuserEnc ? res.cookie(cookieName, appuserEnc, { maxAge: 900000, httpOnly: true }) : null;
             res.locals.token = token;
@@ -146,13 +146,11 @@ const handleApiResponse = () => {
 };
 exports.handleApiResponse = handleApiResponse;
 const sendreq = (o) => __awaiter(void 0, void 0, void 0, function* () {
+    const fetch = (yield require("node-fetch")).default;
     try {
         //if(opts.ssl) opts = Object.assign({},opts,{});//SSLCertInfo);//readCert();
-        const fetch = (_a) => {
-            var { url } = _a, opts = __rest(_a, ["url"]);
-            return Promise.resolve().then(() => __importStar(require("node-fetch"))).then(({ default: f }) => f(url, opts));
-        };
-        const res = yield fetch(o);
+        const { url } = o, opts = __rest(o, ["url"]);
+        const res = yield fetch(url, opts);
         const data = yield res.json();
         if (!res.ok)
             throw res.text();
@@ -160,7 +158,7 @@ const sendreq = (o) => __awaiter(void 0, void 0, void 0, function* () {
             return data;
     }
     catch (e) {
-        oba_common_1.default.error(e.message, e.code);
+        oba_common_1.default.error(e.message);
         throw e;
     }
 });

@@ -1,19 +1,19 @@
 import {Request,Response,NextFunction,Router } from "express";
 import {Enum,OfErrorType,AnyBoolean} from "@onebro/oba-common";
-import {OBAExpressApiBaseType} from "./express-api-base-type";
+import OBACoreApi from "@onebro/oba-core-api";
 
 export type Handler = (req:Request,res:Response,next:NextFunction) => Promise<Response|void>;
 export type ErrorHandler = (e:OfErrorType,req:Request,res:Response,next:NextFunction) => Response|void;
 export type FileReqHandler<U,DB> = (req:Request,res:Response,db:DB) => Promise<U>;
-export type CustomHandlerCreator<Ev,Sockets> = (app:OBAExpressApiBaseType<Ev,Sockets>) => Promise<Handler>;
-export type MainApiConstructor<Ev,Sockets> = (app:OBAExpressApiBaseType<Ev,Sockets>) => Promise<Router>;
-export type CustomHandlerConfig<Ev,Sockets> = {
-  func:CustomHandlerCreator<Ev,Sockets>;
+export type CustomHandlerCreator = (app:OBACoreApi) => Promise<Handler>;
+export type MainApiConstructor = (app:OBACoreApi) => Promise<Router>;
+export type CustomHandlerConfig = {
+  func:CustomHandlerCreator;
   before?:string;
   after?:string;
   active?:AnyBoolean;
 };
-export type CustomHandlers<Ev,Sockets> = Enum<CustomHandlerConfig<Ev,Sockets>,string>;
+export type CustomHandlers = Enum<CustomHandlerConfig,string>;
 export type RouterEndpoint = {path:string,methods:string[]};
 export interface CookieBody {
   value:string;

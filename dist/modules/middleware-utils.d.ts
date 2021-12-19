@@ -1,8 +1,13 @@
 import { Request } from "express";
-import OB, { Enum } from "@onebro/oba-common";
+import morgan from "morgan";
+import { Enum, TypedMethods } from "@onebro/oba-common";
 import { ApiUserID } from "./vars-types";
-export declare const morganMsgTokens: OB.TypedMethods<Request, string>;
-export declare const morganMsgFormats: Enum<string, undefined, "access" | "warn" | "error" | "info">;
+import { OBACoreLogger } from "@onebro/oba-core-api";
+export declare type MorganLoggerTypes = "access" | "warn" | "error" | "info";
+export declare const morganMsgTokens: TypedMethods<Request, string>;
+export declare const morganMsgFormats: Enum<string, undefined, MorganLoggerTypes>;
+export declare const morganMsgFormatFlags: Enum<string, MorganLoggerTypes>;
+export declare const makeMorganOpts: (logger: OBACoreLogger, k: MorganLoggerTypes) => morgan.Options<any, any>;
 export declare type CheckCORS = Partial<{
     origin: string;
     origins: string[];

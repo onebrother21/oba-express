@@ -7,5 +7,5 @@ export declare type SocketEventCreator<SocketData> = (io: Server, s?: Socket) =>
 export declare type SocketEvents<Sockets> = {
     [k in Keys<Sockets>]: SocketEventCreator<Sockets[k]>;
 };
-export declare type OBAExpressApiSocketsConfig<Sockets> = SocketEvents<Sockets>;
-export declare type OBAExpressApiSocketsType = Server;
+export declare type OBAExpressApiSocketsConfigType<Sockets> = SocketEvents<Sockets>;
+export declare type OBAExpressApiSocketsServer = <Sockets>(o: OBAExpressApiSocketsConfigType<Sockets>) => Server;

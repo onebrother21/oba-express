@@ -9,45 +9,27 @@
       "version":1.1,
       "entry":"/"
     },
-    "errors":{
-      "cors":{"status":403,"message":"CORS is not allowed"},
-      "csrf":{"status":403,"message":"Access denied"},
-      "unauthorized":{"status":401,"message":"%s not authorized"},
-      "notfound":{"status":404,"message":"Requested resource not found"},
-      "doesNotExist":{"status":404,"message":"%s does not exist"},
-      "existing":{"status":425,"message":"%s already exists"},
-      "invalid":{"status":422,"message":"Invalid %s"},
-      "missing":{"status":422,"message":"Missing %s"},
-      "mismatch":{"status":422,"message":"%s mismatch"},
-      "uploadValidation":{"status":422,"message":"Upload Request Validation Failed"},
-      "uploadFail":{"status":422,"message":"Error uploading file - %s"},
-      "uploadNoName":{"status":422,"message":"No msg file \"name\" in request body"},
-      "uploadNoInfo":{"status":422,"message":"No msg file info in request body"},
-      "uploadBadInfo":{"status":422,"message":"Invalid msg file info"},
-      "uploadBadId":{
-        "status":422,
-        "message":"Invalid trackID in URL parameter. Must be string of 12 bytes or 24 hex characters"},
-      "validation":{"status":422,"message":"Action not permitted. Check data in try again"},
-      "castError":{"status":422,"message":"Action not permitted. Check data in try again"},
-      "someError":{"status":500,"message":"Oops, something went wrong."}
-    },
     "logger":{
+      "file":[
+        {"level":"error"},
+        {"level":"access"},
+        {"level":"info"}
+      ],
       "db":[
         {
           "level":"info",
-          "collection":"server_activity_log",
+          "collection":"all_log",
           "options":{"useUnifiedTopology":true},
           "metaKey":"meta",
           "decolorize":true,
           "tryReconnect":true,
-          "expireAfterSeconds":120
+          "expreAfterSeconds":120
         }
       ],
-      "file":[
-        {"level":"error"},
-        {"level":"access"},
-        {"level":"info"},
-        {"level":"warn"}
+      "dbCustom":[
+        {"level":"error","name":"error_log","dateStub":"mm"},
+        {"level":"access","name":"access_log","dateStub":"mm"},
+        {"level":"info","name":"info_log","dateStub":"mm"}
       ]
     },
     "db":{
@@ -57,8 +39,30 @@
         "serverSelectionTimeoutMS":5000,
         "socketTimeoutMS":45000,
         "family":4
-      },
-      "connections":{}
+      }
+    },
+    "errors":{
+      "notfound":{"status":404,"message":"Requested resource not found"},
+      "doesNotExist":{"status":404,"message":"%s does not exist"},
+      "cors":{"status":403,"message":"CORS is not allowed"},
+      "csrf":{"status":403,"message":"Access denied"},
+      "unauthorized":{"status":401,"message":"%s not authorized"},
+      "existing":{"status":422,"message":"%s already exists"},
+      "invalid":{"status":400,"message":"Invalid %s"},
+      "missing":{"status":400,"message":"Missing %s"},
+      "mismatch":{"status":400,"message":"%s mismatch"},
+      "validation":{"status":400,"message":"Action not permitted. Check data in try again"},
+      "castError":{"status":400,"message":"Action not permitted. Check data in try again"},
+      "someError":{"status":500,"message":"Oops, something went wrong."},
+      "uploadValidation":{"status":422,"message":"Upload Request Validation Failed"},
+      "uploadFail":{"status":422,"message":"Error uploading file - %s"},
+      "uploadNoName":{"status":422,"message":"No msg file \"name\" in request body"},
+      "uploadNoInfo":{"status":422,"message":"No msg file info in request body"},
+      "uploadBadInfo":{"status":422,"message":"Invalid msg file info"},
+      "uploadBadId":{
+        "status":422,
+        "message":"Invalid trackID in URL parameter. Must be string of 12 bytes or 24 hex characters"
+      }
     },
     "middleware":{
       "disablePoweredBy":true,

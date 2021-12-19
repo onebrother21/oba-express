@@ -8,52 +8,53 @@ import {takeWhile,tap,catchError} from "rxjs/operators";
 
 import OB,{Component,AnyBoolean} from "@onebro/oba-common";
 import OBACoreApi from "@onebro/oba-core-api";
-import {OBAExpressApiConfig} from "./express-api-config-type";
-import {OBAExpressApiBaseType} from "./express-api-base-type";
+import {OBAExpressApiConfigType,OBAExpressApiBaseType} from "./express-api-types";
 import {RouterEndpoint} from "./middleware-handler-types";
 import {OBAExpressApiMiddlewareKeys} from "./middleware-types";
 import {OBAExpressApiMiddleware} from "./middleware-main";
 import {OBAExpressApiSockets} from "./sockets-main";
 
-export interface OBAExpressApi<Ev,Sockets> extends Component<OBAExpressApiConfig<Ev,Sockets>,Ev>,OBAExpressApiBaseType<Ev,Sockets> {}
-export class OBAExpressApi<Ev,Sockets> extends Component<OBAExpressApiConfig<Ev,Sockets>,Ev> {
+export type OBAExpressApiConfig<Sockets> = OBAExpressApiConfigType<Sockets>;
+export interface OBAExpressApi<Ev = undefined,Sockets = undefined> extends Component<OBAExpressApiConfig<Sockets>,Ev>,OBAExpressApiBaseType<Ev,Sockets>{}
+export class OBAExpressApi<Ev = undefined,Sockets = undefined> extends Component<OBAExpressApiConfig<Sockets>,Ev> {
   get e(){return this.errors;}
   get v(){return this.vars;}
   set v(vars:OBAExpressApi<Ev,Sockets>["vars"]){this.vars = vars;}
   get routes():RouterEndpoint[]{return listEndpoints(this.app);}
-  startServer = async () => new Promise<void>(done => this.server.listen(this.vars.port,() => done()));
+  startServer = async () => new Promise<void>(done => this.server.listen(this.vars.host,this.vars.port,() => done()));
   createApp = async () => {
+    const api = this as any;
     const app = express();
-    const middleware = new OBAExpressApiMiddleware<Ev,Sockets>();
+    const middleware = OBAExpressApiMiddleware.init();
     const {middleware:middlewareConfig} = this.config;
     const noMiddleware = !middlewareConfig||OB.empty(middlewareConfig);
     const custom = (middlewareConfig||{}).custom;
     const main = (middlewareConfig||{}).main;
     const mainSetter = async () => {
       main?
-      app.use(this.vars.entry,await main(this)):
+      app.use(this.vars.entry,await main(api)):
       app.get(this.vars.entry,(req,res) => res.json({ready:true}));
     };
     const setCustomMiddleware = async (k:string,b:1|0) => {
       if(custom) for(const m in custom){
         const handler = custom[m];
         handler.active?
-        handler.before == k && b?app.use(await handler.func(this)):
-        handler.after == k && !b?app.use(await handler.func(this)):
+        handler.before == k && b?app.use(await handler.func(api)):
+        handler.after == k && !b?app.use(await handler.func(api)):
         null:null;
       }
     };
     if(noMiddleware) await mainSetter();
     else for(const k in middlewareConfig) if(k != "custom"){
-      const k1 = k as OBAExpressApiMiddlewareKeys<Ev,Sockets>;
+      const k1 = k as OBAExpressApiMiddlewareKeys;
       const opts = middlewareConfig[k1];
       const setter = middleware[k1];
       await setCustomMiddleware(k,1);
-      k == "main"?await mainSetter():setter?setter(app,opts as any,this):null;
+      k == "main"?await mainSetter():setter?setter(app,opts as any,api):null;
       await setCustomMiddleware(k,0);
     }
-    middleware.pageNotFound(app,null,this);
-    middleware.finalHandler(app,null,this);
+    middleware.pageNotFound(app,null,api);
+    middleware.finalHandler(app,null,api);
     return app;
   };
   initCore = async (start?:AnyBoolean) => {
@@ -67,7 +68,7 @@ export class OBAExpressApi<Ev,Sockets> extends Component<OBAExpressApiConfig<Ev,
     this.server = this.app?createServer(this.app):null;
     const isSocketServer = this.config.sockets && this.server;
     const checkConn = this.server && this.vars.settings && this.vars.settings.checkConn;
-    if(isSocketServer) this.io = new OBAExpressApiSockets(this.config.sockets,this.server);
+    if(isSocketServer) this.io = OBAExpressApiSockets.init(this.config.sockets,this.server);
     if(checkConn) await this.monitor();
     if(start) await this.startServer();
   };

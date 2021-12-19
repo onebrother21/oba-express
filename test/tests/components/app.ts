@@ -1,5 +1,5 @@
-import {J} from "../utils";
-import {TestAppApi} from "../test-app-api";
+import {J} from "../../utils";
+import {TestAppApi} from "../../test-app-api";
 import supertest,{SuperTest,Test} from "supertest";
 import OB from "@onebro/oba-common";
 

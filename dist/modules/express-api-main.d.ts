@@ -1,11 +1,11 @@
 import { Component, AnyBoolean } from "@onebro/oba-common";
-import { OBAExpressApiConfig } from "./express-api-config-type";
-import { OBAExpressApiBaseType } from "./express-api-base-type";
+import { OBAExpressApiConfigType, OBAExpressApiBaseType } from "./express-api-types";
 import { RouterEndpoint } from "./middleware-handler-types";
-export interface OBAExpressApi<Ev, Sockets> extends Component<OBAExpressApiConfig<Ev, Sockets>, Ev>, OBAExpressApiBaseType<Ev, Sockets> {
+export declare type OBAExpressApiConfig<Sockets> = OBAExpressApiConfigType<Sockets>;
+export interface OBAExpressApi<Ev = undefined, Sockets = undefined> extends Component<OBAExpressApiConfig<Sockets>, Ev>, OBAExpressApiBaseType<Ev, Sockets> {
 }
-export declare class OBAExpressApi<Ev, Sockets> extends Component<OBAExpressApiConfig<Ev, Sockets>, Ev> {
-    get e(): import("@onebro/oba-core-base-api").OBACoreBaseErrorFactory<Ev>;
+export declare class OBAExpressApi<Ev = undefined, Sockets = undefined> extends Component<OBAExpressApiConfig<Sockets>, Ev> {
+    get e(): import("@onebro/oba-core-api").OBACoreErrorFactory;
     get v(): OBAExpressApi<Ev, Sockets>["vars"];
     set v(vars: OBAExpressApi<Ev, Sockets>["vars"]);
     get routes(): RouterEndpoint[];

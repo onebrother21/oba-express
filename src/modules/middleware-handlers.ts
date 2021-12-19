@@ -3,7 +3,7 @@ import fs from "fs";
 import path from "path";
 import jwt from "jsonwebtoken";
 import {ValidationChain,validationResult} from "express-validator";
-import OB,{encrypt,decrypt,Keys,Values,Strings,AppError,AnyBoolean,Enum} from "@onebro/oba-common";
+import OB,{Keys,Values,Strings,AppError,AnyBoolean,Enum} from "@onebro/oba-common";
 import {Handler,SendReqOpts} from "./middleware-handler-types";
 
 export const readCert = () => {
@@ -30,7 +30,7 @@ export const verifyTkn = (header:string,secret:string) => {
 export const getApiUserCreds = (cookieName:string,ekey:string,authSecret:string) => {
   const handler:Handler = async (req,res,next) => {
     const cookie = req.cookies[cookieName]  as string;
-    req.appuser = cookie?decrypt(ekey,cookie):null;
+    req.appuser = cookie?OB.decrypt(ekey,cookie):null;
     req.authtkn = verifyTkn(req.headers.authorization,authSecret);
     return next();};
   return handler;
@@ -77,7 +77,7 @@ export const refreshApiUserCreds = (cookieName:string,ekey:string,authSecret:str
   const handler:Handler = async (req,res,next) => {
   try{
       const appuser = res.locals.user||req.appuser;
-      const appuserEnc = appuser?encrypt(ekey,appuser):null;
+      const appuserEnc = appuser?OB.encrypt(ekey,appuser):null;
       const token = res.locals.auth?generateTkn({appuser,okto:"use-api",role:"USER"},authSecret):null;
       appuserEnc?res.cookie(cookieName,appuserEnc,{maxAge:900000,httpOnly:true}):null;
       res.locals.token = token;
@@ -92,15 +92,16 @@ export const handleApiResponse = () => {
   return handler;
 };
 export const sendreq = async <T>(o:SendReqOpts):Promise<T> => {
+  const fetch = (await require("node-fetch")).default;
   try{
     //if(opts.ssl) opts = Object.assign({},opts,{});//SSLCertInfo);//readCert();
-    const fetch = ({url,...opts}:SendReqOpts) => import ("node-fetch").then(({default:f}) => f(url,opts));
-    const res = await fetch(o);
+    const {url,...opts} = o;
+    const res = await fetch(url,opts);
     const data = await res.json() as T;
     if(!res.ok) throw res.text();
     else return data;
   }
-  catch(e){OB.error(e.message,e.code);throw e;}
+  catch(e){OB.error(e.message);throw e;}
 };
 export const mapUserRole = <R extends Strings>(roles:R,role?:Values<R>) => {
   const keys = Object.keys(roles);

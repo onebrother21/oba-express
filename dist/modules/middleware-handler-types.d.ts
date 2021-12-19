@@ -1,18 +1,18 @@
 import { Request, Response, NextFunction, Router } from "express";
 import { Enum, OfErrorType, AnyBoolean } from "@onebro/oba-common";
-import { OBAExpressApiBaseType } from "./express-api-base-type";
+import OBACoreApi from "@onebro/oba-core-api";
 export declare type Handler = (req: Request, res: Response, next: NextFunction) => Promise<Response | void>;
 export declare type ErrorHandler = (e: OfErrorType, req: Request, res: Response, next: NextFunction) => Response | void;
 export declare type FileReqHandler<U, DB> = (req: Request, res: Response, db: DB) => Promise<U>;
-export declare type CustomHandlerCreator<Ev, Sockets> = (app: OBAExpressApiBaseType<Ev, Sockets>) => Promise<Handler>;
-export declare type MainApiConstructor<Ev, Sockets> = (app: OBAExpressApiBaseType<Ev, Sockets>) => Promise<Router>;
-export declare type CustomHandlerConfig<Ev, Sockets> = {
-    func: CustomHandlerCreator<Ev, Sockets>;
+export declare type CustomHandlerCreator = (app: OBACoreApi) => Promise<Handler>;
+export declare type MainApiConstructor = (app: OBACoreApi) => Promise<Router>;
+export declare type CustomHandlerConfig = {
+    func: CustomHandlerCreator;
     before?: string;
     after?: string;
     active?: AnyBoolean;
 };
-export declare type CustomHandlers<Ev, Sockets> = Enum<CustomHandlerConfig<Ev, Sockets>, string>;
+export declare type CustomHandlers = Enum<CustomHandlerConfig, string>;
 export declare type RouterEndpoint = {
     path: string;
     methods: string[];

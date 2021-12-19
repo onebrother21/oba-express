@@ -1,10 +1,8 @@
-/// <reference types="node" />
+import socketIo from "socket.io";
 import { Server } from "http";
-import { OBAExpressApiSocketsType, OBAExpressApiSocketsConfig } from "./sockets-types";
-export interface OBAExpressApiSockets<Sockets> extends OBAExpressApiSocketsType {
-}
-export declare class OBAExpressApiSockets<Sockets> {
-    constructor(config: OBAExpressApiSocketsConfig<Sockets>, server: Server);
+import { OBAExpressApiSocketsConfigType } from "./sockets-types";
+export declare type OBAExpressApiSocketsConfig<Sockets> = OBAExpressApiSocketsConfigType<Sockets>;
+export declare class OBAExpressApiSockets {
+    static init: <Sockets>(config: OBAExpressApiSocketsConfig<Sockets>, httpServer: Server) => socketIo.Server<import("socket.io/dist/typed-events").DefaultEventsMap, import("socket.io/dist/typed-events").DefaultEventsMap, import("socket.io/dist/typed-events").DefaultEventsMap>;
 }
 export default OBAExpressApiSockets;
-export * from "./sockets-types";

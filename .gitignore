@@ -1,4 +1,6 @@
 node_modules
-launch.ps1
 logs
+dev
+uploads
+launch.ps1
 reload-pack.ps1

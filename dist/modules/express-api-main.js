@@ -46,17 +46,18 @@ const sockets_main_1 = require("./sockets-main");
 class OBAExpressApi extends oba_common_1.Component {
     constructor() {
         super(...arguments);
-        this.startServer = () => __awaiter(this, void 0, void 0, function* () { return new Promise(done => this.server.listen(this.vars.port, () => done())); });
+        this.startServer = () => __awaiter(this, void 0, void 0, function* () { return new Promise(done => this.server.listen(this.vars.host, this.vars.port, () => done())); });
         this.createApp = () => __awaiter(this, void 0, void 0, function* () {
+            const api = this;
             const app = (0, express_1.default)();
-            const middleware = new middleware_main_1.OBAExpressApiMiddleware();
+            const middleware = middleware_main_1.OBAExpressApiMiddleware.init();
             const { middleware: middlewareConfig } = this.config;
             const noMiddleware = !middlewareConfig || oba_common_1.default.empty(middlewareConfig);
             const custom = (middlewareConfig || {}).custom;
             const main = (middlewareConfig || {}).main;
             const mainSetter = () => __awaiter(this, void 0, void 0, function* () {
                 main ?
-                    app.use(this.vars.entry, yield main(this)) :
+                    app.use(this.vars.entry, yield main(api)) :
                     app.get(this.vars.entry, (req, res) => res.json({ ready: true }));
             });
             const setCustomMiddleware = (k, b) => __awaiter(this, void 0, void 0, function* () {
@@ -64,8 +65,8 @@ class OBAExpressApi extends oba_common_1.Component {
                     for (const m in custom) {
                         const handler = custom[m];
                         handler.active ?
-                            handler.before == k && b ? app.use(yield handler.func(this)) :
-                                handler.after == k && !b ? app.use(yield handler.func(this)) :
+                            handler.before == k && b ? app.use(yield handler.func(api)) :
+                                handler.after == k && !b ? app.use(yield handler.func(api)) :
                                     null : null;
                     }
             });
@@ -78,11 +79,11 @@ class OBAExpressApi extends oba_common_1.Component {
                         const opts = middlewareConfig[k1];
                         const setter = middleware[k1];
                         yield setCustomMiddleware(k, 1);
-                        k == "main" ? yield mainSetter() : setter ? setter(app, opts, this) : null;
+                        k == "main" ? yield mainSetter() : setter ? setter(app, opts, api) : null;
                         yield setCustomMiddleware(k, 0);
                     }
-            middleware.pageNotFound(app, null, this);
-            middleware.finalHandler(app, null, this);
+            middleware.pageNotFound(app, null, api);
+            middleware.finalHandler(app, null, api);
             return app;
         });
         this.initCore = (start) => __awaiter(this, void 0, void 0, function* () {
@@ -97,7 +98,7 @@ class OBAExpressApi extends oba_common_1.Component {
             const isSocketServer = this.config.sockets && this.server;
             const checkConn = this.server && this.vars.settings && this.vars.settings.checkConn;
             if (isSocketServer)
-                this.io = new sockets_main_1.OBAExpressApiSockets(this.config.sockets, this.server);
+                this.io = sockets_main_1.OBAExpressApiSockets.init(this.config.sockets, this.server);
             if (checkConn)
                 yield this.monitor();
             if (start)

@@ -11,5 +11,4 @@ export * from "./sockets-types";
 export * from "./vars-types";
 export * from "./express-api-config";
 export * from "./express-api-main";
-export * from "./express-api-config-type";
-export * from "./express-api-base-type";
+export * from "./express-api-types";

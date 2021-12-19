@@ -2,7 +2,7 @@
 import { Request } from "express";
 import jwt from "jsonwebtoken";
 import { ValidationChain } from "express-validator";
-import OB, { Values, AnyBoolean, Enum } from "@onebro/oba-common";
+import { Values, Strings, AnyBoolean, Enum } from "@onebro/oba-common";
 import { Handler, SendReqOpts } from "./middleware-handler-types";
 export declare const readCert: () => {
     cert: Buffer;
@@ -26,8 +26,8 @@ export declare const handleApiAction: (action: (req: Request) => Promise<ActionR
 export declare const refreshApiUserCreds: (cookieName: string, ekey: string, authSecret: string) => Handler;
 export declare const handleApiResponse: () => Handler;
 export declare const sendreq: <T>(o: SendReqOpts) => Promise<T>;
-export declare const mapUserRole: <R extends OB.Strings>(roles: R, role?: OB.Values<R>) => string;
-export declare const validateUserRole: <R extends OB.Strings>(roles: R) => Handler;
+export declare const mapUserRole: <R extends Strings>(roles: R, role?: Values<R>) => string;
+export declare const validateUserRole: <R extends Strings>(roles: R) => Handler;
 export declare type OBNotificationData = {
     method: string;
     type: string;

@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import supertest,{Response} from "supertest";
-import OB,{AnyBoolean,Enum} from "@onebro/oba-common";
-import {testAppApiConfig} from "./test-app-api/test-app-config";
+import {AnyBoolean,Enum} from "@onebro/oba-common";
+import {testAppApiConfig} from "./test-app-api";
 
 export type ResponseData = {
   cookieArr:string[];
@@ -14,6 +14,7 @@ export const J = {
   desc:describe,
   type:(a:any,b:string) => expect(typeof a).toBe(b),
   instance:(a:any,b:any) => expect(a instanceof b).toBe(true),
+  cookies:(a:any) => expect(Array.isArray(a)).toBe(true),
   arr:(a:any) => expect(Array.isArray(a)).toBe(true),
   gt:(a:number,b:number) => expect(a).toBeGreaterThan(b),
   eq:(a:number,b:number,c:number=2) => expect(a).toBeCloseTo(b,c),
@@ -29,24 +30,15 @@ export const J = {
   doesNotThrow:(o:Function) => expect(o()).not.toThrow(),
   error:(o:any) => expect(o).toBeInstanceOf(Error),
   noterror:(o:any) => expect(o).not.toBeInstanceOf(Error),
-  refreshDb:async () => {
-    const db = await mongoose.createConnection("mongodb://localhost:27017/oba-dev").asPromise();
+  refreshDb:async (s:string) => {
+    const {api} = await testAppApiConfig(s);
+    const db = await mongoose.createConnection(api.config.db.uri).asPromise();
     await db.dropDatabase();
   },
   initApp:async (s:string,withTestApp?:AnyBoolean) => {
     try{
       const {api} = await testAppApiConfig(s);
-      //OB.log(api.config.logger);
-      await api.init(1).then(() => {
-        /*const badsignals = ["SIGUSR2","SIGINT","SIGTERM","exit"];
-        for(const i of badsignals) process.on(i,() => OB.warn("SYSTEM TERMINATING ::",i) && api.events.emit("shutdown",true));
-        api.events.emit("config",api.config);
-        api.events.emit("init",true);
-        const {name,env,port,host} = api.vars;
-        api.events.emit("serverOK",{name,env,host,port});
-        api.events.emit("ready",true as any);
-        */
-      });
+      await api.init(1);
       const app = supertest(api.app);
       return {api,...withTestApp?{app}:null};
     }
@@ -70,31 +62,30 @@ export const J = {
       cookieObj.cookie = o;});
     return cookieObj;
   },
-  parseCookieArray:(data:{cookieArr:string[];cookies:any;},arr:string[]) => {
+  parseCookieArray:(data:Partial<ResponseData>,cookieArr:string[]) => {
     try{
+      if(!(cookieArr&&cookieArr.length)){return data;}
       const cookieNames = [];
-      if(!(arr&&arr.length)){return data;}
-      else {
-        for(let i=0;i<arr.length;i++){
-          const {name,cookie} = J.parseCookie(arr[i]);
-          cookie.index = i;
-          cookieNames.push(name);
-          data.cookies = Object.assign({},data.cookies,{[name]:cookie});
-        }
-        if(!data.cookieArr.length) data.cookieArr = arr;
-        else {
-          cookieNames.forEach((c,i) => {
-            let didMatch = false,isMatch = false;
-            const cookie = arr[i];
-            data.cookieArr = data.cookieArr.map(k => {
-              isMatch = new RegExp(c).test(k);
-              didMatch = isMatch||didMatch;
-              return isMatch?cookie:k;});
-            !didMatch?data.cookieArr.push(cookie):null;});
-          }
-        }
-        return data;
+      const cookies = {};
+      if(!data.cookieArr.length) data.cookieArr = cookieArr;
+      else for(let i=0;i<cookieArr.length;i++){
+        const cookieStr = cookieArr[i];
+        const {name} = J.parseCookie(cookieStr);
+        let didMatch = false,isMatch = false;
+        data.cookieArr = data.cookieArr.map(str => {
+          isMatch = new RegExp(name).test(str);
+          didMatch = isMatch||didMatch;
+          return isMatch?cookieStr:str;
+        });
+        !didMatch?data.cookieArr.push(cookieStr):null;
       }
+      for(let i=0;i<data.cookieArr.length;i++){
+        const {name,cookie} = J.parseCookie(data.cookieArr[i]);
+        cookie.index = i;
+        data.cookies[name] = cookie;
+      }
+      return data;
+    }
     catch(e){console.error(e);throw e;}
   },
   newResponseData:():ResponseData => ({cookieArr:[],cookies:{},csrfToken:"",authToken:"",body:{}}),

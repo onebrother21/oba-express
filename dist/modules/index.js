@@ -23,6 +23,5 @@ __exportStar(require("./sockets-types"), exports);
 __exportStar(require("./vars-types"), exports);
 __exportStar(require("./express-api-config"), exports);
 __exportStar(require("./express-api-main"), exports);
-__exportStar(require("./express-api-config-type"), exports);
-__exportStar(require("./express-api-base-type"), exports);
+__exportStar(require("./express-api-types"), exports);
 //# sourceMappingURL=index.js.map

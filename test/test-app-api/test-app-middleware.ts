@@ -1,19 +1,16 @@
 import path from "path";
-//import { SendReqOpts,sendreq } from "../middleware-utils";
-import OB,{DeepPartial, longId} from "@onebro/oba-common";
-import {
-  TestAppApiConfig,
-  TestAppApiHandlers,
-  TestAppApi,
-} from "./test-app-types";
-import {TestAppMainApi} from "./test-app-main-api";
+import { CustomHandlers,SendReqOpts,sendreq } from "../../src";
+import OB,{DeepPartial} from "@onebro/oba-common";
+import {TestAppApiConfig,TestAppApi,} from "./test-app-types";
+import TestAppMainApi from "./test-app-main-api";
 
-export const TestMiddlewares:TestAppApiHandlers = {
+export type TestAppApiHandlers = CustomHandlers;
+export const TestHandlers:TestAppApiHandlers = {
   reqId:{
     active:true,
     before:"cors",
     func:async () => async (req,res,next) => {
-      (req as any).id = longId();
+      (req as any).id = OB.longId();
       return next();
     }
   },
@@ -29,13 +26,13 @@ export const TestMiddlewares:TestAppApiHandlers = {
     active:true,
     after:"cors",
     func:async api => async (req,res,next) => {
-      const consumers = api.vars.consumers;
+      const consumers = (api.vars as any).consumers;
       if(consumers){
         const name = req.url.split("/").slice(1)[0];
         const consumer = consumers[name];
         if(consumer){
-          const id = req.headers["oba-client-id"] as string||null;
-          const key = req.headers["oba-client-key"] as string||null;
+          const id = req.headers["oba-client-id"] as string||"";
+          const key = req.headers["oba-client-key"] as string||"";
           const valid = consumer && id && key?id === consumer.id && key === consumer.key:false;
           //ob.log(name,consumer,id,key,valid);
           if(!(id && key)) return next(api.e._.missing(401,"API credentials not provided"));
@@ -73,33 +70,34 @@ export const TestMiddlewares:TestAppApiHandlers = {
     },
   },
   ipData:{
-    active:false,
+    active:true,
     after:"session",
     func:async api => async (req,res,next) => {
-      const session = req.session as any;
+      const {ip,session} = req as any;
       if(session && !session.ipdata){
-        const consumerkey = api.vars.providers["ip-data"];
-        const ip = /127.0.0/.test(req.ip)?"":req.ip;
-        const url = `https://consumer.ipdata.co${ip?"/"+ip:""}?consumer-key=${consumerkey}`;
-        //const opts:SendReqOpts = {url};
-        //req.session.ipdata = await sendreq(opts);
-        req.session = session as any;
+        const provider = (api.vars as any).providers["ip-data"];
+        const isLocal = /127.0.0/.test(ip);
+        const url = isLocal?"":`https://consumer.ipdata.co${ip?"/"+ip:""}?consumer-key=${provider.key}`;
+        const opts:SendReqOpts = {url,method:"get",body:""};
+        const ipdata = isLocal?{addr:ip}:await sendreq(opts) as any;
+        session.ipdata = ipdata;
+        req.session = session;
       }
       return next();
     },
   },
   reqCounter:{
-    active:false,
+    active:true,
     after:"session",
     func:async () => async (req,res,next) => {
-      const session = req.session as any;
+      const {session} = req as any;
       const within1Min = session.lastReq?((Date.now() - session.lastReq)/1000) <= 60:true;
       if(within1Min) session.visits = (session.visits||0)+1;
       else session.visits = 1;
-        //req.session.reqsPerMin = (req.session.visits/60);}
-      //if(req.session.visits > 12) console.warn("whoa what is going on?");
+      session.reqsPerMin = (session.visits/60);
       session.lastReq = Date.now();
-      req.session = session as any;
+      if(session.visits > 12) console.warn("whoa what is going on?");
+      req.session = session;
       return next();
     }
   },
@@ -124,10 +122,10 @@ export const getMiddleware = (s:string,api:TestAppApi):DeepPartial<TestAppApiCon
     name:OB.evar(s,"_SESSION_ID"),
     secret:OB.evar(s,"_SESSION_SECRET"),
     store:{
-      collectionName:`${s.toLocaleLowerCase()}sessions`,
-      mongoUrl:api.config.db.connections[api.config.vars.name],
+      collectionName:`user_sessions`,
+      mongoUrl:api.config.db.uri,
     }
   },
-  custom:TestMiddlewares,
+  custom:TestHandlers,
   main:TestAppMainApi,
 });

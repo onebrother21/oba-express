@@ -1,5 +1,5 @@
-import {J} from "../utils";
-import {TestAppApi} from "../test-app-api";
+import {J} from "../../utils";
+import {TestAppApi} from "../../test-app-api";
 
 export const OBAExpressSocketsInitTests = () => J.desc("AM Sockets Init",() => {
   let api:TestAppApi,sockets:any;

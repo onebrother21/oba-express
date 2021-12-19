@@ -1,6 +1,5 @@
 import { Router } from "express";
 import { body } from "express-validator";
-import { TestAppMainApi } from "./test-app-types";
 import {
   Handler,
   generateTkn,
@@ -10,12 +9,15 @@ import {
   handleReqValidation,
   handleApiAction,
   handleApiResponse,
+  MainApiConstructor,
 } from "../../src";
 
-const TestAppMainApi:TestAppMainApi = async api => {
-  const k$ = api.config.middleware["auth"].ekey;
-  const c$ = api.config.middleware["auth"].cookie;
-  const s$ = api.config.middleware["auth"].secret;
+export type TestAppMainApi = MainApiConstructor;
+export const TestAppMainApi:TestAppMainApi = async api => {
+  const config = api.config as any;
+  const k$ = config.middleware["auth"].ekey;
+  const c$ = config.middleware["auth"].cookie;
+  const s$ = config.middleware["auth"].secret;
   const a1 = getApiUserCreds(c$,k$,s$);
   const a2 = validateApiUserCreds();
   const a3 = refreshApiUserCreds(c$,k$,s$);
@@ -40,4 +42,4 @@ const TestAppMainApi:TestAppMainApi = async api => {
   router.get(entry+"/test-tkn",a1,a2,h4,a3,r1);
   return router;
 };
-export {TestAppMainApi};
+export default TestAppMainApi;

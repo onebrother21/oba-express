@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getMiddlewares = void 0;
+exports.getCommonMiddlewares = void 0;
 const express_1 = __importDefault(require("express"));
 const compression_1 = __importDefault(require("compression"));
 const path_1 = __importDefault(require("path"));
@@ -47,52 +47,23 @@ const passport_1 = __importDefault(require("passport"));
 const errorhandler_1 = __importDefault(require("errorhandler"));
 const middleware_utils_1 = require("./middleware-utils");
 const oba_common_1 = __importStar(require("@onebro/oba-common"));
-const getMiddlewares = () => ({
+const getCommonMiddlewares = () => ({
     disablePoweredBy: (a, o) => { o ? a.disable("x-powered-by") : null; },
     compression: (a, o) => { o ? a.use((0, compression_1.default)()) : null; },
     flash: (a, o) => { o ? a.use((0, express_flash_1.default)()) : null; },
     errorhandler: (a, o) => { o ? a.use((0, errorhandler_1.default)()) : null; },
     morgan: (a, o, api) => {
         const { useDev, useLogger } = o;
-        const { logger: { file: fileLogger, db: dbLogger } } = api;
-        const formats = middleware_utils_1.morganMsgFormats;
-        const formatFlags = {
-            "access": `{"type":"ACCESS"}`,
-            "warn": `{"type":"WARN"}`,
-            "error": `{"type":"ERROR"}`,
-            "info": `{"type":"INFO"}`,
-        };
-        const makeMorganOpts = (k) => ({
-            skip: (req) => k == "error" ? !req.error : k == "warn" ? !req.warning : false,
-            stream: { write: (str) => __awaiter(void 0, void 0, void 0, function* () {
-                    const d = dbLogger.info;
-                    const f = fileLogger[k].bind(fileLogger);
-                    const flag = formatFlags[k];
-                    const meta = JSON.parse(str);
-                    let info;
-                    try {
-                        info = yield d(flag, { meta });
-                    } //OB.log(info);}
-                    catch (e) {
-                        oba_common_1.default.warn(e);
-                        try {
-                            info = f(str);
-                        }
-                        catch (e_) {
-                            throw e_;
-                        }
-                    }
-                }) }
-        });
+        const { logger } = api;
         for (const k in middleware_utils_1.morganMsgTokens)
             morgan_1.default.token(k, middleware_utils_1.morganMsgTokens[k]);
-        if (useDev)
+        if (useDev && oba_common_1.default.debug())
             a.use((0, morgan_1.default)("dev"));
         if (useLogger)
-            for (const k in formats) {
+            for (const k in middleware_utils_1.morganMsgFormats) {
                 const K = k;
-                const opts = makeMorganOpts(K);
-                a.use((0, morgan_1.default)(formats[K], opts));
+                const opts = (0, middleware_utils_1.makeMorganOpts)(logger, K);
+                a.use((0, morgan_1.default)(middleware_utils_1.morganMsgFormats[K], opts));
             }
     },
     cors: (a, o, api) => {
@@ -184,5 +155,5 @@ const getMiddlewares = () => ({
         a.use(handler);
     },
 });
-exports.getMiddlewares = getMiddlewares;
+exports.getCommonMiddlewares = getCommonMiddlewares;
 //# sourceMappingURL=middleware-setters.js.map

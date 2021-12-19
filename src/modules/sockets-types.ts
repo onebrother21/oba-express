@@ -8,5 +8,5 @@ export type SocketEvent<SocketData> = (data:SocketData) => SocketEventPayload|Pr
 export type SocketEventCreator<SocketData> = (io:Server,s?:Socket) => SocketEvent<SocketData>;
 export type SocketEvents<Sockets> = {[k in Keys<Sockets>]:SocketEventCreator<Sockets[k]>;};
 
-export type OBAExpressApiSocketsConfig<Sockets> = SocketEvents<Sockets>;
-export type OBAExpressApiSocketsType = Server;
+export type OBAExpressApiSocketsConfigType<Sockets> = SocketEvents<Sockets>;
+export type OBAExpressApiSocketsServer = <Sockets>(o:OBAExpressApiSocketsConfigType<Sockets>) =>  Server;

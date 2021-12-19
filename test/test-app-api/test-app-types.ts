@@ -2,7 +2,7 @@ import {OBAExpressApiConfig,OBAExpressApi,CustomHandlers,MainApiConstructor} fro
 import {Enum,AnyBoolean} from "@onebro/oba-common";
 
 export type DefaultEvents = Enum<boolean,"init"|"shutdown"> & {
-  config:OBAExpressApiConfig<DefaultEvents,DefaultSockets>;
+  config:OBAExpressApiConfig<DefaultSockets>;
   isActive:AnyBoolean;
   ready:boolean;
   serverOK:Enum<string,"name"|"env"|"host"> & {port:number;};
@@ -22,9 +22,6 @@ export type DefaultSockets = {
   info_message:SocketUserMsg;
   typing:SocketUserTyping;
 };
-
-export type TestAppApiHandlers = CustomHandlers<DefaultEvents,DefaultSockets>;
-export type TestAppMainApi = MainApiConstructor<DefaultEvents,DefaultSockets>;
-export type TestAppApiConfig = OBAExpressApiConfig<DefaultEvents,DefaultSockets>;
+export type TestAppApiConfig = OBAExpressApiConfig<DefaultSockets>;
 export interface TestAppApi extends OBAExpressApi<DefaultEvents,DefaultSockets> {}
 export class TestAppApi extends OBAExpressApi<DefaultEvents,DefaultSockets> {}
