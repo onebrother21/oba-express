@@ -1,7 +1,5 @@
-import mongoose from "mongoose";
-import supertest,{Response} from "supertest";
-import {AnyBoolean,Enum} from "@onebro/oba-common";
-import {testAppApiConfig} from "./test-app-api";
+import {Response} from "supertest";
+import {Enum} from "@onebro/oba-common";
 
 export type ResponseData = {
   cookieArr:string[];
@@ -30,20 +28,6 @@ export const J = {
   doesNotThrow:(o:Function) => expect(o()).not.toThrow(),
   error:(o:any) => expect(o).toBeInstanceOf(Error),
   noterror:(o:any) => expect(o).not.toBeInstanceOf(Error),
-  refreshDb:async (s:string) => {
-    const {api} = await testAppApiConfig(s);
-    const db = await mongoose.createConnection(api.config.db.uri).asPromise();
-    await db.dropDatabase();
-  },
-  initApp:async (s:string,withTestApp?:AnyBoolean) => {
-    try{
-      const {api} = await testAppApiConfig(s);
-      await api.init(1);
-      const app = supertest(api.app);
-      return {api,...withTestApp?{app}:null};
-    }
-    catch(e){console.error(e);throw e;}
-  },
   parseCookie:(cookieStr:string) => {
     const cookieObj:any = {name:"",cookie:{}};
     cookieStr

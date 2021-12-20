@@ -1,18 +1,10 @@
-export {};
-/*
-import {AppMaster,masterConfig} from "./modules";
-import deepmerge from "deepmerge";
-import path from "path";
+import {testAppApiConfig} from "./dev";
+import OB from "@onebro/oba-common";
 
-const initApp = async () => {
-  try {
-    const c = deepmerge(masterConfig("APPMASTER"),{
-      logger:{dirname:path.join(__dirname,"/../logs")},
-      middleware:{
-        public:{dirname:path.join(__dirname,"/../public")},
-        views:{dirname:path.join(__dirname,"/../views")}}});
-    const m = new AppMaster(c);
-    await m.start();}
-  catch(e){console.error(e);throw e;}};
-module.exports = (async () => await initApp())();
-*/
+module.exports = (async () => {
+  try{
+    const {api} = await testAppApiConfig("OBA_EXPRESS");
+    await api.init(1,1);
+  }
+  catch(e){OB.error(e);throw e;}
+})();

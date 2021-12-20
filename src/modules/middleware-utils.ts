@@ -7,23 +7,21 @@ import { OBACoreLogger } from "@onebro/oba-core-api";
 export type MorganLoggerTypes = "access"|"warn"|"error"|"info";
 export const morganMsgTokens:TypedMethods<Request,string> = {
   errLogMsg:(req:Request) => {
-    const msg = {
-      id:!req.id?OB.longId():req.id,
-      time:new Date().toLocaleString("en-US",OB.locals.dateFormat as any),
-      appName:req.appname,
+    const msg:any = {
+      id:req.id,
+      ts:new Date().toLocaleString("en-US",OB.locals.dateFormat as any),
       name:req.error?req.error.name:"",
       msg:req.error?req.error.message:"",
-      warning:req.error&&req.error.warning?req.error.warning:false,
-      code:req.error&&req.error.code?req.error.code.toString():"",
-      info:req.error&&req.error.info?JSON.stringify(req.error.info):{},
-      errors:req.error&&req.error.errors?JSON.stringify(req.error.errors):{},
       stack:req.error?req.error.stack:"",
     };
+    req.error&&req.error.warning?msg.warning = req.error.warning:null;
+    req.error&&req.error.code?msg.code = req.error.code:null;
+    req.error&&req.error.info?msg.info = req.error.info:null;
+    req.error&&req.error.errors?msg.errors = req.error.errors:null;
     return JSON.stringify(msg);
   },
   time:() => new Date().toLocaleString("en-US",OB.locals.dateFormat as any),
   hostname:(req:Request) => req.hostname,
-  appName:(req:Request) => req.appname,
   contentType:(req:Request) => req.headers["content-type"],
   headers:(req:Request) => req.headers?JSON.stringify(req.headers):"",
   query:(req:Request) => req.query?JSON.stringify(req.query):"",
@@ -31,9 +29,8 @@ export const morganMsgTokens:TypedMethods<Request,string> = {
   body:(req:Request) => req.body?JSON.stringify(req.body):"",
 };
 const accessTokenStrs:Strings = {
-  time:`"time":":time"`,
+  time:`"ts":":time"`,
   host:`"host":":hostname"`,
-  app:`"app":":appName"`,
   user:`"user":":remote-user"`,
   ip:`"ip":":remote-addr"`,
   referrer:`"referrer":":referrer"`,
@@ -41,9 +38,9 @@ const accessTokenStrs:Strings = {
   http:`"http":":http-version"`,
   method:`"method":":method"`,
   path:`"path":":url"`,
-  resStatus:`"res-status"::status`,
-  resSize:`"res-size"::res[content-length]`,
-  resTime:`"res-time"::response-time`,
+  resStatus:`"status"::status`,
+  resSize:`"size"::res[content-length]`,
+  resTime:`"time"::response-time`,
 };
 const accessLogMsg = "{" + Object.keys(accessTokenStrs).map(k => accessTokenStrs[k as any]).join(",") +"}";
 export const morganMsgFormats:Enum<string,undefined,MorganLoggerTypes> = {
@@ -52,10 +49,10 @@ export const morganMsgFormats:Enum<string,undefined,MorganLoggerTypes> = {
   error:`:errLogMsg`,
 };
 export const morganMsgFormatFlags:Enum<string,MorganLoggerTypes> = {
-  "access":`{"type":"ACCESS"}`,
-  "warn":`{"type":"WARN"}`,
-  "error":`{"type":"ERROR"}`,
-  "info":`{"type":"INFO"}`,
+  "access":"ACCESS",
+  "warn":"WARN",
+  "error":"ERROR",
+  "info":"INFO",
 };
 export const makeMorganOpts = (logger:OBACoreLogger,k:MorganLoggerTypes):morgan.Options<any,any> => ({
   skip:(req:Request) =>  k == "error"?!req.error:k == "warn"?!req.warning:false,

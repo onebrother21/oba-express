@@ -21,7 +21,7 @@ export class OBAExpressApi<Ev = undefined,Sockets = undefined> extends Component
   get v(){return this.vars;}
   set v(vars:OBAExpressApi<Ev,Sockets>["vars"]){this.vars = vars;}
   get routes():RouterEndpoint[]{return listEndpoints(this.app);}
-  startServer = async () => new Promise<void>(done => this.server.listen(this.vars.host,this.vars.port,() => done()));
+  startServer = async () => {await this.server.listen(this.vars.host,this.vars.port);};
   createApp = async () => {
     const api = this as any;
     const app = express();

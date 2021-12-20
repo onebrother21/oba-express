@@ -17,22 +17,20 @@ const oba_common_1 = __importDefault(require("@onebro/oba-common"));
 exports.morganMsgTokens = {
     errLogMsg: (req) => {
         const msg = {
-            id: !req.id ? oba_common_1.default.longId() : req.id,
-            time: new Date().toLocaleString("en-US", oba_common_1.default.locals.dateFormat),
-            appName: req.appname,
+            id: req.id,
+            ts: new Date().toLocaleString("en-US", oba_common_1.default.locals.dateFormat),
             name: req.error ? req.error.name : "",
             msg: req.error ? req.error.message : "",
-            warning: req.error && req.error.warning ? req.error.warning : false,
-            code: req.error && req.error.code ? req.error.code.toString() : "",
-            info: req.error && req.error.info ? JSON.stringify(req.error.info) : {},
-            errors: req.error && req.error.errors ? JSON.stringify(req.error.errors) : {},
             stack: req.error ? req.error.stack : "",
         };
+        req.error && req.error.warning ? msg.warning = req.error.warning : null;
+        req.error && req.error.code ? msg.code = req.error.code : null;
+        req.error && req.error.info ? msg.info = req.error.info : null;
+        req.error && req.error.errors ? msg.errors = req.error.errors : null;
         return JSON.stringify(msg);
     },
     time: () => new Date().toLocaleString("en-US", oba_common_1.default.locals.dateFormat),
     hostname: (req) => req.hostname,
-    appName: (req) => req.appname,
     contentType: (req) => req.headers["content-type"],
     headers: (req) => req.headers ? JSON.stringify(req.headers) : "",
     query: (req) => req.query ? JSON.stringify(req.query) : "",
@@ -40,9 +38,8 @@ exports.morganMsgTokens = {
     body: (req) => req.body ? JSON.stringify(req.body) : "",
 };
 const accessTokenStrs = {
-    time: `"time":":time"`,
+    time: `"ts":":time"`,
     host: `"host":":hostname"`,
-    app: `"app":":appName"`,
     user: `"user":":remote-user"`,
     ip: `"ip":":remote-addr"`,
     referrer: `"referrer":":referrer"`,
@@ -50,9 +47,9 @@ const accessTokenStrs = {
     http: `"http":":http-version"`,
     method: `"method":":method"`,
     path: `"path":":url"`,
-    resStatus: `"res-status"::status`,
-    resSize: `"res-size"::res[content-length]`,
-    resTime: `"res-time"::response-time`,
+    resStatus: `"status"::status`,
+    resSize: `"size"::res[content-length]`,
+    resTime: `"time"::response-time`,
 };
 const accessLogMsg = "{" + Object.keys(accessTokenStrs).map(k => accessTokenStrs[k]).join(",") + "}";
 exports.morganMsgFormats = {
@@ -61,10 +58,10 @@ exports.morganMsgFormats = {
     error: `:errLogMsg`,
 };
 exports.morganMsgFormatFlags = {
-    "access": `{"type":"ACCESS"}`,
-    "warn": `{"type":"WARN"}`,
-    "error": `{"type":"ERROR"}`,
-    "info": `{"type":"INFO"}`,
+    "access": "ACCESS",
+    "warn": "WARN",
+    "error": "ERROR",
+    "info": "INFO",
 };
 const makeMorganOpts = (logger, k) => ({
     skip: (req) => k == "error" ? !req.error : k == "warn" ? !req.warning : false,

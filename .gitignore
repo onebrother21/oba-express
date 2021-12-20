@@ -2,5 +2,4 @@ node_modules
 logs
 dev
 uploads
-launch.ps1
-reload-pack.ps1
+ps

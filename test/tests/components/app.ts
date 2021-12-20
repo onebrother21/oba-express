@@ -1,12 +1,13 @@
 import {J} from "../../utils";
-import {TestAppApi} from "../../test-app-api";
+import {App} from "../../app";
+import {TestAppApi} from "../../../src/dev";
 import supertest,{SuperTest,Test} from "supertest";
 import OB from "@onebro/oba-common";
 
 export const OBAExpressAppInitTests = () => J.desc("AM App Init",() => {
   let api:TestAppApi,app:SuperTest<Test>;
   it("init",async () => {
-    api = (await J.initApp("OBA_EXPRESS")).api;
+    api = (await App.init()).api;
     J.is(api);
     J.true(api.app);
     J.is(api.routes);

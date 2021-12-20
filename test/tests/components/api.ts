@@ -1,12 +1,13 @@
 import {J,ResponseData} from "../../utils";
+import {App} from "../../app";
 import {SuperTest,Test,Response} from "supertest";
 import OB from "@onebro/oba-common";
 
 export const OBAExpressApiInitTests = () => J.desc("OBA EXPRESS TEST API",() => {
   let app:SuperTest<Test>,res_:ResponseData = J.newResponseData();
   it("init w/o errors",async () => {
-    await J.refreshDb("OBA_EXPRESS");
-    app = (await J.initApp("OBA_EXPRESS",true)).app;
+    await App.refresh();
+    app = (await App.init(true)).app;
     J.is(app);
   },1E9);                    
   it("Home: GET / [403 - No Origin]",async () => {
@@ -68,6 +69,19 @@ export const OBAExpressApiInitTests = () => J.desc("OBA EXPRESS TEST API",() => 
     .expect((res:Response) => {
       J.handleResponse(res_,res);
       J.true(/not found/.test(res_.body.message));
+    })
+    .catch(e => {OB.error(e);throw e;});
+  },1E9);
+  it("Error: GET /error [500 - Holy Shit, **check db error_log for record**]",async () => {
+    await app
+    .get("/error")
+    .set("Origin","https://oba-dev-apps.com")
+    .set("Cookie",res_.cookieArr)
+    .expect("Content-Type",/json/)
+    .expect(500)
+    .expect((res:Response) => {
+      J.handleResponse(res_,res);
+      J.true(/holy shit/.test(res_.body.message));
     })
     .catch(e => {OB.error(e);throw e;});
   },1E9); 
@@ -199,7 +213,7 @@ export const OBAExpressApiInitTests = () => J.desc("OBA EXPRESS TEST API",() => 
       J.handleResponse(res_,res);
       J.is(res_.cookies["_ob_auth_11"]);
       J.is(res_.authToken);
-      J.is(res_.body.data.test,10);
+      J.is(res_.body.data.test,15);
     })
     .catch(e => {OB.error(e);throw e;});
   },1E9);

@@ -46,7 +46,7 @@ const sockets_main_1 = require("./sockets-main");
 class OBAExpressApi extends oba_common_1.Component {
     constructor() {
         super(...arguments);
-        this.startServer = () => __awaiter(this, void 0, void 0, function* () { return new Promise(done => this.server.listen(this.vars.host, this.vars.port, () => done())); });
+        this.startServer = () => __awaiter(this, void 0, void 0, function* () { yield this.server.listen(this.vars.host, this.vars.port); });
         this.createApp = () => __awaiter(this, void 0, void 0, function* () {
             const api = this;
             const app = (0, express_1.default)();
