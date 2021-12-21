@@ -21,7 +21,11 @@ export class OBAExpressApi<Ev = undefined,Sockets = undefined> extends Component
   get v(){return this.vars;}
   set v(vars:OBAExpressApi<Ev,Sockets>["vars"]){this.vars = vars;}
   get routes():RouterEndpoint[]{return listEndpoints(this.app);}
-  startServer = async () => {await this.server.listen(this.vars.host,this.vars.port);};
+  startServer = async () => {
+    await Promise.resolve()
+    .then(() => this.server.listen(this.vars.port))//,this.vars.host))
+    .then(s => s?OB.ok("Server started now man"):null);
+  };
   createApp = async () => {
     const api = this as any;
     const app = express();
@@ -70,7 +74,7 @@ export class OBAExpressApi<Ev = undefined,Sockets = undefined> extends Component
     const checkConn = this.server && this.vars.settings && this.vars.settings.checkConn;
     if(isSocketServer) this.io = OBAExpressApiSockets.init(this.config.sockets,this.server);
     if(checkConn) await this.monitor();
-    if(start) await this.startServer();
+    if(start) this.startServer();
   };
   monitor = async () => {
     const check = this.vars.settings.checkConn;

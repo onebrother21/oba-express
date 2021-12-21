@@ -75,7 +75,19 @@
         "urlencoded":{"extended":true},
         "raw":{"type":"audio/wav","limit":"50mb"}
       },
-      "flash":true
+      "flash":true,
+      "session":{
+        "resave":false,
+        "saveUninitialized":true,
+        "cookie":{"maxAge":36000000},
+        "store":{
+          "autoRemove":"interval",
+          "autoRemoveInterval":10,
+          "autoReconnect":true
+        }
+      },
+      "csrf":{"cookie":true},
+      "passport":{}
     }
   }
 }

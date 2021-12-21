@@ -46,7 +46,11 @@ const sockets_main_1 = require("./sockets-main");
 class OBAExpressApi extends oba_common_1.Component {
     constructor() {
         super(...arguments);
-        this.startServer = () => __awaiter(this, void 0, void 0, function* () { yield this.server.listen(this.vars.host, this.vars.port); });
+        this.startServer = () => __awaiter(this, void 0, void 0, function* () {
+            yield Promise.resolve()
+                .then(() => this.server.listen(this.vars.port)) //,this.vars.host))
+                .then(s => s ? oba_common_1.default.ok("Server started now man") : null);
+        });
         this.createApp = () => __awaiter(this, void 0, void 0, function* () {
             const api = this;
             const app = (0, express_1.default)();
@@ -102,7 +106,7 @@ class OBAExpressApi extends oba_common_1.Component {
             if (checkConn)
                 yield this.monitor();
             if (start)
-                yield this.startServer();
+                this.startServer();
         });
         this.monitor = () => __awaiter(this, void 0, void 0, function* () {
             const check = this.vars.settings.checkConn;
