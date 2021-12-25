@@ -57,25 +57,23 @@ const getCommonMiddlewares = () => ({
         const { logger } = api;
         for (const k in middleware_utils_1.morganMsgTokens)
             morgan_1.default.token(k, middleware_utils_1.morganMsgTokens[k]);
-        if (useDev && oba_common_1.default.debug())
+        if (useDev && !oba_common_1.default.prod())
             a.use((0, morgan_1.default)("dev"));
         if (useLogger)
             for (const k in middleware_utils_1.morganMsgFormats) {
                 const K = k;
-                const opts = (0, middleware_utils_1.makeMorganOpts)(logger, K);
-                a.use((0, morgan_1.default)(middleware_utils_1.morganMsgFormats[K], opts));
+                const format = middleware_utils_1.morganMsgFormats[K];
+                const skip = (req) => k == "error" ? !req.error : k == "warn" ? !req.warning : false;
+                const stream = { write: logger.postLogMsg.bind(logger, K) };
+                const opts = { skip, stream };
+                a.use((0, morgan_1.default)(format, opts));
             }
     },
     cors: (a, o, api) => {
         const { origins, preflightContinue, credentials } = o;
-        const opts = {
-            preflightContinue,
-            credentials,
-            origin: (origin, done) => {
-                //const whitelist = [...origins,...api.vars.whitelist];
-                (0, middleware_utils_1.checkCORS)({ origin, origins }) ? done() : done(api.e._.cors());
-            }
-        };
+        //const whitelist = [...origins,...api.vars.whitelist];
+        const originGuard = (origin, done) => (0, middleware_utils_1.checkCORS)({ origin, origins }) ? done() : done(api.e._.cors());
+        const opts = { preflightContinue, credentials, origin: originGuard };
         a.use((0, cors_1.default)(opts));
     },
     cookieParser: (a, o) => { a.use((0, cookie_parser_1.default)(o.secret)); },

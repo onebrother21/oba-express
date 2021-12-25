@@ -9,7 +9,7 @@ export const morganMsgTokens:TypedMethods<Request,string> = {
   errLogMsg:(req:Request) => {
     const msg:any = {
       id:req.id,
-      ts:new Date().toLocaleString("en-US",OB.locals.dateFormat as any),
+      //ts:new Date().toLocaleString("en-US",OB.locals.dateFormat as any),
       name:req.error?req.error.name:"",
       msg:req.error?req.error.message:"",
       stack:req.error?req.error.stack:"",
@@ -21,6 +21,7 @@ export const morganMsgTokens:TypedMethods<Request,string> = {
     return JSON.stringify(msg);
   },
   time:() => new Date().toLocaleString("en-US",OB.locals.dateFormat as any),
+  appuser:(req:Request) => (req as any).appuser,
   hostname:(req:Request) => req.hostname,
   contentType:(req:Request) => req.headers["content-type"],
   headers:(req:Request) => req.headers?JSON.stringify(req.headers):"",
@@ -29,18 +30,18 @@ export const morganMsgTokens:TypedMethods<Request,string> = {
   body:(req:Request) => req.body?JSON.stringify(req.body):"",
 };
 const accessTokenStrs:Strings = {
-  time:`"ts":":time"`,
+  //time:`"ts":":time"`,
   host:`"host":":hostname"`,
-  user:`"user":":remote-user"`,
   ip:`"ip":":remote-addr"`,
+  user:`"user":":appuser"`,
   referrer:`"referrer":":referrer"`,
   agent:`"agent":":user-agent"`,
   http:`"http":":http-version"`,
   method:`"method":":method"`,
-  path:`"path":":url"`,
+  path:`"url":":url"`,
   resStatus:`"status"::status`,
-  resSize:`"size"::res[content-length]`,
-  resTime:`"time"::response-time`,
+  resSize:`"res-size"::res[content-length]`,
+  resTime:`"res-time"::response-time`,
 };
 const accessLogMsg = "{" + Object.keys(accessTokenStrs).map(k => accessTokenStrs[k as any]).join(",") +"}";
 export const morganMsgFormats:Enum<string,undefined,MorganLoggerTypes> = {
@@ -48,37 +49,6 @@ export const morganMsgFormats:Enum<string,undefined,MorganLoggerTypes> = {
   warn:`:errLogMsg`,
   error:`:errLogMsg`,
 };
-export const morganMsgFormatFlags:Enum<string,MorganLoggerTypes> = {
-  "access":"ACCESS",
-  "warn":"WARN",
-  "error":"ERROR",
-  "info":"INFO",
-};
-export const makeMorganOpts = (logger:OBACoreLogger,k:MorganLoggerTypes):morgan.Options<any,any> => ({
-  skip:(req:Request) =>  k == "error"?!req.error:k == "warn"?!req.warning:false,
-  stream:{write:async (str:string) => {
-    const {file:fileLogger,db:dbLogger,dbCustom} = logger;
-    const c = dbCustom[k];
-    const d = dbLogger.info;
-    const f = fileLogger[k].bind(fileLogger);
-    const flag = morganMsgFormatFlags[k] as any;
-    const meta = JSON.parse(str);
-    let info:any;
-    try{info = await c(meta);}
-    catch(e){
-      OB.warn(e);
-      try{
-        await OB.sleep(5);
-        info = await d(flag,{meta});
-      }
-      catch(e){
-        OB.warn(e);
-        try{info = f(str);}
-        catch(e_){throw e_;}
-      }
-    }
-  }}
-});
 export type CheckCORS = Partial<{origin:string;origins:string[];whitelist:ApiUserID[];blacklist:ApiUserID[]}>;
 export const checkCORS = ({origin,origins,whitelist,blacklist}:CheckCORS) => {
   if(!origin) return false;

@@ -47,9 +47,26 @@ class OBAExpressApi extends oba_common_1.Component {
     constructor() {
         super(...arguments);
         this.startServer = () => __awaiter(this, void 0, void 0, function* () {
-            yield Promise.resolve()
-                .then(() => this.server.listen(this.vars.port)) //,this.vars.host))
-                .then(s => s ? oba_common_1.default.ok("Server started now man") : null);
+            const PORT = this.vars.port;
+            const HOST = this.vars.host;
+            const serverOK = () => {
+                const started = new Date();
+                const info = oba_common_1.default.stringify(Object.assign(Object.assign({}, this.vars), { started }));
+                oba_common_1.default.ok("Server started now man");
+                this.logger.postLogMsg("info", info);
+            };
+            const serverErr = (e) => {
+                if (e.code === "EADDRINUSE") {
+                    oba_common_1.default.log("Address in use, retrying...");
+                    setTimeout(() => {
+                        this.server.close();
+                        this.server.listen(PORT);
+                    }, 1000);
+                }
+            };
+            this.server.on("listening", serverOK);
+            this.server.on("error", serverErr);
+            this.server.listen(PORT);
         });
         this.createApp = () => __awaiter(this, void 0, void 0, function* () {
             const api = this;

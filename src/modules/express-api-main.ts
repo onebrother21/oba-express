@@ -6,7 +6,7 @@ import dns from "dns";
 import {interval,of} from "rxjs";
 import {takeWhile,tap,catchError} from "rxjs/operators";
 
-import OB,{Component,AnyBoolean} from "@onebro/oba-common";
+import OB,{Component,AnyBoolean, AppError} from "@onebro/oba-common";
 import OBACoreApi from "@onebro/oba-core-api";
 import {OBAExpressApiConfigType,OBAExpressApiBaseType} from "./express-api-types";
 import {RouterEndpoint} from "./middleware-handler-types";
@@ -22,9 +22,26 @@ export class OBAExpressApi<Ev = undefined,Sockets = undefined> extends Component
   set v(vars:OBAExpressApi<Ev,Sockets>["vars"]){this.vars = vars;}
   get routes():RouterEndpoint[]{return listEndpoints(this.app);}
   startServer = async () => {
-    await Promise.resolve()
-    .then(() => this.server.listen(this.vars.port))//,this.vars.host))
-    .then(s => s?OB.ok("Server started now man"):null);
+    const PORT = this.vars.port;
+    const HOST = this.vars.host;
+    const serverOK = () => {
+      const started = new Date();
+      const info = OB.stringify({...this.vars,started});
+      OB.ok("Server started now man");
+      this.logger.postLogMsg("info",info);
+    };
+    const serverErr = (e:AppError) => {
+      if(e.code === "EADDRINUSE"){
+        OB.log("Address in use, retrying...");
+        setTimeout(() => {
+          this.server.close();
+          this.server.listen(PORT);
+        },1000);
+      }
+    };
+    this.server.on("listening",serverOK);
+    this.server.on("error",serverErr);
+    this.server.listen(PORT);
   };
   createApp = async () => {
     const api = this as any;

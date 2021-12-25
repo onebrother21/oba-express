@@ -1,24 +1,15 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkCORS = exports.makeMorganOpts = exports.morganMsgFormatFlags = exports.morganMsgFormats = exports.morganMsgTokens = void 0;
+exports.checkCORS = exports.morganMsgFormats = exports.morganMsgTokens = void 0;
 const oba_common_1 = __importDefault(require("@onebro/oba-common"));
 exports.morganMsgTokens = {
     errLogMsg: (req) => {
         const msg = {
             id: req.id,
-            ts: new Date().toLocaleString("en-US", oba_common_1.default.locals.dateFormat),
+            //ts:new Date().toLocaleString("en-US",OB.locals.dateFormat as any),
             name: req.error ? req.error.name : "",
             msg: req.error ? req.error.message : "",
             stack: req.error ? req.error.stack : "",
@@ -30,6 +21,7 @@ exports.morganMsgTokens = {
         return JSON.stringify(msg);
     },
     time: () => new Date().toLocaleString("en-US", oba_common_1.default.locals.dateFormat),
+    appuser: (req) => req.appuser,
     hostname: (req) => req.hostname,
     contentType: (req) => req.headers["content-type"],
     headers: (req) => req.headers ? JSON.stringify(req.headers) : "",
@@ -38,18 +30,18 @@ exports.morganMsgTokens = {
     body: (req) => req.body ? JSON.stringify(req.body) : "",
 };
 const accessTokenStrs = {
-    time: `"ts":":time"`,
+    //time:`"ts":":time"`,
     host: `"host":":hostname"`,
-    user: `"user":":remote-user"`,
     ip: `"ip":":remote-addr"`,
+    user: `"user":":appuser"`,
     referrer: `"referrer":":referrer"`,
     agent: `"agent":":user-agent"`,
     http: `"http":":http-version"`,
     method: `"method":":method"`,
-    path: `"path":":url"`,
+    path: `"url":":url"`,
     resStatus: `"status"::status`,
-    resSize: `"size"::res[content-length]`,
-    resTime: `"time"::response-time`,
+    resSize: `"res-size"::res[content-length]`,
+    resTime: `"res-time"::response-time`,
 };
 const accessLogMsg = "{" + Object.keys(accessTokenStrs).map(k => accessTokenStrs[k]).join(",") + "}";
 exports.morganMsgFormats = {
@@ -57,44 +49,6 @@ exports.morganMsgFormats = {
     warn: `:errLogMsg`,
     error: `:errLogMsg`,
 };
-exports.morganMsgFormatFlags = {
-    "access": "ACCESS",
-    "warn": "WARN",
-    "error": "ERROR",
-    "info": "INFO",
-};
-const makeMorganOpts = (logger, k) => ({
-    skip: (req) => k == "error" ? !req.error : k == "warn" ? !req.warning : false,
-    stream: { write: (str) => __awaiter(void 0, void 0, void 0, function* () {
-            const { file: fileLogger, db: dbLogger, dbCustom } = logger;
-            const c = dbCustom[k];
-            const d = dbLogger.info;
-            const f = fileLogger[k].bind(fileLogger);
-            const flag = exports.morganMsgFormatFlags[k];
-            const meta = JSON.parse(str);
-            let info;
-            try {
-                info = yield c(meta);
-            }
-            catch (e) {
-                oba_common_1.default.warn(e);
-                try {
-                    yield oba_common_1.default.sleep(5);
-                    info = yield d(flag, { meta });
-                }
-                catch (e) {
-                    oba_common_1.default.warn(e);
-                    try {
-                        info = f(str);
-                    }
-                    catch (e_) {
-                        throw e_;
-                    }
-                }
-            }
-        }) }
-});
-exports.makeMorganOpts = makeMorganOpts;
 const checkCORS = ({ origin, origins, whitelist, blacklist }) => {
     if (!origin)
         return false;

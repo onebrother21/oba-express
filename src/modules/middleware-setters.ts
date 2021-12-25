@@ -16,9 +16,7 @@ import {Handler,ErrorHandler} from "./middleware-handler-types";
 import {
   MorganLoggerTypes,
   morganMsgFormats,
-  morganMsgFormatFlags,
   morganMsgTokens,
-  makeMorganOpts,
   checkCORS} from "./middleware-utils";
 import OB,{Keys,AppError} from "@onebro/oba-common";
 import { OBAExpressApiMiddlewareSetters } from "./middleware-types";
@@ -32,23 +30,21 @@ export const getCommonMiddlewares = ():Partial<OBAExpressApiMiddlewareSetters> =
     const {useDev,useLogger} = o;
     const {logger} = api;
     for(const k in morganMsgTokens) morgan.token(k,morganMsgTokens[k]);
-    if(useDev && OB.debug()) a.use(morgan("dev"));
+    if(useDev && !OB.prod()) a.use(morgan("dev"));
     if(useLogger) for(const k in morganMsgFormats){
       const K = k as MorganLoggerTypes;
-      const opts = makeMorganOpts(logger,K);
-      a.use(morgan(morganMsgFormats[K],opts));
+      const format = morganMsgFormats[K];
+      const skip = (req:Request) =>  k == "error"?!req.error:k == "warn"?!req.warning:false;
+      const stream = {write:logger.postLogMsg.bind(logger,K)};
+      const opts = {skip,stream} as morgan.Options<any,any>;
+      a.use(morgan(format,opts));
     }
   },
   cors:(a,o,api) => {
     const {origins,preflightContinue,credentials} = o;
-    const opts:CorsOptions = {
-      preflightContinue,
-      credentials,
-      origin:(origin:string,done:Function) => {
-        //const whitelist = [...origins,...api.vars.whitelist];
-        checkCORS({origin,origins})?done():done(api.e._.cors());
-      }
-    };
+    //const whitelist = [...origins,...api.vars.whitelist];
+    const originGuard = (origin:string,done:Function) => checkCORS({origin,origins})?done():done(api.e._.cors());
+    const opts:CorsOptions = {preflightContinue,credentials,origin:originGuard};
     a.use(cors(opts));
   },
   cookieParser:(a,o) => {a.use(cookieParser(o.secret));},
