@@ -52,7 +52,7 @@ class OBAExpressApi extends oba_common_1.Component {
             const serverOK = () => {
                 const started = new Date();
                 const info = oba_common_1.default.stringify(Object.assign(Object.assign({}, this.vars), { started }));
-                oba_common_1.default.ok("Server started now man");
+                oba_common_1.default.ok("Server started now man", this.server.address());
                 this.logger.postLogMsg("info", info);
             };
             const serverErr = (e) => {
@@ -74,8 +74,8 @@ class OBAExpressApi extends oba_common_1.Component {
             const middleware = middleware_main_1.OBAExpressApiMiddleware.init();
             const { middleware: middlewareConfig } = this.config;
             const noMiddleware = !middlewareConfig || oba_common_1.default.empty(middlewareConfig);
-            const custom = (middlewareConfig || {}).custom;
-            const main = (middlewareConfig || {}).main;
+            const custom = middlewareConfig === null || middlewareConfig === void 0 ? void 0 : middlewareConfig.custom;
+            const main = middlewareConfig === null || middlewareConfig === void 0 ? void 0 : middlewareConfig.main;
             const mainSetter = () => __awaiter(this, void 0, void 0, function* () {
                 main ?
                     app.use(this.vars.entry, yield main(api)) :

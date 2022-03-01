@@ -244,6 +244,20 @@ export const OBAExpressApiInitTests = () => J.desc("OBA EXPRESS TEST API",() => 
     .expect((res:Response) => {J.handleResponse(res_,res);})
     .catch(e => {OB.error(e);throw e;});
   },1E9);
+  it("Api Test: GET /oba-express/v1/en/test-tkn [401 - Bad Tkn #2]",async () => {
+    await app
+    .get("/oba-express/v1/en/test-tkn")
+    .set("Origin","https://oba-dev-apps.com")
+    .set("OBA-CLIENT-ID","00-obA-express")
+    .set("OBA-CLIENT-KEY","1873487748")
+    .set("Authorization","Bearer snickerdoodle")
+    .set("XSRF-TOKEN",res_.csrfToken)
+    .set("Cookie",res_.cookieArr)
+    .expect("Content-Type",/json/)
+    .expect(401)
+    .expect((res:Response) => {J.handleResponse(res_,res);})
+    .catch(e => {OB.error(e);throw e;});
+  },1E9);
   it("Api Test: GET /oba-express/v1/en/test-tkn [200 - Auth Tkn OK]",async () => {
     await app
     .get("/oba-express/v1/en/test-tkn")

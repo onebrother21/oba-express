@@ -7,6 +7,7 @@ import OB from "@onebro/oba-common";
 export const OBAExpressAppInitTests = () => J.desc("AM App Init",() => {
   let api:TestAppApi,app:SuperTest<Test>;
   it("init",async () => {
+    OB.ok("** test started **");
     api = (await App.init()).api;
     J.is(api);
     J.true(api.app);

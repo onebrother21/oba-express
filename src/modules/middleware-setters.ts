@@ -30,7 +30,7 @@ export const getCommonMiddlewares = ():Partial<OBAExpressApiMiddlewareSetters> =
     const {useDev,useLogger} = o;
     const {logger} = api;
     for(const k in morganMsgTokens) morgan.token(k,morganMsgTokens[k]);
-    if(useDev && !OB.prod()) a.use(morgan("dev"));
+    if(useDev && !OB.isEnv("prod")) a.use(morgan("dev"));
     if(useLogger) for(const k in morganMsgFormats){
       const K = k as MorganLoggerTypes;
       const format = morganMsgFormats[K];
@@ -92,11 +92,11 @@ export const getCommonMiddlewares = ():Partial<OBAExpressApiMiddlewareSetters> =
         default:_e = api.e.map(<Error>e);break;
       }
       if(_e.warning){
-        OB.warn(_e);
+        //OB.warn(_e);
         req.warning = _e;
       }
       else if(_e.status >= 500){
-        OB.error(_e);
+        //OB.error(_e);
         req.error = _e;
       }
       if(res.headersSent){OB.warn("response already sent",_e.message);return;}

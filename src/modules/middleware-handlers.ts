@@ -6,6 +6,13 @@ import {ValidationChain,validationResult} from "express-validator";
 import OB,{Keys,Values,Strings,AppError,AnyBoolean,Enum} from "@onebro/oba-common";
 import {Handler,SendReqOpts} from "./middleware-handler-types";
 
+export type ActionResponse = {
+  data:Enum<any,string>;
+  user?:string;
+  auth?:AnyBoolean;
+  status?:number;
+  token?:string;
+};
 export const readCert = () => {
   const certFile = path.resolve(__dirname, "ssl/client.crt");
   const keyFile = path.resolve(__dirname, "ssl/client.key");
@@ -18,31 +25,45 @@ export const readCert = () => {
   };
   return SSLCertInfo;
 };
+export const mapUserRole = <R extends Strings>(roles:R,role?:Values<R>) => {
+  const keys = Object.keys(roles);
+  if(!role) return keys[0];
+  else return keys.find(r => roles[r] == role);
+};
 export const generateTkn = (payload:any,secret:string,opts?:any) => jwt.sign(payload,secret,opts);
-export const verifyTkn = (header:string,secret:string) => {
-  if(!header) return null;
-  const parts = header.split(" ");
-  const valid = ["Bearer","Token"].includes(parts[0]) && !!parts[1];
-  const token = valid?parts[1]:null;
-  if(!token) return null;
-  return jwt.verify(token,secret);
-};
-export const getApiUserCreds = (cookieName:string,ekey:string,authSecret:string) => {
+export const verifyTkn = (token:string,secret:string) => jwt.verify(token,secret);
+
+export const validateApiUser = (cookieName:string,ekey:string,authSecret:string) => {
   const handler:Handler = async (req,res,next) => {
-    const cookie = req.cookies[cookieName]  as string;
-    req.appuser = cookie?OB.decrypt(ekey,cookie):null;
-    req.authtkn = verifyTkn(req.headers.authorization,authSecret);
-    return next();};
+    try{
+      const cookie = req.cookies[cookieName] as string;
+      const header = req.headers.authorization;
+      const parts = header?.split(" ")||[];
+      const valid = parts.length == 2 && ["Bearer","Token"].includes(parts[0]) && OB.str(parts[1]);
+      const token = valid?parts[1]:null;
+      if(!token) throw new AppError({
+        message:"Not Authorized",
+        status:401
+      });
+      req.appuser = cookie?OB.decrypt(ekey,cookie):null;
+      req.authtkn = verifyTkn(token,authSecret);
+      return next();
+      }
+    catch(e){return next(e);}
+  };
   return handler;
 };
-export const validateApiUserCreds = () => {
-  const handler:Handler = async (req,res,next) => req.authtkn?next():next(new AppError({
-    message:"Not Authorized",
-    status:401
-  }));
+export const validateApiUserRole = <R extends Strings>(roles:R) => {
+  const keys = Object.keys(roles);
+  const handler:Handler = async (req,res,next) => {
+    const {role} = req.authtkn;
+    const badRole = !keys.includes(role);
+    if(badRole) return next(new AppError({message:"unauthorized",status:401}));
+    return next();
+  };
   return handler;
 };
-export const handleReqValidation = (validators:ValidationChain[]) => {
+export const validateReq = (validators:ValidationChain[]) => {
   const handler:Handler = async (req,res,next) => {
     const errors = validationResult(req);
     if(errors.isEmpty()) return next();
@@ -51,13 +72,6 @@ export const handleReqValidation = (validators:ValidationChain[]) => {
     return next({errors:extractedErrors});
   };
   return [...validators,handler];
-};
-export type ActionResponse = {
-  data:Enum<any,string>;
-  user?:string;
-  auth?:AnyBoolean;
-  status?:number;
-  token?:string;
 };
 export const handleApiAction = (action:(req:Request) => Promise<ActionResponse>,statusOK:number = 200) => {
   const handler:Handler = async (req,res,next) => {
@@ -73,25 +87,25 @@ export const handleApiAction = (action:(req:Request) => Promise<ActionResponse>,
   };
   return handler;
 };
-export const refreshApiUserCreds = (cookieName:string,ekey:string,authSecret:string) => {
+export const refreshApiUser = (cookieName:string,ekey:string,authSecret:string) => {
   const handler:Handler = async (req,res,next) => {
   try{
       const appuser = res.locals.user||req.appuser;
       const appuserEnc = appuser?OB.encrypt(ekey,appuser):null;
-      const token = res.locals.auth?generateTkn({appuser,okto:"use-api",role:"USER"},authSecret):null;
-      appuserEnc?res.cookie(cookieName,appuserEnc,{maxAge:900000,httpOnly:true}):null;
-      res.locals.token = token;
+      const token = generateTkn({appuser,okto:"use-api",role:"USER"},authSecret);
+      if(appuserEnc) res.cookie(cookieName,appuserEnc,{maxAge:900000,httpOnly:true});
+      res.locals.token = res.locals.auth?token:null;
       return next();
     }
     catch(e){return next(e);}
   };
   return handler;
 };
-export const handleApiResponse = () => {
-  const handler:Handler = async (req,res,next) => res.status(res.locals.status).json(res.locals);
+export const sendResponse = () => {
+  const handler:Handler = async (req,res) => res.status(res.locals.status).json(res.locals);
   return handler;
 };
-export const sendreq = async <T>(o:SendReqOpts):Promise<T> => {
+export const sendRequest = async <T>(o:SendReqOpts):Promise<T> => {
   const fetch = (await require("node-fetch")).default;
   try{
     //if(opts.ssl) opts = Object.assign({},opts,{});//SSLCertInfo);//readCert();
@@ -103,20 +117,5 @@ export const sendreq = async <T>(o:SendReqOpts):Promise<T> => {
   }
   catch(e){OB.error(e.message);throw e;}
 };
-export const mapUserRole = <R extends Strings>(roles:R,role?:Values<R>) => {
-  const keys = Object.keys(roles);
-  if(!role) return keys[0];
-  else return keys.find(r => roles[r] == role);
-};
-export const validateUserRole = <R extends Strings>(roles:R) => {
-  const keys = Object.keys(roles);
-  const handler:Handler = async (req,res,next) => {
-    const {role} = req.authtkn;
-    const badRole = !keys.includes(role);
-    if(badRole) return next(new AppError({message:"unauthorized",status:401}));
-    return next();
-  };
-  return handler;
-};
 export type OBNotificationData = {method:string;type:string;user:string;data:any};
-export const notifyUser = async (o:OBNotificationData,doSend?:boolean|number) => doSend?OB.ok(o):null;
+export const notifyApiUser = async (o:OBNotificationData,doSend?:boolean|number) => doSend?OB.ok(o):null;

@@ -42,7 +42,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.notifyUser = exports.validateUserRole = exports.mapUserRole = exports.sendreq = exports.handleApiResponse = exports.refreshApiUserCreds = exports.handleApiAction = exports.handleReqValidation = exports.validateApiUserCreds = exports.getApiUserCreds = exports.verifyTkn = exports.generateTkn = exports.readCert = void 0;
+exports.notifyApiUser = exports.sendRequest = exports.sendResponse = exports.refreshApiUser = exports.handleApiAction = exports.validateReq = exports.validateApiUserRole = exports.validateApiUser = exports.verifyTkn = exports.generateTkn = exports.mapUserRole = exports.readCert = void 0;
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
@@ -61,40 +61,55 @@ const readCert = () => {
     return SSLCertInfo;
 };
 exports.readCert = readCert;
+const mapUserRole = (roles, role) => {
+    const keys = Object.keys(roles);
+    if (!role)
+        return keys[0];
+    else
+        return keys.find(r => roles[r] == role);
+};
+exports.mapUserRole = mapUserRole;
 const generateTkn = (payload, secret, opts) => jsonwebtoken_1.default.sign(payload, secret, opts);
 exports.generateTkn = generateTkn;
-const verifyTkn = (header, secret) => {
-    if (!header)
-        return null;
-    const parts = header.split(" ");
-    const valid = ["Bearer", "Token"].includes(parts[0]) && !!parts[1];
-    const token = valid ? parts[1] : null;
-    if (!token)
-        return null;
-    return jsonwebtoken_1.default.verify(token, secret);
-};
+const verifyTkn = (token, secret) => jsonwebtoken_1.default.verify(token, secret);
 exports.verifyTkn = verifyTkn;
-const getApiUserCreds = (cookieName, ekey, authSecret) => {
+const validateApiUser = (cookieName, ekey, authSecret) => {
     const handler = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-        const cookie = req.cookies[cookieName];
-        req.appuser = cookie ? oba_common_1.default.decrypt(ekey, cookie) : null;
-        req.authtkn = (0, exports.verifyTkn)(req.headers.authorization, authSecret);
+        try {
+            const cookie = req.cookies[cookieName];
+            const header = req.headers.authorization;
+            const parts = (header === null || header === void 0 ? void 0 : header.split(" ")) || [];
+            const valid = parts.length == 2 && ["Bearer", "Token"].includes(parts[0]) && oba_common_1.default.str(parts[1]);
+            const token = valid ? parts[1] : null;
+            if (!token)
+                throw new oba_common_1.AppError({
+                    message: "Not Authorized",
+                    status: 401
+                });
+            req.appuser = cookie ? oba_common_1.default.decrypt(ekey, cookie) : null;
+            req.authtkn = (0, exports.verifyTkn)(token, authSecret);
+            return next();
+        }
+        catch (e) {
+            return next(e);
+        }
+    });
+    return handler;
+};
+exports.validateApiUser = validateApiUser;
+const validateApiUserRole = (roles) => {
+    const keys = Object.keys(roles);
+    const handler = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+        const { role } = req.authtkn;
+        const badRole = !keys.includes(role);
+        if (badRole)
+            return next(new oba_common_1.AppError({ message: "unauthorized", status: 401 }));
         return next();
     });
     return handler;
 };
-exports.getApiUserCreds = getApiUserCreds;
-const validateApiUserCreds = () => {
-    const handler = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-        return req.authtkn ? next() : next(new oba_common_1.AppError({
-            message: "Not Authorized",
-            status: 401
-        }));
-    });
-    return handler;
-};
-exports.validateApiUserCreds = validateApiUserCreds;
-const handleReqValidation = (validators) => {
+exports.validateApiUserRole = validateApiUserRole;
+const validateReq = (validators) => {
     const handler = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         const errors = (0, express_validator_1.validationResult)(req);
         if (errors.isEmpty())
@@ -105,7 +120,7 @@ const handleReqValidation = (validators) => {
     });
     return [...validators, handler];
 };
-exports.handleReqValidation = handleReqValidation;
+exports.validateReq = validateReq;
 const handleApiAction = (action, statusOK = 200) => {
     const handler = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         try {
@@ -123,14 +138,15 @@ const handleApiAction = (action, statusOK = 200) => {
     return handler;
 };
 exports.handleApiAction = handleApiAction;
-const refreshApiUserCreds = (cookieName, ekey, authSecret) => {
+const refreshApiUser = (cookieName, ekey, authSecret) => {
     const handler = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const appuser = res.locals.user || req.appuser;
             const appuserEnc = appuser ? oba_common_1.default.encrypt(ekey, appuser) : null;
-            const token = res.locals.auth ? (0, exports.generateTkn)({ appuser, okto: "use-api", role: "USER" }, authSecret) : null;
-            appuserEnc ? res.cookie(cookieName, appuserEnc, { maxAge: 900000, httpOnly: true }) : null;
-            res.locals.token = token;
+            const token = (0, exports.generateTkn)({ appuser, okto: "use-api", role: "USER" }, authSecret);
+            if (appuserEnc)
+                res.cookie(cookieName, appuserEnc, { maxAge: 900000, httpOnly: true });
+            res.locals.token = res.locals.auth ? token : null;
             return next();
         }
         catch (e) {
@@ -139,13 +155,13 @@ const refreshApiUserCreds = (cookieName, ekey, authSecret) => {
     });
     return handler;
 };
-exports.refreshApiUserCreds = refreshApiUserCreds;
-const handleApiResponse = () => {
-    const handler = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () { return res.status(res.locals.status).json(res.locals); });
+exports.refreshApiUser = refreshApiUser;
+const sendResponse = () => {
+    const handler = (req, res) => __awaiter(void 0, void 0, void 0, function* () { return res.status(res.locals.status).json(res.locals); });
     return handler;
 };
-exports.handleApiResponse = handleApiResponse;
-const sendreq = (o) => __awaiter(void 0, void 0, void 0, function* () {
+exports.sendResponse = sendResponse;
+const sendRequest = (o) => __awaiter(void 0, void 0, void 0, function* () {
     const fetch = (yield require("node-fetch")).default;
     try {
         //if(opts.ssl) opts = Object.assign({},opts,{});//SSLCertInfo);//readCert();
@@ -162,27 +178,7 @@ const sendreq = (o) => __awaiter(void 0, void 0, void 0, function* () {
         throw e;
     }
 });
-exports.sendreq = sendreq;
-const mapUserRole = (roles, role) => {
-    const keys = Object.keys(roles);
-    if (!role)
-        return keys[0];
-    else
-        return keys.find(r => roles[r] == role);
-};
-exports.mapUserRole = mapUserRole;
-const validateUserRole = (roles) => {
-    const keys = Object.keys(roles);
-    const handler = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-        const { role } = req.authtkn;
-        const badRole = !keys.includes(role);
-        if (badRole)
-            return next(new oba_common_1.AppError({ message: "unauthorized", status: 401 }));
-        return next();
-    });
-    return handler;
-};
-exports.validateUserRole = validateUserRole;
-const notifyUser = (o, doSend) => __awaiter(void 0, void 0, void 0, function* () { return doSend ? oba_common_1.default.ok(o) : null; });
-exports.notifyUser = notifyUser;
+exports.sendRequest = sendRequest;
+const notifyApiUser = (o, doSend) => __awaiter(void 0, void 0, void 0, function* () { return doSend ? oba_common_1.default.ok(o) : null; });
+exports.notifyApiUser = notifyApiUser;
 //# sourceMappingURL=middleware-handlers.js.map

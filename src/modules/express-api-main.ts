@@ -27,7 +27,7 @@ export class OBAExpressApi<Ev = undefined,Sockets = undefined> extends Component
     const serverOK = () => {
       const started = new Date();
       const info = OB.stringify({...this.vars,started});
-      OB.ok("Server started now man");
+      OB.ok("Server started now man",this.server.address());
       this.logger.postLogMsg("info",info);
     };
     const serverErr = (e:AppError) => {
@@ -49,8 +49,8 @@ export class OBAExpressApi<Ev = undefined,Sockets = undefined> extends Component
     const middleware = OBAExpressApiMiddleware.init();
     const {middleware:middlewareConfig} = this.config;
     const noMiddleware = !middlewareConfig||OB.empty(middlewareConfig);
-    const custom = (middlewareConfig||{}).custom;
-    const main = (middlewareConfig||{}).main;
+    const custom = middlewareConfig?.custom;
+    const main = middlewareConfig?.main;
     const mainSetter = async () => {
       main?
       app.use(this.vars.entry,await main(api)):

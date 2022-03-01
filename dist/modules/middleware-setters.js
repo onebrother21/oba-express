@@ -57,7 +57,7 @@ const getCommonMiddlewares = () => ({
         const { logger } = api;
         for (const k in middleware_utils_1.morganMsgTokens)
             morgan_1.default.token(k, middleware_utils_1.morganMsgTokens[k]);
-        if (useDev && !oba_common_1.default.prod())
+        if (useDev && !oba_common_1.default.isEnv("prod"))
             a.use((0, morgan_1.default)("dev"));
         if (useLogger)
             for (const k in middleware_utils_1.morganMsgFormats) {
@@ -130,11 +130,11 @@ const getCommonMiddlewares = () => ({
                     break;
             }
             if (_e.warning) {
-                oba_common_1.default.warn(_e);
+                //OB.warn(_e);
                 req.warning = _e;
             }
             else if (_e.status >= 500) {
-                oba_common_1.default.error(_e);
+                //OB.error(_e);
                 req.error = _e;
             }
             if (res.headersSent) {

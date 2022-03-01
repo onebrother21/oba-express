@@ -8,12 +8,12 @@ const config_1 = __importDefault(require("config"));
 const oba_common_1 = __importDefault(require("@onebro/oba-common"));
 const oba_core_api_1 = require("@onebro/oba-core-api");
 const setDefaultConfigWithEnvironment = (prefix) => {
-    const host = process.env.HOST || oba_common_1.default.evar(prefix, "_HOST");
-    const port = Number(process.env.PORT || oba_common_1.default.evar(prefix, "_PORT"));
+    const host = process.env.HOST || oba_common_1.default.getvar(prefix, "_HOST");
+    const port = Number(process.env.PORT || oba_common_1.default.getvar(prefix, "_PORT"));
     //OB.log(host,port);
-    const origins = oba_common_1.default.evar(prefix, "_ORIGINS") ? oba_common_1.default.evar(prefix, "_ORIGINS").split(",") : [];
-    const providers = JSON.parse(oba_common_1.default.evar(prefix, "_PROVIDERS"));
-    const consumers = JSON.parse(oba_common_1.default.evar(prefix, "_CONSUMERS"));
+    const origins = oba_common_1.default.getvar(prefix, "_ORIGINS") ? oba_common_1.default.getvar(prefix, "_ORIGINS").split(",") : [];
+    const providers = JSON.parse(oba_common_1.default.getvar(prefix, "_PROVIDERS"));
+    const consumers = JSON.parse(oba_common_1.default.getvar(prefix, "_CONSUMERS"));
     const settings = { checkConn: false };
     const initial = config_1.default.get("appconfig");
     const coreRuntime = oba_common_1.default.mergeObj(initial, (0, oba_core_api_1.coreConfig)(prefix), false);
