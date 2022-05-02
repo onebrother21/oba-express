@@ -16,7 +16,7 @@ const dev_1 = require("./dev");
 const oba_common_1 = __importDefault(require("@onebro/oba-common"));
 module.exports = (() => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { api } = yield (0, dev_1.testAppApiConfig)("OBA_EXPRESS");
+        const { api } = yield (0, dev_1.testAppApiConfig)();
         yield api.init(1, 1);
     }
     catch (e) {
