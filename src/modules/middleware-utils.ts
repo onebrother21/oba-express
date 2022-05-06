@@ -40,7 +40,7 @@ const accessTokenStrs:Strings = {
   method:`"method":":method"`,
   path:`"url":":url"`,
   resStatus:`"status"::status`,
-  resSize:`"res-size"::res[content-length]`,
+  resSize:`"res-size":":res[content-length]"`,
   resTime:`"res-time"::response-time`,
 };
 const accessLogMsg = "{" + Object.keys(accessTokenStrs).map(k => accessTokenStrs[k as any]).join(",") +"}";
