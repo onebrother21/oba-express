@@ -74,10 +74,12 @@ export const getCommonMiddlewares = ():Partial<OBAExpressApiMiddlewareSetters> =
     a.use(lusca(o));
   },
   passport:(a) => {a.use(passport.initialize());},
-  public:(a,o) => {a.use(express.static(o.dirname,o));},
+  public:(a,o) => {o.dirname?a.use(express.static(o.dirname,o)):null;},
   views:(a,o) => {
-    a.set("views",o.dirname);
-    a.set("view engine",o.engine);
+    if(o.dirname && o.engine){
+      a.set("views",o.dirname);
+      a.set("view engine",o.engine);
+    }
   },
   pageNotFound:(a,o,api) => {a.use(async (req,res,next) => next(api.e._.notfound()));},
   finalHandler:(a,o,api) => {

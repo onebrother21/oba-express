@@ -109,10 +109,12 @@ const getCommonMiddlewares = () => ({
         a.use((0, lusca_1.default)(o));
     },
     passport: (a) => { a.use(passport_1.default.initialize()); },
-    public: (a, o) => { a.use(express_1.default.static(o.dirname, o)); },
+    public: (a, o) => { o.dirname ? a.use(express_1.default.static(o.dirname, o)) : null; },
     views: (a, o) => {
-        a.set("views", o.dirname);
-        a.set("view engine", o.engine);
+        if (o.dirname && o.engine) {
+            a.set("views", o.dirname);
+            a.set("view engine", o.engine);
+        }
     },
     pageNotFound: (a, o, api) => { a.use((req, res, next) => __awaiter(void 0, void 0, void 0, function* () { return next(api.e._.notfound()); })); },
     finalHandler: (a, o, api) => {
