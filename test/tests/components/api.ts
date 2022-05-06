@@ -72,6 +72,32 @@ export const OBAExpressApiInitTests = () => J.desc("OBA EXPRESS TEST API",() => 
     })
     .catch(e => {OB.error(e);throw e;});
   },1E9);
+  it("Test: GET /sample [200 - Home Page OK]",async () => {
+    await app
+    .get("/sample")
+    .set("Origin","https://oba-dev-apps.com")
+    .set("Cookie",res_.cookieArr)
+    .expect("Content-Type",/text\/html/)
+    .expect(200)
+    .expect((res:Response) => {
+      J.handleResponse(res_,res);
+      J.has(res.text,`Hello, World!`);
+    })
+    .catch(e => {OB.error(e);throw e;});
+  },1E9);
+  it("Test: GET /sample/0 [200 - Page 0 OK]",async () => {
+    await app
+    .get("/sample/0")
+    .set("Origin","https://oba-dev-apps.com")
+    .set("Cookie",res_.cookieArr)
+    .expect("Content-Type",/text\/html/)
+    .expect(200)
+    .expect((res:Response) => {
+      J.handleResponse(res_,res);
+      J.has(res.text,`You are logged in as`);
+    })
+    .catch(e => {OB.error(e);throw e;});
+  },1E9);
   it("Error: GET /error [500 - Holy Shit, **check db error_log for record**]",async () => {
     await app
     .get("/error")

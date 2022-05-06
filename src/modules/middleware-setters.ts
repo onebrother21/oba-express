@@ -74,12 +74,9 @@ export const getCommonMiddlewares = ():Partial<OBAExpressApiMiddlewareSetters> =
     a.use(lusca(o));
   },
   passport:(a) => {a.use(passport.initialize());},
-  public:(a,o) => {
-    const publicPath = path.join(o.dirname,"public");
-    a.use(express.static(publicPath,o));
-  },
+  public:(a,o) => {a.use(express.static(o.dirname,o));},
   views:(a,o) => {
-    a.set("views",path.join(o.dirname,"../views"));
+    a.set("views",o.dirname);
     a.set("view engine",o.engine);
   },
   pageNotFound:(a,o,api) => {a.use(async (req,res,next) => next(api.e._.notfound()));},

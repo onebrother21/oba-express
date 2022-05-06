@@ -38,7 +38,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getCommonMiddlewares = void 0;
 const express_1 = __importDefault(require("express"));
 const compression_1 = __importDefault(require("compression"));
-const path_1 = __importDefault(require("path"));
 const morgan_1 = __importDefault(require("morgan"));
 const cors_1 = __importDefault(require("cors"));
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
@@ -110,12 +109,9 @@ const getCommonMiddlewares = () => ({
         a.use((0, lusca_1.default)(o));
     },
     passport: (a) => { a.use(passport_1.default.initialize()); },
-    public: (a, o) => {
-        const publicPath = path_1.default.join(o.dirname, "public");
-        a.use(express_1.default.static(publicPath, o));
-    },
+    public: (a, o) => { a.use(express_1.default.static(o.dirname, o)); },
     views: (a, o) => {
-        a.set("views", path_1.default.join(o.dirname, "../views"));
+        a.set("views", o.dirname);
         a.set("view engine", o.engine);
     },
     pageNotFound: (a, o, api) => { a.use((req, res, next) => __awaiter(void 0, void 0, void 0, function* () { return next(api.e._.notfound()); })); },
