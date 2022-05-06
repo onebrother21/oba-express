@@ -67,8 +67,20 @@
     "middleware":{
       "disablePoweredBy":true,
       "compression":true,
+      "public":{},
+      "views":{},
       "morgan":{"useDev":true,"useLogger":true},
-      "cors":{"origins":[],"preflightContinue":false,"credentials":true},
+      "cors":{
+        "origins":[],
+        "preflightContinue":false,
+        "credentials":true
+      },
+      "cors_ext":{
+        "origins":[],
+        "preflightContinue":false,
+        "credentials":true,
+        "skip":["/sample","sample/0"]
+      },
       "cookieParser":{},
       "bodyParser":{
         "json":{"limit":"50mb"},

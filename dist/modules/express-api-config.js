@@ -19,7 +19,7 @@ const setDefaultConfigWithEnvironment = () => {
     const coreRuntime = oba_common_1.default.mergeObj(initial, (0, oba_core_api_1.coreConfig)(), false);
     const atRuntime = {
         vars: { host, port, providers, consumers, settings },
-        middleware: { cors: { origins } },
+        middleware: { cors: { origins }, cors_ext: { origins } },
     };
     const expressConfig = oba_common_1.default.mergeObj(coreRuntime, atRuntime, false);
     return expressConfig;

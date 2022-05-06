@@ -75,9 +75,23 @@ const getCommonMiddlewares = () => ({
     cors: (a, o, api) => {
         const { origins, preflightContinue, credentials } = o;
         //const whitelist = [...origins,...api.vars.whitelist];
-        const originGuard = (origin, done) => (0, middleware_utils_1.checkCORS)({ origin, origins }) ? done() : done(api.e._.cors());
-        const opts = { preflightContinue, credentials, origin: originGuard };
+        const originGuard = (origin, done) => (0, middleware_utils_1.validateCORS)({
+            origin,
+            origins,
+        }) ? done() : done(api.e._.cors());
+        const opts = { preflightContinue, credentials, origin: "*" }; //originGuard};
         a.use((0, cors_1.default)(opts));
+    },
+    cors_ext: (a, o, api) => {
+        const handler = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+            const origin = req.headers["origin"];
+            const route = { url: req.url, method: req.method };
+            const { origins, skip } = o;
+            const shouldSkip = () => skip.includes(route.url);
+            const originGuard = () => (0, middleware_utils_1.validateCORS)({ origin, origins });
+            return shouldSkip() ? next() : originGuard() ? next() : next(api.e._.cors());
+        });
+        a.use(handler);
     },
     cookieParser: (a, o) => { a.use((0, cookie_parser_1.default)(o.secret)); },
     bodyParser: (a, o) => { for (const k in o)

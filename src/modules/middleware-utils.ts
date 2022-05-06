@@ -3,6 +3,7 @@ import morgan from "morgan";
 import OB,{Enum,Strings,TypedMethods} from "@onebro/oba-common";
 import { ApiUserID } from "./vars-types";
 import { OBACoreLogger } from "@onebro/oba-core-api";
+import { CorsValidationParams } from "./middleware-base-types";
 
 export type MorganLoggerTypes = "access"|"warn"|"error"|"info";
 export const morganMsgTokens:TypedMethods<Request,string> = {
@@ -49,11 +50,10 @@ export const morganMsgFormats:Enum<string,undefined,MorganLoggerTypes> = {
   warn:`:errLogMsg`,
   error:`:errLogMsg`,
 };
-export type CheckCORS = Partial<{origin:string;origins:string[];whitelist:ApiUserID[];blacklist:ApiUserID[]}>;
-export const checkCORS = ({origin,origins,whitelist,blacklist}:CheckCORS) => {
+export const validateCORS = ({origin,origins,blacklist}:CorsValidationParams) => {
   if(!origin) return false;
   if(origins) for(let i = 0,l = origins.length;i<l;i++) if(OB.match(new RegExp(origins[i]),origin)) return true;
-  if(whitelist) for(let i = 0,l = whitelist.length;i<l;i++) if(OB.match(new RegExp(whitelist[i].id),origin)) return true;
-  if(blacklist) for(let i = 0,l = blacklist.length;i<l;i++) if(OB.match(new RegExp(blacklist[i].id),origin)) return false;
+  if(blacklist) for(let i = 0,l = blacklist.length;i<l;i++) if(OB.match(new RegExp(OB.str(
+    blacklist[i])?blacklist[i]:(blacklist[i] as any).id),origin)) return false;
   return false;
 };

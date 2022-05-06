@@ -17,7 +17,7 @@ import {
   MorganLoggerTypes,
   morganMsgFormats,
   morganMsgTokens,
-  checkCORS} from "./middleware-utils";
+  validateCORS} from "./middleware-utils";
 import OB,{Keys,AppError} from "@onebro/oba-common";
 import { OBAExpressApiMiddlewareSetters } from "./middleware-types";
 
@@ -43,9 +43,23 @@ export const getCommonMiddlewares = ():Partial<OBAExpressApiMiddlewareSetters> =
   cors:(a,o,api) => {
     const {origins,preflightContinue,credentials} = o;
     //const whitelist = [...origins,...api.vars.whitelist];
-    const originGuard = (origin:string,done:Function) => checkCORS({origin,origins})?done():done(api.e._.cors());
-    const opts:CorsOptions = {preflightContinue,credentials,origin:originGuard};
+    const originGuard = (origin:string,done:Function) => validateCORS({
+      origin,
+      origins,
+    })?done():done(api.e._.cors());
+    const opts:CorsOptions = {preflightContinue,credentials,origin:"*"};//originGuard};
     a.use(cors(opts));
+  },
+  cors_ext:(a,o,api) => {
+    const handler:Handler = async (req,res,next) => {
+      const origin = req.headers["origin"];
+      const route = {url:req.url,method:req.method};
+      const {origins,skip} = o;
+      const shouldSkip = () => skip.includes(route.url);
+      const originGuard = () => validateCORS({origin,origins});
+      return shouldSkip()?next():originGuard()?next():next(api.e._.cors());
+    };
+    a.use(handler);
   },
   cookieParser:(a,o) => {a.use(cookieParser(o.secret));},
   bodyParser:(a,o) => {for(const k in o) a.use((<any>express)[k](o[k as Keys<typeof o>]));},

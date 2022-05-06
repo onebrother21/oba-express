@@ -1,4 +1,5 @@
 import { AnyBoolean } from "@onebro/oba-common";
+import { ApiUserID } from "./vars-types";
 export declare type PublicOpts = {
     maxAge: 3000000;
     dirname: string;
@@ -15,6 +16,12 @@ export declare type CorsOpts = {
     origins: string[];
     preflightContinue: boolean;
     credentials: boolean;
+    skip?: string[];
+};
+export declare type CorsValidationParams = {
+    origin: string;
+    origins: string[];
+    blacklist?: string | ApiUserID[];
 };
 export declare type CookieParserOpts = {
     secret?: string;
@@ -96,6 +103,9 @@ export declare type OBAExpressApiMiddlewareBaseConfig = Partial<{
     views: ViewsOpts;
     morgan: MorganOpts;
     cors: CorsOpts;
+    cors_ext: CorsOpts & {
+        skip?: string[];
+    };
     bodyParser: BodyParserOpts;
     cookieParser: CookieParserOpts;
     session: SessionOpts;

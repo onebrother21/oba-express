@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkCORS = exports.morganMsgFormats = exports.morganMsgTokens = void 0;
+exports.validateCORS = exports.morganMsgFormats = exports.morganMsgTokens = void 0;
 const oba_common_1 = __importDefault(require("@onebro/oba-common"));
 exports.morganMsgTokens = {
     errLogMsg: (req) => {
@@ -49,22 +49,18 @@ exports.morganMsgFormats = {
     warn: `:errLogMsg`,
     error: `:errLogMsg`,
 };
-const checkCORS = ({ origin, origins, whitelist, blacklist }) => {
+const validateCORS = ({ origin, origins, blacklist }) => {
     if (!origin)
         return false;
     if (origins)
         for (let i = 0, l = origins.length; i < l; i++)
             if (oba_common_1.default.match(new RegExp(origins[i]), origin))
                 return true;
-    if (whitelist)
-        for (let i = 0, l = whitelist.length; i < l; i++)
-            if (oba_common_1.default.match(new RegExp(whitelist[i].id), origin))
-                return true;
     if (blacklist)
         for (let i = 0, l = blacklist.length; i < l; i++)
-            if (oba_common_1.default.match(new RegExp(blacklist[i].id), origin))
+            if (oba_common_1.default.match(new RegExp(oba_common_1.default.str(blacklist[i]) ? blacklist[i] : blacklist[i].id), origin))
                 return false;
     return false;
 };
-exports.checkCORS = checkCORS;
+exports.validateCORS = validateCORS;
 //# sourceMappingURL=middleware-utils.js.map

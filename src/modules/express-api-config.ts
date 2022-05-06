@@ -15,7 +15,7 @@ const setDefaultConfigWithEnvironment = <Sockets = undefined>():OBAExpressApiCon
   const coreRuntime = OB.mergeObj(initial,coreConfig(),false);
   const atRuntime:DeepPartial<OBAExpressApiConfig<Sockets>> = {
     vars:{host,port,providers,consumers,settings},
-    middleware:{cors:{origins}},
+    middleware:{cors:{origins},cors_ext:{origins}},
   };
   const expressConfig = OB.mergeObj(coreRuntime,atRuntime,false) as OBAExpressApiConfig<Sockets>;
   return expressConfig;

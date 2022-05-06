@@ -1,4 +1,5 @@
 import {AnyBoolean} from "@onebro/oba-common";
+import { ApiUserID } from "./vars-types";
 
 export type PublicOpts = {maxAge:3000000;dirname:string;};
 export type ViewsOpts = {engine:string;dirname:string;};
@@ -7,6 +8,12 @@ export type CorsOpts = {
   origins:string[];
   preflightContinue:boolean;
   credentials:boolean;
+  skip?:string[];
+};
+export type CorsValidationParams = {
+  origin:string;
+  origins:string[];
+  blacklist?:string|ApiUserID[];
 };
 export type CookieParserOpts = {secret?:string;};
 export type MongoStoreOpts = {
@@ -68,6 +75,7 @@ export type OBAExpressApiMiddlewareBaseConfig = Partial<{
   views:ViewsOpts;
   morgan:MorganOpts;
   cors:CorsOpts;
+  cors_ext:CorsOpts & {skip?:string[]};
   bodyParser:BodyParserOpts;
   cookieParser:CookieParserOpts;
   session:SessionOpts;
