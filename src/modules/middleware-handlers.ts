@@ -31,39 +31,41 @@ export const mapUserRole = <R extends Strings>(roles:R,role?:Values<R>) => {
   else return keys.find(r => roles[r] == role);
 };
 export const generateTkn = (payload:any,secret:string,opts?:any) => jwt.sign(payload,secret,opts);
-export const verifyTkn = (token:string,secret:string) => jwt.verify(token,secret);
+export const validateTkn = (token:string,secret:string) => jwt.verify(token,secret);
 
 export const validateApiUser = (cookieName:string,ekey:string,authSecret:string) => {
   const handler:Handler = async (req,res,next) => {
     try{
       const cookie = req.cookies[cookieName] as string;
+      const appuser = cookie?OB.decrypt(ekey,cookie):null;
       const header = req.headers.authorization;
-      const parts = header?.split(" ")||[];
-      const valid = parts.length == 2 && ["Bearer","Token"].includes(parts[0]) && OB.str(parts[1]);
-      const token = valid?parts[1]:null;
+      const headerParts = header?.split(" ")||[];
+      const validTknFormat = headerParts.length == 2 && ["Bearer","Token"].includes(headerParts[0]) && OB.str(headerParts[1]);
+      const token = validTknFormat?validateTkn(headerParts[1],authSecret):null;
       if(!token) throw new AppError({
         message:"Not Authorized",
         status:401
       });
-      req.appuser = cookie?OB.decrypt(ekey,cookie):null;
-      req.authtkn = verifyTkn(token,authSecret);
-      return next();
+      else {
+        req.appuser = appuser;
+        req.authtkn = token;
+        return next();
       }
+    }
     catch(e){return next(e);}
   };
   return handler;
 };
 export const validateApiUserRole = <R extends Strings>(roles:R) => {
-  const keys = Object.keys(roles);
   const handler:Handler = async (req,res,next) => {
     const {role} = req.authtkn;
-    const badRole = !keys.includes(role);
+    const badRole = !Object.keys(roles).includes(role);
     if(badRole) return next(new AppError({message:"unauthorized",status:401}));
     return next();
   };
   return handler;
 };
-export const validateReq = (validators:ValidationChain[]) => {
+export const validateApiReq = (validators:ValidationChain[]) => {
   const handler:Handler = async (req,res,next) => {
     const errors = validationResult(req);
     if(errors.isEmpty()) return next();

@@ -46,7 +46,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.notifyApiUser = exports.sendRequest = exports.sendResponse = exports.refreshApiUser = exports.handleApiAction = exports.validateReq = exports.validateApiUserRole = exports.validateApiUser = exports.verifyTkn = exports.generateTkn = exports.mapUserRole = exports.readCert = void 0;
+exports.notifyApiUser = exports.sendRequest = exports.sendResponse = exports.refreshApiUser = exports.handleApiAction = exports.validateApiReq = exports.validateApiUserRole = exports.validateApiUser = exports.validateTkn = exports.generateTkn = exports.mapUserRole = exports.readCert = void 0;
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
@@ -75,24 +75,27 @@ const mapUserRole = (roles, role) => {
 exports.mapUserRole = mapUserRole;
 const generateTkn = (payload, secret, opts) => jsonwebtoken_1.default.sign(payload, secret, opts);
 exports.generateTkn = generateTkn;
-const verifyTkn = (token, secret) => jsonwebtoken_1.default.verify(token, secret);
-exports.verifyTkn = verifyTkn;
+const validateTkn = (token, secret) => jsonwebtoken_1.default.verify(token, secret);
+exports.validateTkn = validateTkn;
 const validateApiUser = (cookieName, ekey, authSecret) => {
     const handler = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const cookie = req.cookies[cookieName];
+            const appuser = cookie ? oba_common_1.default.decrypt(ekey, cookie) : null;
             const header = req.headers.authorization;
-            const parts = (header === null || header === void 0 ? void 0 : header.split(" ")) || [];
-            const valid = parts.length == 2 && ["Bearer", "Token"].includes(parts[0]) && oba_common_1.default.str(parts[1]);
-            const token = valid ? parts[1] : null;
+            const headerParts = (header === null || header === void 0 ? void 0 : header.split(" ")) || [];
+            const validTknFormat = headerParts.length == 2 && ["Bearer", "Token"].includes(headerParts[0]) && oba_common_1.default.str(headerParts[1]);
+            const token = validTknFormat ? (0, exports.validateTkn)(headerParts[1], authSecret) : null;
             if (!token)
                 throw new oba_common_1.AppError({
                     message: "Not Authorized",
                     status: 401
                 });
-            req.appuser = cookie ? oba_common_1.default.decrypt(ekey, cookie) : null;
-            req.authtkn = (0, exports.verifyTkn)(token, authSecret);
-            return next();
+            else {
+                req.appuser = appuser;
+                req.authtkn = token;
+                return next();
+            }
         }
         catch (e) {
             return next(e);
@@ -102,10 +105,9 @@ const validateApiUser = (cookieName, ekey, authSecret) => {
 };
 exports.validateApiUser = validateApiUser;
 const validateApiUserRole = (roles) => {
-    const keys = Object.keys(roles);
     const handler = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         const { role } = req.authtkn;
-        const badRole = !keys.includes(role);
+        const badRole = !Object.keys(roles).includes(role);
         if (badRole)
             return next(new oba_common_1.AppError({ message: "unauthorized", status: 401 }));
         return next();
@@ -113,7 +115,7 @@ const validateApiUserRole = (roles) => {
     return handler;
 };
 exports.validateApiUserRole = validateApiUserRole;
-const validateReq = (validators) => {
+const validateApiReq = (validators) => {
     const handler = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         const errors = (0, express_validator_1.validationResult)(req);
         if (errors.isEmpty())
@@ -124,7 +126,7 @@ const validateReq = (validators) => {
     });
     return [...validators, handler];
 };
-exports.validateReq = validateReq;
+exports.validateApiReq = validateApiReq;
 const handleApiAction = (action, statusOK = 200) => {
     const handler = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         try {
