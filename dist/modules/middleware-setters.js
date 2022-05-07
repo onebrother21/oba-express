@@ -72,14 +72,9 @@ const getCommonMiddlewares = () => ({
                 a.use((0, morgan_1.default)(format, opts));
             }
     },
-    cors: (a, o, api) => {
-        const { origins, preflightContinue, credentials } = o;
-        //const whitelist = [...origins,...api.vars.whitelist];
-        const originGuard = (origin, done) => (0, middleware_utils_1.validateCORS)({
-            origin,
-            origins,
-        }) ? done() : done(api.e._.cors());
-        const opts = { preflightContinue, credentials, origin: "*" }; //originGuard};
+    cors: (a, o) => {
+        const { preflightContinue, credentials } = o;
+        const opts = { preflightContinue, credentials, origin: "*" };
         a.use((0, cors_1.default)(opts));
     },
     cors_ext: (a, o, api) => {

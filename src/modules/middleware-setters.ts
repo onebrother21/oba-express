@@ -40,14 +40,9 @@ export const getCommonMiddlewares = ():Partial<OBAExpressApiMiddlewareSetters> =
       a.use(morgan(format,opts));
     }
   },
-  cors:(a,o,api) => {
-    const {origins,preflightContinue,credentials} = o;
-    //const whitelist = [...origins,...api.vars.whitelist];
-    const originGuard = (origin:string,done:Function) => validateCORS({
-      origin,
-      origins,
-    })?done():done(api.e._.cors());
-    const opts:CorsOptions = {preflightContinue,credentials,origin:"*"};//originGuard};
+  cors:(a,o) => {
+    const {preflightContinue,credentials} = o;
+    const opts:CorsOptions = {preflightContinue,credentials,origin:"*"};
     a.use(cors(opts));
   },
   cors_ext:(a,o,api) => {
