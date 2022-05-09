@@ -1,0 +1,15 @@
+import { Request } from "express";
+import jwt from "jsonwebtoken";
+import { ValidationChain } from "express-validator";
+import { Values, Strings } from "@onebro/oba-common";
+import { Handler } from "./common-handler-types";
+import { MainApiActionResponse } from "./main-router-types";
+export declare const mapUserRole: <R extends Strings<undefined>>(roles: R, role?: Values<R>) => string;
+export declare const generateTkn: (payload: any, secret: string, opts?: any) => string;
+export declare const validateTkn: (token: string, secret: string) => string | jwt.JwtPayload;
+export declare const validateApiUser: (cookieName: string, ekey: string, authSecret: string) => Handler;
+export declare const validateApiUserRole: <R extends Strings<undefined>>(roles: R) => Handler;
+export declare const validateApiReq: (validators: ValidationChain[]) => (Handler | ValidationChain)[];
+export declare const handleApiAction: (action: (req: Request) => Promise<MainApiActionResponse>, statusOK?: number) => Handler;
+export declare const refreshApiUser: (cookieName: string, ekey: string, authSecret: string) => Handler;
+export declare const sendResponse: () => Handler;

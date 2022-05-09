@@ -1,10 +1,13 @@
 import {J} from "../utils";
 import {App} from "../app";
-import {OBAExpressApiComponentsTests} from "./components";
+import {OBAExpressComponentsTests} from "./components";
 import OB from "@onebro/oba-common";
 
 export const init = () => J.desc("INIT",() => {
-  it("Init",async () => {await App.refresh();},1E9);
+  it("Init",async () => {
+    await App.refresh();
+    OB.ok("**tests started**",OB.appEnvName(),OB.env());
+  },1E9);
 });
 export const finalCheck = () => J.desc("INIT EXPRESS API",() => {
   it("Final Init Core Api",async () => {
@@ -17,7 +20,7 @@ export const wrapup = () => J.desc("WRAPUP",() => {
 });
 export const allTests = () => J.desc("ALL TESTS",() => {
   init();
-  OBAExpressApiComponentsTests();
+  OBAExpressComponentsTests();
   finalCheck();
   wrapup();
 });

@@ -2,12 +2,12 @@ import {J} from "../../utils";
 import { OBAExpressMiddlewareInitTests } from "./middleware";
 import { OBAExpressAppInitTests } from "./app";
 import { OBAExpressSocketsInitTests } from "./sockets";
-import { OBAExpressApiInitTests } from "./api";
+import { OBAExpressInitTests } from "./api";
 
-export const OBAExpressApiComponentsTests = () => J.desc("OBA Express Api Components",() => {
+export const OBAExpressComponentsTests = () => J.desc("OBA Express Api Components",() => {
   //OBAExpressMiddlewareInitTests();
   //OBAExpressAppInitTests();
   //OBAExpressSocketsInitTests();
-  OBAExpressApiInitTests();
+  OBAExpressInitTests();
 });
 

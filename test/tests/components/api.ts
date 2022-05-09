@@ -3,7 +3,7 @@ import {App} from "../../app";
 import {SuperTest,Test,Response} from "supertest";
 import OB from "@onebro/oba-common";
 
-export const OBAExpressApiInitTests = () => J.desc("OBA EXPRESS TEST API",() => {
+export const OBAExpressInitTests = () => J.desc("OBA EXPRESS TEST API",() => {
   let app:SuperTest<Test>,res_:ResponseData = J.newResponseData();
   it("init w/o errors",async () => {
     await App.refresh();

@@ -1,3 +1,3 @@
-import { OBAExpressApi } from "./modules";
+import { OBAExpress } from "./modules";
 export * from "./modules";
-export default OBAExpressApi;
+export default OBAExpress;

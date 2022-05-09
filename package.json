@@ -1,5 +1,5 @@
 {
-  "name": "@onebro/oba-express-api",
+  "name": "@onebro/oba-express",
   "version": "2.9.7",
   "description": "Express Api for OneBrother Apps",
   "author": "OneBrotherApps",
@@ -30,7 +30,8 @@
     "watch-debug-v": "concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"yellow.bold,cyan.bold,green.bold\" \"npm run watch-ts\" \"npm run serve-debug\""
   },
   "dependencies": {
-    "@onebro/oba-common": "^2.8.7",
+    "@onebro/oba-common": "^2.8.8",
+    "@onebro/oba-core": "^2.9.5",
     "@onebro/oba-core-api": "^2.9.3",
     "compression": "^1.7.4",
     "config": "^3.3.6",
@@ -84,10 +85,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/onebrother21/oba-express-api.git"
+    "url": "git+https://github.com/onebrother21/oba-express.git"
   },
   "bugs": {
-    "url": "https://github.com/onebrother21/oba-express-api/issues"
+    "url": "https://github.com/onebrother21/oba-express/issues"
   },
-  "homepage": "https://github.com/onebrother21/oba-express-api#readme"
+  "homepage": "https://github.com/onebrother21/oba-express#readme"
 }
