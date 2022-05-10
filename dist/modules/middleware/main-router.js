@@ -38,7 +38,7 @@ const createApp = (api) => __awaiter(void 0, void 0, void 0, function* () {
                 case oba_common_1.default.match(/custom\./, k): {
                     const name = k.split(".")[1];
                     const setter = custom ? custom[name] : null;
-                    setter ? app.use(yield setter.func(api)) : null;
+                    setter ? app.use(yield setter(api)) : null;
                     break;
                 }
                 default: {

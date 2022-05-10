@@ -21,7 +21,7 @@ export const createApp = async (api:any):Promise<express.Express> => {
       case OB.match(/custom\./,k):{
         const name = k.split(".")[1];
         const setter = custom?(custom as any)[name]:null;
-        setter?app.use(await setter.func(api)):null;
+        setter?app.use(await setter(api)):null;
         break;
       }
       default:{
