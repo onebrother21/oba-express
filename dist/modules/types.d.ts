@@ -16,16 +16,16 @@ export declare type OBAExpressConfigType<Sockets = undefined> = OBACoreConfig & 
     middleware: OBAExpressMiddlewareConfig;
     sockets: OBAExpressSocketsConfig<Sockets>;
 }>;
-export declare type OBAExpressBaseTypeMethods = {
+export declare type OBAExpressMethods = {
     monitor: () => Promise<any>;
-    createApp: (api: OBAExpressBaseType<any, any>) => Promise<express.Express>;
+    createApp: (api: OBAExpressType<any, any>) => Promise<express.Express>;
     startDB: () => Promise<void>;
     startServer: () => Promise<void>;
     initCore: (startDb?: AnyBoolean) => Promise<void>;
     initServer: (startServer?: AnyBoolean) => Promise<void>;
     init: (db?: AnyBoolean, server?: AnyBoolean) => Promise<void>;
 };
-export declare type OBAExpressBaseType<Ev = undefined, Sockets = undefined> = Omit<OBACore<Ev>, "config"> & OBAExpressBaseTypeMethods & {
+export declare type OBAExpressType<Ev = undefined, Sockets = undefined> = Omit<OBACore<Ev>, "config"> & OBAExpressMethods & {
     routes: OBAExpressRouterEndpoint[];
     config: OBAExpressConfigType<Sockets>;
     vars: OBAExpressVars;

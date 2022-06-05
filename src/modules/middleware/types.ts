@@ -1,12 +1,12 @@
-import express from "express";
+import express, { Router } from "express";
 import {Keys,Enum} from "@onebro/oba-common";
 import OBACore from "@onebro/oba-core";
-import {OBAExpressMiddlewareBaseConfig} from "./common-middleware-types";
+import {OBAExpressCommonMiddlewareConfig} from "./common-middleware-types";
 import {CustomHandlers} from "./common-handler-types";
-import {MainApiConstructor} from "./main-router-types";
 
+export type MainApiConstructor = (app:OBACore) => Promise<Router>;
 export type OBAExpressMiddlewareConfig = {
-  common:OBAExpressMiddlewareBaseConfig;
+  common:OBAExpressCommonMiddlewareConfig;
   custom?:CustomHandlers;
   main?:MainApiConstructor;
   auth?:Enum<string,"cookie"|"secret"|"ekey">;
@@ -14,5 +14,5 @@ export type OBAExpressMiddlewareConfig = {
 };
 export type OBAExpressMiddlewareSetter<MiddlewareOpts> = (app:express.Application,opts?:MiddlewareOpts,api?:OBACore) => void;
 export type OBAExpressMiddlewareSetters = {
-  [k in Keys<OBAExpressMiddlewareBaseConfig>]:OBAExpressMiddlewareSetter<OBAExpressMiddlewareBaseConfig[k]>;
+  [k in Keys<OBAExpressCommonMiddlewareConfig>]:OBAExpressMiddlewareSetter<OBAExpressCommonMiddlewareConfig[k]>;
 };

@@ -15,3 +15,8 @@ export interface CookieBody {
   httponly?:boolean;
   secure?:boolean;
 }
+export type ApiActionResponse = Partial<Record<"user"|"device"|"role"|"okto"|"token",string> & {
+  data:Enum<any,string>;
+  auth:boolean;
+  status:number;
+}>;

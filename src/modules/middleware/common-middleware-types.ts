@@ -66,7 +66,7 @@ export type BodyParserOpts = {
 };
 export type PassportOpts = {};
 
-export type OBAExpressMiddlewareBaseConfig = Partial<{
+export type OBAExpressCommonMiddlewareConfig = Partial<{
   disablePoweredBy:AnyBoolean;
   flash:AnyBoolean;
   errorhandler:AnyBoolean;

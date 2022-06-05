@@ -10,14 +10,14 @@ import OB,{Component,AnyBoolean,AppError} from "@onebro/oba-common";
 import OBACore from "@onebro/oba-core";
 import {
   OBAExpressConfigType,
-  OBAExpressBaseType,
+  OBAExpressType,
   OBAExpressRouterEndpoint,
 } from "./types";
-import {createApp} from "./middleware";
+import {createApp} from "./app";
 import {OBAExpressSockets} from "./sockets";
 
 export type OBAExpressConfig<Sockets> = OBAExpressConfigType<Sockets>;
-export interface OBAExpress<Ev = undefined,Sockets = undefined> extends Component<OBAExpressConfig<Sockets>,Ev>,OBAExpressBaseType<Ev,Sockets>{}
+export interface OBAExpress<Ev = undefined,Sockets = undefined> extends Component<OBAExpressConfig<Sockets>,Ev>,OBAExpressType<Ev,Sockets>{}
 export class OBAExpress<Ev = undefined,Sockets = undefined> extends Component<OBAExpressConfig<Sockets>,Ev> {
   get e(){return this.errors;}
   get v(){return this.vars;}
@@ -53,7 +53,7 @@ export class OBAExpress<Ev = undefined,Sockets = undefined> extends Component<OB
     Object.assign(this,core);
   };
   initServer = async (start?:AnyBoolean) => {
-    this.app = await this.createApp(this);
+    this.app = await this.createApp(this as any);
     this.server = this.app?createServer(this.app):null;
     const isSocketServer = this.config.sockets && this.server;
     const checkConn = this.server && this.vars.settings && this.vars.settings.checkConn;

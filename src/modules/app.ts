@@ -1,10 +1,9 @@
 import express from "express";
-import OB,{Component,AnyBoolean,AppError} from "@onebro/oba-common";
-import {
-  OBAExpressMiddleware,
-} from "./main";
+import OB,{Component,AnyBoolean,AppError, Keys} from "@onebro/oba-common";
+import {OBAExpressMiddleware} from "./middleware";
+import {OBAExpressType} from "./types";
 
-export const createApp = async (api:any):Promise<express.Express> => {
+export const createApp = async (api:OBAExpressType):Promise<express.Express> => {
   const app = express();
   const middleware = OBAExpressMiddleware.init();
   const {common,custom,main,order} = api.config.middleware||{};
@@ -25,7 +24,7 @@ export const createApp = async (api:any):Promise<express.Express> => {
         break;
       }
       default:{
-        const opts = common[k as any];
+        const opts = common[k as Keys<typeof common>];
         const setter = (middleware as any)[k as any];
         setter && opts?setter(app,opts as any,api):null;
         break;
