@@ -1,6 +1,6 @@
 import express from "express";
-import OB,{Component,AnyBoolean,AppError, Keys} from "@onebro/oba-common";
-import {OBAExpressMiddleware} from "./middleware";
+import OB,{Keys} from "@onebro/oba-common";
+import {OBAExpressMiddleware} from "../middleware";
 import {OBAExpressType} from "./types";
 
 export const createApp = async (api:OBAExpressType):Promise<express.Express> => {

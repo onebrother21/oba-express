@@ -23,8 +23,9 @@ exports.morganMsgTokens = {
         return JSON.stringify(msg);
     },
     time: () => new Date().toLocaleString("en-US", oba_common_1.default.locals.dateFormat),
-    appuser: (req) => req.appuser,
-    hostname: (req) => req.hostname,
+    appuser: (req) => ((req.appuser) || {}).username,
+    hostname: (req) => req.headers["host"] || req.hostname,
+    reqid: (req) => req.id || "",
     contentType: (req) => req.headers["content-type"],
     headers: (req) => req.headers ? JSON.stringify(req.headers) : "",
     query: (req) => req.query ? JSON.stringify(req.query) : "",
@@ -32,7 +33,7 @@ exports.morganMsgTokens = {
     body: (req) => req.body ? JSON.stringify(req.body) : "",
 };
 const accessTokenStrs = {
-    //time:`"ts":":time"`,
+    id: `"id":":reqid"`,
     host: `"host":":hostname"`,
     ip: `"ip":":remote-addr"`,
     user: `"user":":appuser"`,

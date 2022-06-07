@@ -3,11 +3,15 @@ import { Keys, Enum } from "@onebro/oba-common";
 import OBACore from "@onebro/oba-core";
 import { OBAExpressCommonMiddlewareConfig } from "./common-middleware-types";
 import { CustomHandlers } from "./common-handler-types";
-export declare type MainApiConstructor = (app: OBACore) => Promise<Router>;
+export declare type OBAExpressRouterConstructor = (app: OBACore) => Promise<Router>;
+export declare type OBAExpressRouterEndpoint = {
+    path: string;
+    methods: string[];
+};
 export declare type OBAExpressMiddlewareConfig = {
     common: OBAExpressCommonMiddlewareConfig;
     custom?: CustomHandlers;
-    main?: MainApiConstructor;
+    main?: OBAExpressRouterConstructor;
     auth?: Enum<string, "cookie" | "secret" | "ekey">;
     order: Keys<OBAExpressMiddlewareConfig["common"]> | `custom.${Keys<OBAExpressMiddlewareConfig["custom"]>}` | "main"[];
 };

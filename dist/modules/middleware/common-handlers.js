@@ -31,45 +31,34 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sendResponse = exports.refreshApiUser = exports.handleApiAction = exports.validateApiReq = exports.validateApiUserRole = exports.validateApiUser = exports.verifyTkn = exports.generateTkn = exports.mapUserRole = void 0;
-const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+exports.sendResponse = exports.refreshApiUser = exports.handleApiAction = exports.validateApiReq = exports.validateApiUserRole = exports.validateApiUser = void 0;
 const express_validator_1 = require("express-validator");
 const oba_common_1 = __importStar(require("@onebro/oba-common"));
-const mapUserRole = (roles, role) => {
-    const keys = Object.keys(roles);
-    if (!role)
-        return keys[0];
-    else
-        return keys.find(r => roles[r] == role);
-};
-exports.mapUserRole = mapUserRole;
-const generateTkn = (payload, secret, opts) => jsonwebtoken_1.default.sign(payload, secret, opts);
-exports.generateTkn = generateTkn;
-const verifyTkn = (token, secret) => jsonwebtoken_1.default.verify(token, secret);
-exports.verifyTkn = verifyTkn;
+const common_handler_utils_1 = require("./common-handler-utils");
 const validateApiUser = (o, authReq) => {
     const handler = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const { cookie, ekey, secret } = o;
+            req.appuser = {};
             if (cookie && ekey) {
                 const appuser = req.cookies[cookie];
-                const userinfo = cookie ? oba_common_1.default.decrypt(ekey, appuser) : null;
-                req.role = userinfo.split("/")[0];
-                req.user = (userinfo.split("/")[1]).split(":")[0];
-                req.device = userinfo.split(":")[1];
+                const userinfo = cookie && appuser ? oba_common_1.default.decrypt(ekey, appuser) : "";
+                if (userinfo) {
+                    req.appuser.role = userinfo.split("/")[0];
+                    req.appuser.username = (userinfo.split("/")[1]).split(":")[0];
+                    req.appuser.device = userinfo.split(":")[1];
+                }
             }
             if (secret) {
                 const header = req.headers.authorization;
                 const headerParts = (header === null || header === void 0 ? void 0 : header.split(" ")) || [];
                 const validTknFormat = headerParts.length == 2 && ["Bearer", "Token"].includes(headerParts[0]) && oba_common_1.default.str(headerParts[1]);
-                const token = validTknFormat ? (0, exports.verifyTkn)(headerParts[1], secret) : null;
+                const token = validTknFormat ? (0, common_handler_utils_1.verifyTkn)(headerParts[1], secret) : null;
                 req.token = token;
+                req.appuser = Object.assign({}, token);
             }
-            if (authReq && !(req.user && req.token))
+            if (authReq && !req.token)
                 throw new oba_common_1.AppError({
                     message: "Not Authorized",
                     status: 401
@@ -85,7 +74,7 @@ const validateApiUser = (o, authReq) => {
 exports.validateApiUser = validateApiUser;
 const validateApiUserRole = (roles) => {
     const handler = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-        const badRole = !Object.keys(roles).includes(req.role);
+        const badRole = !Object.keys(roles).includes(req.appuser.role);
         if (badRole)
             return next(new oba_common_1.AppError({ message: "unauthorized", status: 401 }));
         return next();
@@ -109,12 +98,13 @@ const handleApiAction = (action, statusOK = 200) => {
     const handler = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const { user, device, role, okto, data, auth } = yield action(req);
+            req.appuser = Object.assign({}, req.appuser);
             res.locals.data = data,
-                res.locals.okto = okto;
-            res.locals.auth = !!auth,
-                res.locals.user = user || req.user,
-                res.locals.device = device || req.device,
-                res.locals.role = role || req.role,
+                res.locals.okto = okto,
+                res.locals.auth = !!auth,
+                res.locals.username = user || req.appuser.username,
+                res.locals.device = device || req.appuser.device,
+                res.locals.role = role || req.appuser.role,
                 res.locals.status = statusOK;
             return next();
         }
@@ -129,14 +119,14 @@ const refreshApiUser = (o) => {
     const handler = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const { cookie, ekey, secret } = o;
-            const { user, device, role, okto, auth } = res.locals;
-            if (cookie && ekey && user) {
-                const userstr = `${role || "UNK"}/${user}:${device}`;
+            const { username, device, role, okto, auth } = res.locals;
+            if (cookie && ekey && username) {
+                const userstr = `${role || "-"}/${username}:${device}`;
                 const appuser = oba_common_1.default.encrypt(ekey, userstr);
                 res.cookie(cookie, appuser, { maxAge: 900000, httpOnly: true });
             }
             if (secret && auth)
-                res.locals.token = (0, exports.generateTkn)({ user, device, role, okto }, secret);
+                res.locals.token = (0, common_handler_utils_1.generateTkn)({ username, device, role, okto }, secret);
             return next();
         }
         catch (e) {

@@ -4,11 +4,12 @@ import OBACore from "@onebro/oba-core";
 import {OBAExpressCommonMiddlewareConfig} from "./common-middleware-types";
 import {CustomHandlers} from "./common-handler-types";
 
-export type MainApiConstructor = (app:OBACore) => Promise<Router>;
+export type OBAExpressRouterConstructor = (app:OBACore) => Promise<Router>;
+export type OBAExpressRouterEndpoint = {path:string,methods:string[]};
 export type OBAExpressMiddlewareConfig = {
   common:OBAExpressCommonMiddlewareConfig;
   custom?:CustomHandlers;
-  main?:MainApiConstructor;
+  main?:OBAExpressRouterConstructor;
   auth?:Enum<string,"cookie"|"secret"|"ekey">;
   order:Keys<OBAExpressMiddlewareConfig["common"]>|`custom.${Keys<OBAExpressMiddlewareConfig["custom"]>}`|"main"[];
 };

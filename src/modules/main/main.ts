@@ -8,13 +8,10 @@ import {takeWhile,tap,catchError} from "rxjs/operators";
 
 import OB,{Component,AnyBoolean,AppError} from "@onebro/oba-common";
 import OBACore from "@onebro/oba-core";
-import {
-  OBAExpressConfigType,
-  OBAExpressType,
-  OBAExpressRouterEndpoint,
-} from "./types";
 import {createApp} from "./app";
-import {OBAExpressSockets} from "./sockets";
+import {OBAExpressConfigType,OBAExpressType} from "./types";
+import {OBAExpressRouterEndpoint} from "../middleware";
+import {OBAExpressSockets} from "../sockets";
 
 export type OBAExpressConfig<Sockets> = OBAExpressConfigType<Sockets>;
 export interface OBAExpress<Ev = undefined,Sockets = undefined> extends Component<OBAExpressConfig<Sockets>,Ev>,OBAExpressType<Ev,Sockets>{}
@@ -46,6 +43,10 @@ export class OBAExpress<Ev = undefined,Sockets = undefined> extends Component<OB
     this.server.listen(PORT);
   };
   createApp = createApp;
+  init = async (db?:AnyBoolean,server?:AnyBoolean):Promise<void> => {
+    await this.initCore(db);
+    await this.initServer(server);
+  };
   initCore = async (start?:AnyBoolean) => {
     const core = new OBACore<Ev>(this.config);
     await core.init(start);
@@ -81,10 +82,6 @@ export class OBAExpress<Ev = undefined,Sockets = undefined> extends Component<OB
       );
       return loop.subscribe();
     }
-  };
-  init = async (db?:AnyBoolean,server?:AnyBoolean):Promise<void> => {
-    await this.initCore(db);
-    await this.initServer(server);
   };
 }
 export default OBAExpress;

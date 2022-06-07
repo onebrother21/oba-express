@@ -39,9 +39,9 @@ export const OBAExpressInitTests = () => J.desc("OBA EXPRESS TEST API",() => {
     .expect((res:Response) => {
       J.handleResponse(res_,res);
       J.is(res_.cookies["_bc_0"]);
-      J.is(res_.cookies["_somesession"]);
       J.is(res_.cookies["_csrf"]);
       J.is(res_.cookies["XSRF-TOKEN"]);
+      J.is(res_.cookies["_somesession"]);
       J.is(res_.body.data.ready);
     })
     .catch(e => {OB.error(e);throw e;});

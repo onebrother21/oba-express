@@ -1,3 +1,3 @@
-export * from "./sockets-client";
-export * from "./sockets-main";
-export * from "./sockets-types";
+export * from "./client";
+export * from "./main";
+export * from "./types";

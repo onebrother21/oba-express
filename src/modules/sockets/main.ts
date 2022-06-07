@@ -1,7 +1,7 @@
 import socketIo,{Socket} from "socket.io";
 import {Server} from "http";
 import {Keys} from "@onebro/oba-common";
-import {OBAExpressSocketsConfigType} from "./sockets-types";
+import {OBAExpressSocketsConfigType} from "./types";
 
 export type OBAExpressSocketsConfig<Sockets> = OBAExpressSocketsConfigType<Sockets>;
 

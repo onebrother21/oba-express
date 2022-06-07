@@ -24,8 +24,9 @@ export const morganMsgTokens:TypedMethods<Request,string> = {
     return JSON.stringify(msg);
   },
   time:() => new Date().toLocaleString("en-US",OB.locals.dateFormat as any),
-  appuser:(req:Request) => (req as any).appuser,
-  hostname:(req:Request) => req.hostname,
+  appuser:(req:Request) => (((req as any).appuser)||{}).username,
+  hostname:(req:Request) => req.headers["host"] || req.hostname,
+  reqid:(req:Request) => req.id||"",
   contentType:(req:Request) => req.headers["content-type"],
   headers:(req:Request) => req.headers?JSON.stringify(req.headers):"",
   query:(req:Request) => req.query?JSON.stringify(req.query):"",
@@ -33,7 +34,7 @@ export const morganMsgTokens:TypedMethods<Request,string> = {
   body:(req:Request) => req.body?JSON.stringify(req.body):"",
 };
 const accessTokenStrs:Strings = {
-  //time:`"ts":":time"`,
+  id:`"id":":reqid"`,
   host:`"host":":hostname"`,
   ip:`"ip":":remote-addr"`,
   user:`"user":":appuser"`,
