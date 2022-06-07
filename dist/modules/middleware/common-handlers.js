@@ -129,20 +129,14 @@ const refreshApiUser = (o) => {
     const handler = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const { cookie, ekey, secret } = o;
-            if (cookie && ekey) {
-                const userinfo = `${res.locals.role}/${res.locals.user}:${res.locals.device}`;
-                const appuser = userinfo ? oba_common_1.default.encrypt(ekey, userinfo) : null;
-                appuser ? res.cookie(cookie, appuser, { maxAge: 900000, httpOnly: true }) : null;
+            const { user, device, role, okto, auth } = res.locals;
+            if (cookie && ekey && user) {
+                const userstr = `${role || "UNK"}/${user}:${device}`;
+                const appuser = oba_common_1.default.encrypt(ekey, userstr);
+                res.cookie(cookie, appuser, { maxAge: 900000, httpOnly: true });
             }
-            if (secret) {
-                const token = res.locals.auth ? (0, exports.generateTkn)({
-                    user: res.locals.user,
-                    device: res.locals.device,
-                    role: res.locals.role,
-                    okto: res.locals.okto,
-                }, secret) : null;
-                res.locals.token = token;
-            }
+            if (secret && auth)
+                res.locals.token = (0, exports.generateTkn)({ user, device, role, okto }, secret);
             return next();
         }
         catch (e) {

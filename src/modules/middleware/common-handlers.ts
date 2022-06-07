@@ -80,20 +80,13 @@ export const refreshApiUser = (o:Partial<{cookie:string;ekey:string;secret:strin
   const handler:Handler = async (req,res,next) => {
     try {
       const {cookie,ekey,secret} = o;
-      if(cookie && ekey){
-        const userinfo = `${res.locals.role}/${res.locals.user}:${res.locals.device}`;
-        const appuser = userinfo?OB.encrypt(ekey,userinfo):null;
-        appuser?res.cookie(cookie,appuser,{maxAge:900000,httpOnly:true}):null;
+      const {user,device,role,okto,auth} = res.locals;
+      if(cookie && ekey && user){
+        const userstr = `${role||"UNK"}/${user}:${device}`;
+        const appuser = OB.encrypt(ekey,userstr);
+        res.cookie(cookie,appuser,{maxAge:900000,httpOnly:true});
       }
-      if(secret){
-        const token = res.locals.auth?generateTkn({
-          user:res.locals.user,
-          device:res.locals.device,
-          role:res.locals.role,
-          okto:res.locals.okto,
-        },secret):null;
-        res.locals.token = token;
-      }
+      if(secret && auth) res.locals.token = generateTkn({user,device,role,okto},secret);
       return next();
     }
     catch(e){return next(e);}
