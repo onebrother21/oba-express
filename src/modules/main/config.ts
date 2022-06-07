@@ -3,7 +3,7 @@ import OB,{ DeepPartial } from "@onebro/oba-common";
 import { coreConfig } from "@onebro/oba-core";
 import { OBAExpressConfig } from "./main";
 
-const setDefaultConfigWithEnvironment = <Sockets = undefined>():OBAExpressConfig<Sockets> => {
+export const expressConfig = <Sockets = undefined>():OBAExpressConfig<Sockets> => {
   const host = process.env.HOST || OB.appvar("_HOST");
   const port = Number(process.env.PORT || OB.appvar("_PORT"));
   const origins = OB.appvar("_ORIGINS");
@@ -16,7 +16,6 @@ const setDefaultConfigWithEnvironment = <Sockets = undefined>():OBAExpressConfig
     vars:{host,port,providers,consumers,settings},
     middleware:{common:{cors:{origins},cors_ext:{origins}}},
   };
-  const expressConfig = OB.mergeObj(coreRuntime,atRuntime,false) as OBAExpressConfig<Sockets>;
-  return expressConfig;
+  const expressconfig = OB.mergeObj(coreRuntime,atRuntime,false) as OBAExpressConfig<Sockets>;
+  return expressconfig;
 };
-export {setDefaultConfigWithEnvironment as expressConfig};

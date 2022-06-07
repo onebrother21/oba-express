@@ -7,7 +7,7 @@ exports.expressConfig = void 0;
 const config_1 = __importDefault(require("config"));
 const oba_common_1 = __importDefault(require("@onebro/oba-common"));
 const oba_core_1 = require("@onebro/oba-core");
-const setDefaultConfigWithEnvironment = () => {
+const expressConfig = () => {
     const host = process.env.HOST || oba_common_1.default.appvar("_HOST");
     const port = Number(process.env.PORT || oba_common_1.default.appvar("_PORT"));
     const origins = oba_common_1.default.appvar("_ORIGINS");
@@ -20,8 +20,8 @@ const setDefaultConfigWithEnvironment = () => {
         vars: { host, port, providers, consumers, settings },
         middleware: { common: { cors: { origins }, cors_ext: { origins } } },
     };
-    const expressConfig = oba_common_1.default.mergeObj(coreRuntime, atRuntime, false);
-    return expressConfig;
+    const expressconfig = oba_common_1.default.mergeObj(coreRuntime, atRuntime, false);
+    return expressconfig;
 };
-exports.expressConfig = setDefaultConfigWithEnvironment;
+exports.expressConfig = expressConfig;
 //# sourceMappingURL=config.js.map
