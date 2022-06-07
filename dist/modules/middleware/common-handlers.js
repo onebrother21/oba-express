@@ -46,7 +46,7 @@ const validateApiUser = (o, authReq) => {
                 const userinfo = cookie && appuser ? oba_common_1.default.decrypt(ekey, appuser) : "";
                 if (userinfo) {
                     req.appuser.role = userinfo.split("/")[0];
-                    req.appuser.username = (userinfo.split("/")[1]).split(":")[0];
+                    req.appuser.name = (userinfo.split("/")[1]).split(":")[0];
                     req.appuser.device = userinfo.split(":")[1];
                 }
             }
@@ -54,9 +54,10 @@ const validateApiUser = (o, authReq) => {
                 const header = req.headers.authorization;
                 const headerParts = (header === null || header === void 0 ? void 0 : header.split(" ")) || [];
                 const validTknFormat = headerParts.length == 2 && ["Bearer", "Token"].includes(headerParts[0]) && oba_common_1.default.str(headerParts[1]);
-                const token = validTknFormat ? (0, common_handler_utils_1.verifyTkn)(headerParts[1], secret) : null;
+                const token = validTknFormat ? headerParts[1] : null;
+                const tokendata = token ? (0, common_handler_utils_1.verifyTkn)(token, secret) : null;
                 req.token = token;
-                req.appuser = Object.assign({}, token);
+                req.appuser = Object.assign({}, tokendata);
             }
             if (authReq && !req.token)
                 throw new oba_common_1.AppError({
@@ -97,14 +98,15 @@ exports.validateApiReq = validateApiReq;
 const handleApiAction = (action, statusOK = 200) => {
     const handler = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            const { user, device, role, okto, data, auth } = yield action(req);
+            const { role, name, device, okto, next: next_, auth, data } = yield action(req);
             req.appuser = Object.assign({}, req.appuser);
             res.locals.data = data,
-                res.locals.okto = okto,
-                res.locals.auth = !!auth,
-                res.locals.username = user || req.appuser.username,
-                res.locals.device = device || req.appuser.device,
                 res.locals.role = role || req.appuser.role,
+                res.locals.name = name || req.appuser.name,
+                res.locals.device = device || req.appuser.device,
+                res.locals.next = next_ || req.appuser.next,
+                res.locals.okto = okto || req.appuser.okto,
+                res.locals.auth = !!(auth || req.token),
                 res.locals.status = statusOK;
             return next();
         }
@@ -119,14 +121,14 @@ const refreshApiUser = (o) => {
     const handler = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const { cookie, ekey, secret } = o;
-            const { username, device, role, okto, auth } = res.locals;
-            if (cookie && ekey && username) {
-                const userstr = `${role || "-"}/${username}:${device}`;
+            const { name, device, role, okto, auth, next: next_ } = res.locals;
+            if (cookie && ekey && name) {
+                const userstr = `${role || "-"}/${name}:${device}`;
                 const appuser = oba_common_1.default.encrypt(ekey, userstr);
                 res.cookie(cookie, appuser, { maxAge: 900000, httpOnly: true });
             }
             if (secret && auth)
-                res.locals.token = (0, common_handler_utils_1.generateTkn)({ username, device, role, okto }, secret);
+                res.locals.token = (0, common_handler_utils_1.generateTkn)({ name, device, role, okto, next: next_ }, secret);
             return next();
         }
         catch (e) {

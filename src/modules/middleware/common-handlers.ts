@@ -14,7 +14,7 @@ export const validateApiUser = (o:Partial<{cookie:string;ekey:string;secret:stri
         const userinfo = cookie && appuser?OB.decrypt(ekey,appuser):"";
         if(userinfo){
           req.appuser.role = userinfo.split("/")[0];
-          req.appuser.username = (userinfo.split("/")[1]).split(":")[0];
+          req.appuser.name = (userinfo.split("/")[1]).split(":")[0];
           req.appuser.device = userinfo.split(":")[1];
         }
       }
@@ -22,9 +22,10 @@ export const validateApiUser = (o:Partial<{cookie:string;ekey:string;secret:stri
         const header = req.headers.authorization;
         const headerParts = header?.split(" ")||[];
         const validTknFormat = headerParts.length == 2 && ["Bearer","Token"].includes(headerParts[0]) && OB.str(headerParts[1]);
-        const token = validTknFormat?verifyTkn(headerParts[1],secret):null as any;
+        const token = validTknFormat?headerParts[1]:null;
+        const tokendata = token?verifyTkn(token,secret):null;
         req.token = token;
-        req.appuser = {...token};
+        req.appuser = {...tokendata as any};
       }
       if(authReq && !req.token) throw new AppError({
         message:"Not Authorized",
@@ -57,14 +58,15 @@ export const validateApiReq = (validators:ValidationChain[]) => {
 export const handleApiAction = (action:(req:Request) => Promise<ApiActionResponse>,statusOK:number = 200) => {
   const handler:Handler = async (req,res,next) => {
     try {
-      const {user,device,role,okto,data,auth} = await action(req);
+      const {role,name,device,okto,next:next_,auth,data} = await action(req);
       req.appuser = {...req.appuser};
       res.locals.data = data,
-      res.locals.okto = okto,
-      res.locals.auth = !!auth,
-      res.locals.username = user || req.appuser.username,
-      res.locals.device = device || req.appuser.device,
       res.locals.role = role || req.appuser.role,
+      res.locals.name = name || req.appuser.name,
+      res.locals.device = device || req.appuser.device,
+      res.locals.next = next_ || req.appuser.next,
+      res.locals.okto = okto || req.appuser.okto,
+      res.locals.auth = !!(auth || req.token),
       res.locals.status = statusOK;
       return next();
     }
@@ -76,13 +78,13 @@ export const refreshApiUser = (o:Partial<{cookie:string;ekey:string;secret:strin
   const handler:Handler = async (req,res,next) => {
     try {
       const {cookie,ekey,secret} = o;
-      const {username,device,role,okto,auth} = res.locals;
-      if(cookie && ekey && username){
-        const userstr = `${role||"-"}/${username}:${device}`;
+      const {name,device,role,okto,auth,next:next_} = res.locals;
+      if(cookie && ekey && name){
+        const userstr = `${role||"-"}/${name}:${device}`;
         const appuser = OB.encrypt(ekey,userstr);
         res.cookie(cookie,appuser,{maxAge:900000,httpOnly:true});
       }
-      if(secret && auth) res.locals.token = generateTkn({username,device,role,okto},secret);
+      if(secret && auth) res.locals.token = generateTkn({name,device,role,okto,next:next_},secret);
       return next();
     }
     catch(e){return next(e);}

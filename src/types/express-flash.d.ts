@@ -8,12 +8,10 @@ interface Flash {
   id?:string;
   appname?:string;
   appuser?:Partial<{
-    ip:string;
-    device:string;
-    username:string;
-    next:string;
     role:string;
-    info:any;
+    name:string;
+    device:string;
+    next:string;
     okto:string;
   }>;
   token:string;
