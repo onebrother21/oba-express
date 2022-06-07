@@ -138,11 +138,8 @@ const refreshApiUser = (o) => {
 exports.refreshApiUser = refreshApiUser;
 const sendResponse = () => {
     const handler = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        delete res.locals.role;
-        delete res.locals.device;
-        delete res.locals.auth;
-        delete res.locals.okto;
-        res.status(res.locals.status).json(res.locals);
+        const { status, data, token } = res.locals;
+        res.status(status).json({ status, data, token });
     });
     return handler;
 };

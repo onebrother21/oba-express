@@ -91,11 +91,8 @@ export const refreshApiUser = (o:Partial<{cookie:string;ekey:string;secret:strin
 };
 export const sendResponse = () => {
   const handler:Handler = async (req,res) => {
-    delete res.locals.role;
-    delete res.locals.device;
-    delete res.locals.auth;
-    delete res.locals.okto;
-    res.status(res.locals.status).json(res.locals);
+    const {status,data,token} = res.locals;
+    res.status(status).json({status,data,token});
   };
   return handler;
 };
