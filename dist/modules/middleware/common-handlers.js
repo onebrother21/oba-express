@@ -75,7 +75,7 @@ const validateApiUser = (o, authReq) => {
 exports.validateApiUser = validateApiUser;
 const validateApiUserRole = (roles) => {
     const handler = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-        const badRole = !Object.keys(roles).includes(req.appuser.role);
+        const badRole = !roles.includes(req.appuser.role);
         if (badRole)
             return next(new oba_common_1.AppError({ message: "unauthorized", status: 401 }));
         return next();

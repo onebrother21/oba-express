@@ -37,9 +37,9 @@ export const validateApiUser = (o:Partial<{cookie:string;ekey:string;secret:stri
   };
   return handler;
 };
-export const validateApiUserRole = <R extends Strings>(roles:R) => {
+export const validateApiUserRole = <R extends string>(roles:R[]) => {
   const handler:Handler = async (req,res,next) => {
-    const badRole = !Object.keys(roles).includes(req.appuser.role);
+    const badRole = !roles.includes(req.appuser.role as R);
     if(badRole) return next(new AppError({message:"unauthorized",status:401}));
     return next();
   };
