@@ -57,7 +57,7 @@ const validateApiUser = (o, authReq) => {
                 const token = validTknFormat ? headerParts[1] : null;
                 const tokendata = token ? (0, common_handler_utils_1.verifyTkn)(token, secret) : null;
                 req.token = token;
-                req.appuser = Object.assign({}, tokendata);
+                req.appuser = Object.assign(Object.assign({}, req.appuser), tokendata);
             }
             if (authReq && !req.token)
                 throw new oba_common_1.AppError({

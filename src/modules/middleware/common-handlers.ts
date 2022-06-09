@@ -25,7 +25,7 @@ export const validateApiUser = (o:Partial<{cookie:string;ekey:string;secret:stri
         const token = validTknFormat?headerParts[1]:null;
         const tokendata = token?verifyTkn(token,secret):null;
         req.token = token;
-        req.appuser = {...tokendata as any};
+        req.appuser = {...req.appuser,...tokendata as any};
       }
       if(authReq && !req.token) throw new AppError({
         message:"Not Authorized",
