@@ -30,8 +30,8 @@
     "watch-debug-v": "concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"yellow.bold,cyan.bold,green.bold\" \"npm run watch-ts\" \"npm run serve-debug\""
   },
   "dependencies": {
-    "@onebro/oba-common": "^2.9.0",
-    "@onebro/oba-core": "^2.9.6",
+    "@onebro/oba-common": "^2.9.1",
+    "@onebro/oba-core": "^2.9.7",
     "@onebro/oba-core-api": "^2.9.3",
     "compression": "^1.7.4",
     "config": "^3.3.6",
