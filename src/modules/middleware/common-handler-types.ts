@@ -1,5 +1,5 @@
 import {Request,Response,NextFunction} from "express";
-import {Enum,OfErrorType,AnyBoolean} from "@onebro/oba-common";
+import {Enum,OfErrorType} from "@onebro/oba-common";
 import OBACore from "@onebro/oba-core";
 
 export type Handler = (req:Request,res:Response,next:NextFunction) => Promise<Response|void>;
