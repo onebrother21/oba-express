@@ -6,9 +6,18 @@ import {testAppApiConfig} from "../src/dev";
 export const App = {
   refresh:async () => {
     const {api} = await testAppApiConfig();
-    if(OB.match(/mongodb\+srv/i,api.config.db.uri)) return;
-    const db = await mongoose.createConnection(api.config.db.uri).asPromise();
-    await db.dropDatabase();
+    if(api.config.db){
+      try {
+        OB.log(`dropping MongoDB database`);
+        const {uri,opts} = api.config.db;
+        if(OB.match(/mongodb\+srv/,uri)) return;
+        const db = mongoose.createConnection(uri,opts);
+        await db.dropDatabase();
+      }
+      catch(e){
+        OB.warn(`MongoDB connection failed -> ${e.message||e}`);
+      }
+    }
   },
   init:async (withTestApp?:AnyBoolean) => {
     try{

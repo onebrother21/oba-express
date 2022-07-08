@@ -4,8 +4,8 @@ import {Enum} from "@onebro/oba-common";
 export type ResponseData = {
   cookieArr:string[];
   cookies:Enum<any,string>;
-  csrfToken?:string;
-  authToken?:string;
+  csrfToken:string;
+  authToken:string;
   body?:any;
 };
 export const J = {
@@ -46,11 +46,9 @@ export const J = {
       cookieObj.cookie = o;});
     return cookieObj;
   },
-  parseCookieArray:(data:Partial<ResponseData>,cookieArr:string[]) => {
+  parseCookieArray:(data:ResponseData,cookieArr:string[]) => {
     try{
       if(!(cookieArr&&cookieArr.length)){return data;}
-      const cookieNames = [];
-      const cookies = {};
       if(!data.cookieArr.length) data.cookieArr = cookieArr;
       else for(let i=0;i<cookieArr.length;i++){
         const cookieStr = cookieArr[i];

@@ -7,7 +7,7 @@ export const OBAExpressInitTests = () => J.desc("OBA EXPRESS TEST API",() => {
   let app:SuperTest<Test>,res_:ResponseData = J.newResponseData();
   it("init w/o errors",async () => {
     await App.refresh();
-    app = (await App.init(true)).app;
+    app = (await App.init(true)).app as SuperTest<Test>;
     J.is(app);
   },1E9);                    
   it("Home: GET / [403 - No Origin]",async () => {
