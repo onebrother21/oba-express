@@ -53,16 +53,17 @@ exports.morganMsgFormats = {
     error: `:errLogMsg`,
 };
 const validateCORS = ({ origin, origins, blacklist }) => {
+    // allow requests with no origin, like mobile apps or curl requests? -> NO UNTIL FURTHER GUIDANCE
     if (!origin)
         return false;
     if (origins)
         for (let i = 0, l = origins.length; i < l; i++)
             if (oba_common_1.default.match(new RegExp(origins[i]), origin))
                 return true;
-    if (blacklist)
-        for (let i = 0, l = blacklist.length; i < l; i++)
-            if (oba_common_1.default.match(new RegExp(oba_common_1.default.str(blacklist[i]) ? blacklist[i] : blacklist[i].id), origin))
-                return false;
+    /*
+    if(blacklist) for(let i = 0,l = blacklist.length;i<l;i++) if(OB.match(new RegExp(OB.str(
+      blacklist[i])?blacklist[i]:(blacklist[i] as any).id),origin)) return false;
+    */
     return false;
 };
 exports.validateCORS = validateCORS;

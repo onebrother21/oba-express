@@ -14,7 +14,7 @@ export const expressConfig = <Sockets = undefined>():OBAExpressConfig<Sockets> =
   const coreRuntime = OB.mergeObj(initial,coreConfig(),false);
   const atRuntime:DeepPartial<OBAExpressConfig<Sockets>> = {
     vars:{host,port,providers,consumers,settings},
-    middleware:{common:{cors:{origins},cors_ext:{origins}}},
+    middleware:{common:{cors:{origins}}},
   };
   const expressconfig = OB.mergeObj(coreRuntime,atRuntime,false) as OBAExpressConfig<Sockets>;
   return expressconfig;

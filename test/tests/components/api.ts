@@ -31,10 +31,11 @@ export const OBAExpressInitTests = () => J.desc("OBA EXPRESS TEST API",() => {
     })
     .catch(e => {OB.error(e);throw e;});
   },1E9);
-  it("Home: GET / [200 - Origin & Cookies OK]",async () => {
+  it("Home: GET / [200 - Origin OK, Cookies OK, Home Page OK]",async () => {
     await app
     .get("/")
     .set("Origin","https://oba-playground.app")
+    .expect("Content-Type",/text\/html/)
     .expect(200)
     .expect((res:Response) => {
       J.handleResponse(res_,res);
@@ -42,7 +43,20 @@ export const OBAExpressInitTests = () => J.desc("OBA EXPRESS TEST API",() => {
       J.is(res_.cookies["_csrf"]);
       J.is(res_.cookies["XSRF-TOKEN"]);
       J.is(res_.cookies["_somesession"]);
-      J.is(res_.body.data.ready);
+      J.has(res.text,`Hello, World!`);
+    })
+    .catch(e => {OB.error(e);throw e;});
+  },1E9);
+  it("Test: GET /sample [200 - Sample (Page 0) OK]",async () => {
+    await app
+    .get("/sample")
+    .set("Origin","https://oba-dev-apps.com")
+    .set("Cookie",res_.cookieArr)
+    .expect("Content-Type",/text\/html/)
+    .expect(200)
+    .expect((res:Response) => {
+      J.handleResponse(res_,res);
+      J.has(res.text,`You are logged in as`);
     })
     .catch(e => {OB.error(e);throw e;});
   },1E9);
@@ -69,32 +83,6 @@ export const OBAExpressInitTests = () => J.desc("OBA EXPRESS TEST API",() => {
     .expect((res:Response) => {
       J.handleResponse(res_,res);
       J.true(/not found/.test(res_.body.message));
-    })
-    .catch(e => {OB.error(e);throw e;});
-  },1E9);
-  it("Test: GET /sample [200 - Home Page OK]",async () => {
-    await app
-    .get("/sample")
-    .set("Origin","https://oba-dev-apps.com")
-    .set("Cookie",res_.cookieArr)
-    .expect("Content-Type",/text\/html/)
-    .expect(200)
-    .expect((res:Response) => {
-      J.handleResponse(res_,res);
-      J.has(res.text,`Hello, World!`);
-    })
-    .catch(e => {OB.error(e);throw e;});
-  },1E9);
-  it("Test: GET /sample/0 [200 - Page 0 OK]",async () => {
-    await app
-    .get("/sample/0")
-    .set("Origin","https://oba-dev-apps.com")
-    .set("Cookie",res_.cookieArr)
-    .expect("Content-Type",/text\/html/)
-    .expect(200)
-    .expect((res:Response) => {
-      J.handleResponse(res_,res);
-      J.has(res.text,`You are logged in as`);
     })
     .catch(e => {OB.error(e);throw e;});
   },1E9);

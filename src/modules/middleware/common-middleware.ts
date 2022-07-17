@@ -41,21 +41,13 @@ export const CommonMiddleware:Partial<OBAExpressMiddlewareSetters> = {
       a.use(morgan(format,opts));
     }
   },
-  cors:(a,o) => {
-    const {preflightContinue,credentials} = o;
-    const opts:CorsOptions = {preflightContinue,credentials,origin:"*"};
+  cors:(a,o,api) => {
+    const {preflightContinue,credentials,origins,exposedHeaders} = o;
+    const opts:CorsOptions = {preflightContinue,credentials,origin:(origin,done) => {
+      const allowed = validateCORS({origin,origins});
+      return allowed?done(null, true):done(api.e._.cors(), false);
+    }};
     a.use(cors(opts));
-  },
-  cors_ext:(a,o,api) => {
-    const handler:Handler = async (req,res,next) => {
-      const origin = req.headers["origin"];
-      const route = {url:req.url,method:req.method};
-      const {origins,skip} = o;
-      const shouldSkip = () => skip.includes(route.url);
-      const originGuard = () => validateCORS({origin,origins});
-      return shouldSkip()?next():originGuard()?next():next(api.e._.cors());
-    };
-    a.use(handler);
   },
   cookieParser:(a,o) => {a.use(cookieParser(o.secret));},
   bodyParser:(a,o) => {for(const k in o) a.use((<any>express)[k](o[k as Keys<typeof o>]));},

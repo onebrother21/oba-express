@@ -44,7 +44,7 @@
     "errors":{
       "notfound":{"status":404,"message":"Requested resource not found"},
       "doesNotExist":{"status":404,"message":"%s does not exist"},
-      "cors":{"status":403,"message":"CORS is not allowed"},
+      "cors":{"status":403,"message":"CORS policy violation"},
       "csrf":{"status":403,"message":"Access denied"},
       "unauthorized":{"status":401,"message":"%s not authorized"},
       "existing":{"status":422,"message":"%s already exists"},
@@ -74,13 +74,8 @@
         "cors":{
           "origins":[],
           "preflightContinue":false,
-          "credentials":true
-        },
-        "cors_ext":{
-          "origins":[],
-          "preflightContinue":false,
           "credentials":true,
-          "skip":["/sample","sample/0"]
+          "exposedHeaders":["X-API-KEY"]
         },
         "cookieParser":{},
         "bodyParser":{

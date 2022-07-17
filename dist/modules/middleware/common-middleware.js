@@ -72,21 +72,13 @@ exports.CommonMiddleware = {
                 a.use((0, morgan_1.default)(format, opts));
             }
     },
-    cors: (a, o) => {
-        const { preflightContinue, credentials } = o;
-        const opts = { preflightContinue, credentials, origin: "*" };
+    cors: (a, o, api) => {
+        const { preflightContinue, credentials, origins, exposedHeaders } = o;
+        const opts = { preflightContinue, credentials, origin: (origin, done) => {
+                const allowed = (0, common_middleware_utils_1.validateCORS)({ origin, origins });
+                return allowed ? done(null, true) : done(api.e._.cors(), false);
+            } };
         a.use((0, cors_1.default)(opts));
-    },
-    cors_ext: (a, o, api) => {
-        const handler = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-            const origin = req.headers["origin"];
-            const route = { url: req.url, method: req.method };
-            const { origins, skip } = o;
-            const shouldSkip = () => skip.includes(route.url);
-            const originGuard = () => (0, common_middleware_utils_1.validateCORS)({ origin, origins });
-            return shouldSkip() ? next() : originGuard() ? next() : next(api.e._.cors());
-        });
-        a.use(handler);
     },
     cookieParser: (a, o) => { a.use((0, cookie_parser_1.default)(o.secret)); },
     bodyParser: (a, o) => { for (const k in o)

@@ -8,7 +8,7 @@ export type CorsOpts = {
   origins:string[];
   preflightContinue:boolean;
   credentials:boolean;
-  skip?:string[];
+  exposedHeaders:string[];
 };
 export type CorsValidationParams = {
   origin:string;
@@ -75,7 +75,6 @@ export type OBAExpressCommonMiddlewareConfig = Partial<{
   views:ViewsOpts;
   morgan:MorganOpts;
   cors:CorsOpts;
-  cors_ext:CorsOpts & {skip?:string[]};
   bodyParser:BodyParserOpts;
   cookieParser:CookieParserOpts;
   session:SessionOpts;

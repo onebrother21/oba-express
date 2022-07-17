@@ -18,7 +18,7 @@ const expressConfig = () => {
     const coreRuntime = oba_common_1.default.mergeObj(initial, (0, oba_core_1.coreConfig)(), false);
     const atRuntime = {
         vars: { host, port, providers, consumers, settings },
-        middleware: { common: { cors: { origins }, cors_ext: { origins } } },
+        middleware: { common: { cors: { origins } } },
     };
     const expressconfig = oba_common_1.default.mergeObj(coreRuntime, atRuntime, false);
     return expressconfig;
