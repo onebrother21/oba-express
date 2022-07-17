@@ -72,10 +72,12 @@
         "views":{},
         "morgan":{"useDev":true,"useLogger":true},
         "cors":{
+          "methods":["GET","PUT","POST","DELETE"],
           "origins":[],
           "preflightContinue":false,
           "credentials":true,
-          "exposedHeaders":["X-API-KEY"]
+          "allowedHeaders":["OBA-CLIENT-ID","OBA-CLIENT-KEY","X-API-EKEY","Content-Type","Authorization"],
+          "maxAge":86400
         },
         "cookieParser":{},
         "bodyParser":{

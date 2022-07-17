@@ -8,7 +8,9 @@ export type CorsOpts = {
   origins:string[];
   preflightContinue:boolean;
   credentials:boolean;
-  exposedHeaders:string[];
+  allowedHeaders:string[];
+  methods:string[];
+  maxAge:number;
 };
 export type CorsValidationParams = {
   origin:string;

@@ -31,6 +31,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -73,11 +84,11 @@ exports.CommonMiddleware = {
             }
     },
     cors: (a, o, api) => {
-        const { preflightContinue, credentials, origins, exposedHeaders } = o;
-        const opts = { preflightContinue, credentials, origin: (origin, done) => {
+        const { origins } = o, corsOpts = __rest(o, ["origins"]);
+        const opts = Object.assign(Object.assign({}, corsOpts), { origin: (origin, done) => {
                 const allowed = (0, common_middleware_utils_1.validateCORS)({ origin, origins });
                 return allowed ? done(null, true) : done(api.e._.cors(), false);
-            } };
+            } });
         a.use((0, cors_1.default)(opts));
     },
     cookieParser: (a, o) => { a.use((0, cookie_parser_1.default)(o.secret)); },

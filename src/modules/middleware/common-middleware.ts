@@ -42,8 +42,8 @@ export const CommonMiddleware:Partial<OBAExpressMiddlewareSetters> = {
     }
   },
   cors:(a,o,api) => {
-    const {preflightContinue,credentials,origins,exposedHeaders} = o;
-    const opts:CorsOptions = {preflightContinue,credentials,origin:(origin,done) => {
+    const {origins,...corsOpts} = o;
+    const opts:CorsOptions = {...corsOpts,origin:(origin,done) => {
       const allowed = validateCORS({origin,origins});
       return allowed?done(null, true):done(api.e._.cors(), false);
     }};

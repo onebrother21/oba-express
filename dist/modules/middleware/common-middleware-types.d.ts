@@ -16,7 +16,9 @@ export declare type CorsOpts = {
     origins: string[];
     preflightContinue: boolean;
     credentials: boolean;
-    exposedHeaders: string[];
+    allowedHeaders: string[];
+    methods: string[];
+    maxAge: number;
 };
 export declare type CorsValidationParams = {
     origin: string;
