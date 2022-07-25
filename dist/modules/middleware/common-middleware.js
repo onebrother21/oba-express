@@ -87,7 +87,10 @@ exports.CommonMiddleware = {
         const { origins } = o, corsOpts = __rest(o, ["origins"]);
         const opts = Object.assign(Object.assign({}, corsOpts), { origin: (origin, done) => {
                 const allowed = (0, common_middleware_utils_1.validateCORS)({ origin, origins });
-                return allowed ? done(null, true) : done(api.e._.cors(), false);
+                return allowed ? done(null, true) : (() => {
+                    console.log(api.e._.cors());
+                    done(api.e._.cors(), false);
+                })();
             } });
         a.use((0, cors_1.default)(opts));
     },
