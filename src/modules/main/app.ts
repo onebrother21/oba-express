@@ -15,6 +15,7 @@ export const createApp = async (api:OBAExpressType):Promise<express.Express> => 
   };
   if(noMiddleware) await mainSetter();
   else for(const k of order){
+    console.log(k);
     switch(true){
       case k == "main":{await mainSetter();break;}
       case OB.match(/custom\./,k):{
@@ -25,6 +26,7 @@ export const createApp = async (api:OBAExpressType):Promise<express.Express> => 
       }
       default:{
         const opts = common[k as Keys<typeof common>];
+        console.log(opts);
         const setter = (middleware as any)[k as any];
         setter && opts?setter(app,opts as any,api):null;
         break;

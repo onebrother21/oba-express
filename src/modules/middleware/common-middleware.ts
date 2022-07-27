@@ -45,10 +45,7 @@ export const CommonMiddleware:Partial<OBAExpressMiddlewareSetters> = {
     const {origins,...corsOpts} = o;
     const opts:CorsOptions = {...corsOpts,origin:(origin,done) => {
       const allowed = validateCORS({origin,origins});
-      return allowed?done(null,true):(() => {
-        console.log(api.e._.cors());
-        done(api.e._.cors(),false);
-      })();
+      return allowed?done(null,true):done(api.e._.cors(),false);
     }};
     a.use(cors(opts));
   },

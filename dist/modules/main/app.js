@@ -30,6 +30,7 @@ const createApp = (api) => __awaiter(void 0, void 0, void 0, function* () {
         yield mainSetter();
     else
         for (const k of order) {
+            console.log(k);
             switch (true) {
                 case k == "main": {
                     yield mainSetter();
@@ -43,6 +44,7 @@ const createApp = (api) => __awaiter(void 0, void 0, void 0, function* () {
                 }
                 default: {
                     const opts = common[k];
+                    console.log(opts);
                     const setter = middleware[k];
                     setter && opts ? setter(app, opts, api) : null;
                     break;
