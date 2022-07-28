@@ -66,7 +66,6 @@ export type BodyParserOpts = {
   urlencoded?:{extended?:boolean};
   raw?:{type?:string;limit?:string;};
 };
-export type PassportOpts = {};
 
 export type OBAExpressCommonMiddlewareConfig = Partial<{
   disablePoweredBy:AnyBoolean;
@@ -83,7 +82,6 @@ export type OBAExpressCommonMiddlewareConfig = Partial<{
   lusca:LuscaOpts;
   helmet:HelmetOpts;
   csrf:CsrfOpts;
-  passport:PassportOpts;
   pageNotFound:null;
   finalHandler:null;
 }>;

@@ -95,7 +95,6 @@ export declare type BodyParserOpts = {
         limit?: string;
     };
 };
-export declare type PassportOpts = {};
 export declare type OBAExpressCommonMiddlewareConfig = Partial<{
     disablePoweredBy: AnyBoolean;
     flash: AnyBoolean;
@@ -111,7 +110,6 @@ export declare type OBAExpressCommonMiddlewareConfig = Partial<{
     lusca: LuscaOpts;
     helmet: HelmetOpts;
     csrf: CsrfOpts;
-    passport: PassportOpts;
     pageNotFound: null;
     finalHandler: null;
 }>;

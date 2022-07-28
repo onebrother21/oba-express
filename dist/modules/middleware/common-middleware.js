@@ -57,7 +57,6 @@ const connect_mongo_1 = __importDefault(require("connect-mongo"));
 const csurf_1 = __importDefault(require("csurf"));
 const lusca_1 = __importDefault(require("lusca"));
 const express_flash_1 = __importDefault(require("express-flash"));
-const passport_1 = __importDefault(require("passport"));
 const errorhandler_1 = __importDefault(require("errorhandler"));
 const common_middleware_utils_1 = require("./common-middleware-utils");
 const oba_common_1 = __importStar(require("@onebro/oba-common"));
@@ -120,7 +119,6 @@ exports.CommonMiddleware = {
         csrfCookie ? a.use(handler) : null;
         a.use((0, lusca_1.default)(o));
     },
-    passport: (a) => { a.use(passport_1.default.initialize()); },
     public: (a, o) => { o.dirname ? a.use(express_1.default.static(o.dirname, o)) : null; },
     views: (a, o) => {
         if (o.dirname && o.engine) {

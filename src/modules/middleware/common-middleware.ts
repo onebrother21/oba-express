@@ -10,7 +10,6 @@ import helmet from "helmet";
 import csrf from "csurf";
 import lusca from "lusca";
 import flash from "express-flash";
-import passport from "passport";
 import errorhandler from "errorhandler";
 import {Handler,ErrorHandler} from "./common-handler-types";
 import {
@@ -75,7 +74,6 @@ export const CommonMiddleware:Partial<OBAExpressMiddlewareSetters> = {
     csrfCookie?a.use(handler):null;
     a.use(lusca(o));
   },
-  passport:(a) => {a.use(passport.initialize());},
   public:(a,o) => {o.dirname?a.use(express.static(o.dirname,o)):null;},
   views:(a,o) => {
     if(o.dirname && o.engine){

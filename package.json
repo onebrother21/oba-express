@@ -30,8 +30,8 @@
     "watch-debug-v": "concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"yellow.bold,cyan.bold,green.bold\" \"npm run watch-ts\" \"npm run serve-debug\""
   },
   "dependencies": {
-    "@onebro/oba-common": "^2.9.3",
-    "@onebro/oba-core": "^2.9.11",
+    "@onebro/oba-common": "^2.9.5",
+    "@onebro/oba-core": "^2.9.13",
     "@onebro/oba-core-api": "^2.9.3",
     "compression": "^1.7.4",
     "config": "^3.3.6",
@@ -49,7 +49,6 @@
     "lusca": "^1.7.0",
     "morgan": "^1.10.0",
     "node-fetch": "^3.0.0",
-    "passport": "^0.5.0",
     "pug": "^3.0.2",
     "socket.io": "^4.3.1"
   },
@@ -68,7 +67,6 @@
     "@types/lusca": "^1.7.1",
     "@types/morgan": "^1.9.3",
     "@types/node": "^16.11.6",
-    "@types/passport": "^1.0.7",
     "@types/socket.io": "^3.0.2",
     "@types/supertest": "^2.0.11",
     "concurrently": "^6.3.0",
