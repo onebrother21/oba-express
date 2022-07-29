@@ -27,9 +27,9 @@
         }
       ],
       "dbCustom":[
-        {"level":"error","name":"error_log","dateStub":"mm"},
-        {"level":"access","name":"access_log","dateStub":"mm"},
-        {"level":"info","name":"info_log","dateStub":"mm"}
+        {"level":"error","name":"api_error_log","dateStub":"mm"},
+        {"level":"access","name":"api_access_log","dateStub":"mm"},
+        {"level":"info","name":"api_info_log","dateStub":"mm"}
       ]
     },
     "db":{
@@ -46,6 +46,7 @@
       "doesNotExist":{"status":404,"message":"%s does not exist"},
       "cors":{"status":403,"message":"CORS policy violation"},
       "csrf":{"status":403,"message":"Access denied"},
+      "forbidden":{"status":403,"message":"Access denied"},
       "unauthorized":{"status":401,"message":"%s not authorized"},
       "existing":{"status":422,"message":"%s already exists"},
       "invalid":{"status":400,"message":"Invalid %s"},
@@ -68,15 +69,22 @@
       "common":{
         "disablePoweredBy":true,
         "compression":true,
-        "public":{},
-        "views":{},
+        "useStatic":{},
+        "useViews":{},
         "morgan":{"useDev":true,"useLogger":true},
         "cors":{
           "methods":["GET","PUT","POST","DELETE"],
-          "origins":[],
+          "whitelist":[],
+          "blacklist":[],
           "preflightContinue":false,
           "credentials":true,
-          "allowedHeaders":["OBA-CLIENT-ID","OBA-CLIENT-KEY","X-API-EKEY","Content-Type","Authorization"],
+          "allowedHeaders":[
+            "OBA-CLIENT-ID",
+            "OBA-CLIENT-KEY",
+            "XSRF-TOKEN",
+            "Authorization",
+            "Content-Type"
+          ],
           "maxAge":86400
         },
         "cookieParser":{},
@@ -88,16 +96,18 @@
         "flash":true,
         "session":{
           "resave":false,
-          "saveUninitialized":true,
-          "cookie":{"maxAge":36000000},
+          "saveUninitialized":false,
+          "cookie":{"maxAge":2592000000},
           "store":{
+            "collectionName":"api_user_sessions",
+            "touchAfter":86400,
             "autoRemove":"interval",
-            "autoRemoveInterval":10,
-            "autoReconnect":true
+            "autoRemoveInterval":30,
+            "autoReconnect":true,
+            "stringify":true
           }
         },
-        "csrf":{"cookie":true},
-        "passport":{}
+        "csrf":{"cookie":true}
       }
     }
   }

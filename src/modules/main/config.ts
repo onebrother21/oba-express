@@ -6,15 +6,16 @@ import { OBAExpressConfig } from "./main";
 export const expressConfig = <Sockets = undefined>():OBAExpressConfig<Sockets> => {
   const host = process.env.HOST || OB.appvar("_HOST");
   const port = Number(process.env.PORT || OB.appvar("_PORT"));
-  const origins = OB.appvar("_ORIGINS");
+  const whitelist = OB.appvar("_ORIGINS");
   const providers = OB.appvar("_PROVIDERS");
   const consumers = OB.appvar("_CONSUMERS");
   const settings = {checkConn:false};
   const initial:OBAExpressConfig<Sockets> = config.get("appconfig");
-  const coreRuntime = OB.mergeObj(initial,coreConfig(),false);
+  const coreInitial = coreConfig();
+  const coreRuntime = OB.mergeObj(initial,coreInitial,false);
   const atRuntime:DeepPartial<OBAExpressConfig<Sockets>> = {
     vars:{host,port,providers,consumers,settings},
-    middleware:{common:{cors:{origins}}},
+    middleware:{common:{cors:{whitelist}}},
   };
   const expressconfig = OB.mergeObj(coreRuntime,atRuntime,false) as OBAExpressConfig<Sockets>;
   return expressconfig;

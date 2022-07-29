@@ -10,6 +10,4 @@ export type OBAExpressVars =  ApiVarsBase & Partial<{
   settings:ApiSettings;
   consumers:ApiCredentials[];
   providers:ApiCredentials[];
-  whitelist:ApiUserID[];
-  blacklist:ApiUserID[];
 }>;

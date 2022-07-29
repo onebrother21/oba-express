@@ -5,12 +5,14 @@ import morgan from "morgan";
 import cors,{CorsOptions} from "cors";
 import cookieParser from "cookie-parser";
 import session,{SessionOptions} from "express-session";
-import mongo from "connect-mongo";
+import MongoStore from "connect-mongo";
 import helmet from "helmet";
 import csrf from "csurf";
 import lusca from "lusca";
 import flash from "express-flash";
 import errorhandler from "errorhandler";
+import * as uuid from "uuid";
+const {v4:uuidv4} = uuid;
 import {Handler,ErrorHandler} from "./common-handler-types";
 import {
   MorganLoggerTypes,
@@ -41,9 +43,9 @@ export const CommonMiddleware:Partial<OBAExpressMiddlewareSetters> = {
     }
   },
   cors:(a,o,api) => {
-    const {origins,...corsOpts} = o;
+    const {whitelist,...corsOpts} = o;
     const opts:CorsOptions = {...corsOpts,origin:(origin,done) => {
-      const allowed = validateCORS({origin,origins});
+      const allowed = validateCORS(origin,whitelist);
       return allowed?done(null,true):done(api.e._.cors(),false);
     }};
     a.use(cors(opts));
@@ -51,17 +53,22 @@ export const CommonMiddleware:Partial<OBAExpressMiddlewareSetters> = {
   cookieParser:(a,o) => {a.use(cookieParser(o.secret));},
   bodyParser:(a,o) => {for(const k in o) a.use((<any>express)[k](o[k as Keys<typeof o>]));},
   session:(a,o) => {
-    const store = o.store?mongo.create(o.store):null;
+    const store = o.store?MongoStore.create(o.store):null;
     const opts:SessionOptions = Object.assign(o,{store});
+    //opts.genid = () => uuidv4();
+    if(a.get("env") === "production"){
+      a.set("trust proxy",1);// trust first proxy
+      opts.cookie.secure = true;
+    }
     a.use(session(opts));
   },
   csrf:(a,o) => {
-    const handler:Handler = async (req,res,next) => {
+    const csrfHandler:Handler = async (req,res,next) => {
       res.cookie("XSRF-TOKEN",req.csrfToken());
       return next();
     };
     a.use(csrf(o));
-    a.use(handler);
+    a.use(csrfHandler);
   },
   lusca:(a,o) => {
     const csrfCookie = o.csrf && (<any>o.csrf).cookie?(<any>o.csrf).cookie:null;
@@ -69,13 +76,13 @@ export const CommonMiddleware:Partial<OBAExpressMiddlewareSetters> = {
     const handler:Handler = async (req,res,next) => {
       const csrf = req.cookies[cookieName];
       if(csrf) req.body && csrf?(req.body._csrf = csrf):null && OB.trace({csrf});
-      return next();};
-    //OB.trace({csrfCookie});
+      return next();
+    };
     csrfCookie?a.use(handler):null;
     a.use(lusca(o));
   },
-  public:(a,o) => {o.dirname?a.use(express.static(o.dirname,o)):null;},
-  views:(a,o) => {
+  useStatic:(a,o) => {o.dirname?a.use(express.static(o.dirname,o)):null;},
+  useViews:(a,o) => {
     if(o.dirname && o.engine){
       a.set("views",o.dirname);
       a.set("view engine",o.engine);

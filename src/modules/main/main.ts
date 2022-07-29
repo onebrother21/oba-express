@@ -25,8 +25,9 @@ export class OBAExpress<Ev = undefined,Sockets = undefined> extends Component<OB
     const HOST = this.vars.host;
     const serverOK = () => {
       const started = new Date();
-      const info = OB.stringify({...this.vars,started});
-      OB.ok("Server started now man",this.server.address());
+      const {address,port} = this.server.address() || {} as any;
+      const info = OB.stringify({server:{...this.vars,address,port,started}});
+      OB.ok(`${this.vars.name.toLocaleUpperCase()} Api is running -> ${info}`);
       this.logger.postLogMsg("info",info);
     };
     const serverErr = (e:AppError) => {

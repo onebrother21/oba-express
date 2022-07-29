@@ -1,52 +1,29 @@
 import { AnyBoolean } from "@onebro/oba-common";
-import { ApiUserID } from "../vars";
-export declare type PublicOpts = {
-    maxAge: 3000000;
-    dirname: string;
-};
-export declare type ViewsOpts = {
-    engine: string;
-    dirname: string;
-};
-export declare type MorganOpts = {
-    useDev?: boolean;
-    useLogger?: boolean;
-};
-export declare type CorsOpts = {
-    origins: string[];
-    preflightContinue: boolean;
-    credentials: boolean;
-    allowedHeaders: string[];
-    methods: string[];
-    maxAge: number;
-};
-export declare type CorsValidationParams = {
-    origin: string;
-    origins: string[];
-    blacklist?: string | ApiUserID[];
-};
+export declare type MorganOpts = Partial<Record<"useDev" | "useLogger", boolean>>;
 export declare type CookieParserOpts = {
     secret?: string;
 };
-export declare type MongoStoreOpts = {
+export declare type MongoSessionStoreOpts = {
     mongoUrl: string;
     collectionName?: string;
     autoRemove?: "native" | "interval" | "disabled";
     autoRemoveInterval?: number;
     autoReconnect?: boolean;
+    touchAfter: 86400;
+    stringify: boolean;
 };
 export declare type SessionOpts = {
     name: string;
-    secret: string;
+    secret: string | string[];
     resave?: boolean;
     saveUninitialized?: boolean;
     cookie?: {
         maxAge: number;
     };
-    store?: MongoStoreOpts;
+    store?: MongoSessionStoreOpts;
 };
-export declare type JwtOpts = {
-    secret: string;
+export declare type CsrfOpts = {
+    cookie: boolean;
 };
 export declare type LuscaOpts = {
     csrf?: boolean | {
@@ -64,9 +41,6 @@ export declare type LuscaOpts = {
     nosniff?: boolean;
     referrerPolicy?: "same-origin" | string;
 };
-export declare type CsrfOpts = {
-    cookie: boolean;
-};
 export declare type HelmetOpts = {
     csrf?: boolean | {
         cookie?: string | any;
@@ -83,6 +57,15 @@ export declare type HelmetOpts = {
     nosniff?: boolean;
     referrerPolicy?: "same-origin" | string;
 };
+export declare type CorsOpts = {
+    whitelist: string[];
+    preflightContinue: boolean;
+    credentials: boolean;
+    allowedHeaders: string[];
+    methods: string[];
+    maxAge: number;
+    blacklist?: string[];
+};
 export declare type BodyParserOpts = {
     json?: {
         limit?: string;
@@ -95,21 +78,29 @@ export declare type BodyParserOpts = {
         limit?: string;
     };
 };
+export declare type UseStaticOpts = {
+    maxAge: 3000000;
+    dirname: string;
+};
+export declare type UseViewsOpts = {
+    engine: string;
+    dirname: string;
+};
 export declare type OBAExpressCommonMiddlewareConfig = Partial<{
-    disablePoweredBy: AnyBoolean;
-    flash: AnyBoolean;
-    errorhandler: AnyBoolean;
     compression: AnyBoolean;
-    public: PublicOpts;
-    views: ViewsOpts;
+    disablePoweredBy: AnyBoolean;
     morgan: MorganOpts;
-    cors: CorsOpts;
-    bodyParser: BodyParserOpts;
+    flash: AnyBoolean;
     cookieParser: CookieParserOpts;
-    session: SessionOpts;
     lusca: LuscaOpts;
     helmet: HelmetOpts;
     csrf: CsrfOpts;
+    session: SessionOpts;
+    cors: CorsOpts;
+    bodyParser: BodyParserOpts;
+    useStatic: UseStaticOpts;
+    useViews: UseViewsOpts;
+    errorhandler: AnyBoolean;
     pageNotFound: null;
     finalHandler: null;
 }>;

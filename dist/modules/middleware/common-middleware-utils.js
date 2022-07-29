@@ -44,7 +44,7 @@ const accessTokenStrs = {
     path: `"url":":url"`,
     resStatus: `"status"::status`,
     resSize: `"res-size":":res[content-length]"`,
-    resTime: `"res-time"::response-time`,
+    resTime: `"res-time"::total-time`,
 };
 const accessLogMsg = "{" + Object.keys(accessTokenStrs).map(k => accessTokenStrs[k]).join(",") + "}";
 exports.morganMsgFormats = {
@@ -52,18 +52,14 @@ exports.morganMsgFormats = {
     warn: `:errLogMsg`,
     error: `:errLogMsg`,
 };
-const validateCORS = ({ origin, origins, blacklist }) => {
+const validateCORS = (origin, whitelist) => {
     // allow requests with no origin, like mobile apps or curl requests? -> NO UNTIL FURTHER GUIDANCE
     if (!origin)
         return false;
-    if (origins)
-        for (let i = 0, l = origins.length; i < l; i++)
-            if (oba_common_1.default.match(new RegExp(origins[i]), origin))
+    if (whitelist)
+        for (let i = 0, l = whitelist.length; i < l; i++)
+            if (oba_common_1.default.match(new RegExp(whitelist[i]), origin))
                 return true;
-    /*
-    if(blacklist) for(let i = 0,l = blacklist.length;i<l;i++) if(OB.match(new RegExp(OB.str(
-      blacklist[i])?blacklist[i]:(blacklist[i] as any).id),origin)) return false;
-    */
     return false;
 };
 exports.validateCORS = validateCORS;

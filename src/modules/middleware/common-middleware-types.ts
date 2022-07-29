@@ -1,39 +1,25 @@
 import {AnyBoolean} from "@onebro/oba-common";
-import { ApiUserID } from "../vars";
 
-export type PublicOpts = {maxAge:3000000;dirname:string;};
-export type ViewsOpts = {engine:string;dirname:string;};
-export type MorganOpts = {useDev?:boolean;useLogger?:boolean;};
-export type CorsOpts = {
-  origins:string[];
-  preflightContinue:boolean;
-  credentials:boolean;
-  allowedHeaders:string[];
-  methods:string[];
-  maxAge:number;
-};
-export type CorsValidationParams = {
-  origin:string;
-  origins:string[];
-  blacklist?:string|ApiUserID[];
-};
+export type MorganOpts = Partial<Record<"useDev"|"useLogger",boolean>>;
 export type CookieParserOpts = {secret?:string;};
-export type MongoStoreOpts = {
+export type MongoSessionStoreOpts = {
   mongoUrl:string;
   collectionName?:string;
   autoRemove?:"native"|"interval"|"disabled";
   autoRemoveInterval?:number;
   autoReconnect?:boolean;
+  touchAfter:86400;
+  stringify:boolean;
 };
 export type SessionOpts = {
   name:string;
-  secret:string;
+  secret:string|string[];
   resave?:boolean;
   saveUninitialized?:boolean;
   cookie?:{maxAge:number;};
-  store?:MongoStoreOpts;
+  store?:MongoSessionStoreOpts;
 };
-export type JwtOpts = {secret:string;};
+export type CsrfOpts = {cookie:boolean;};
 export type LuscaOpts = {
   csrf?:boolean|{cookie?:string|any;};
   csp?:any;
@@ -47,7 +33,6 @@ export type LuscaOpts = {
   nosniff?:boolean;
   referrerPolicy?:"same-origin"|string;
 };
-export type CsrfOpts = {cookie:boolean;};
 export type HelmetOpts = {
   csrf?:boolean|{cookie?:string|any;};
   csp?:any;
@@ -61,27 +46,38 @@ export type HelmetOpts = {
   nosniff?:boolean;
   referrerPolicy?:"same-origin"|string;
 };
+export type CorsOpts = {
+  whitelist:string[];
+  preflightContinue:boolean;
+  credentials:boolean;
+  allowedHeaders:string[];
+  methods:string[];
+  maxAge:number;
+  blacklist?:string[];
+};
 export type BodyParserOpts = {
   json?:{limit?:string;};
   urlencoded?:{extended?:boolean};
   raw?:{type?:string;limit?:string;};
 };
+export type UseStaticOpts = {maxAge:3000000;dirname:string;};
+export type UseViewsOpts = {engine:string;dirname:string;};
 
 export type OBAExpressCommonMiddlewareConfig = Partial<{
-  disablePoweredBy:AnyBoolean;
-  flash:AnyBoolean;
-  errorhandler:AnyBoolean;
   compression:AnyBoolean;
-  public:PublicOpts;
-  views:ViewsOpts;
+  disablePoweredBy:AnyBoolean;
   morgan:MorganOpts;
-  cors:CorsOpts;
-  bodyParser:BodyParserOpts;
+  flash:AnyBoolean;
   cookieParser:CookieParserOpts;
-  session:SessionOpts;
   lusca:LuscaOpts;
   helmet:HelmetOpts;
   csrf:CsrfOpts;
+  session:SessionOpts;
+  cors:CorsOpts;
+  bodyParser:BodyParserOpts;
+  useStatic:UseStaticOpts;
+  useViews:UseViewsOpts;
+  errorhandler:AnyBoolean;
   pageNotFound:null;
   finalHandler:null;
 }>;

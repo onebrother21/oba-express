@@ -1,11 +1,8 @@
 import {Request} from "express";
-import morgan from "morgan";
 import fs from "fs";
 import path from "path";
 import OB,{Enum,Strings,TypedMethods} from "@onebro/oba-common";
-import { OBACoreLogger } from "@onebro/oba-core";
-import { CorsValidationParams } from "./common-middleware-types";
-import { ApiUserID } from "../vars";
+import { CorsOpts } from "./common-middleware-types";
 
 export type MorganLoggerTypes = "access"|"warn"|"error"|"info";
 export const morganMsgTokens:TypedMethods<Request,string> = {
@@ -45,7 +42,7 @@ const accessTokenStrs:Strings = {
   path:`"url":":url"`,
   resStatus:`"status"::status`,
   resSize:`"res-size":":res[content-length]"`,
-  resTime:`"res-time"::response-time`,
+  resTime:`"res-time"::total-time`,
 };
 const accessLogMsg = "{" + Object.keys(accessTokenStrs).map(k => accessTokenStrs[k as any]).join(",") +"}";
 export const morganMsgFormats:Enum<string,undefined,MorganLoggerTypes> = {
@@ -53,14 +50,10 @@ export const morganMsgFormats:Enum<string,undefined,MorganLoggerTypes> = {
   warn:`:errLogMsg`,
   error:`:errLogMsg`,
 };
-export const validateCORS = ({origin,origins,blacklist}:CorsValidationParams) => {
+export const validateCORS = (origin:string,whitelist:CorsOpts["whitelist"]) => {
   // allow requests with no origin, like mobile apps or curl requests? -> NO UNTIL FURTHER GUIDANCE
   if(!origin) return false;
-  if(origins) for(let i = 0,l = origins.length;i<l;i++) if(OB.match(new RegExp(origins[i]),origin)) return true;
-  /*
-  if(blacklist) for(let i = 0,l = blacklist.length;i<l;i++) if(OB.match(new RegExp(OB.str(
-    blacklist[i])?blacklist[i]:(blacklist[i] as any).id),origin)) return false;
-  */
+  if(whitelist) for(let i = 0,l = whitelist.length;i<l;i++) if(OB.match(new RegExp(whitelist[i]),origin)) return true;
   return false;
 };
 export const readCert = () => {

@@ -54,8 +54,9 @@ class OBAExpress extends oba_common_1.Component {
             const HOST = this.vars.host;
             const serverOK = () => {
                 const started = new Date();
-                const info = oba_common_1.default.stringify(Object.assign(Object.assign({}, this.vars), { started }));
-                oba_common_1.default.ok("Server started now man", this.server.address());
+                const { address, port } = this.server.address() || {};
+                const info = oba_common_1.default.stringify({ server: Object.assign(Object.assign({}, this.vars), { address, port, started }) });
+                oba_common_1.default.ok(`${this.vars.name.toLocaleUpperCase()} Api is running -> ${info}`);
                 this.logger.postLogMsg("info", info);
             };
             const serverErr = (e) => {

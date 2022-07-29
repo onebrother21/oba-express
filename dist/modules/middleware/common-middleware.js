@@ -58,6 +58,8 @@ const csurf_1 = __importDefault(require("csurf"));
 const lusca_1 = __importDefault(require("lusca"));
 const express_flash_1 = __importDefault(require("express-flash"));
 const errorhandler_1 = __importDefault(require("errorhandler"));
+const uuid = __importStar(require("uuid"));
+const { v4: uuidv4 } = uuid;
 const common_middleware_utils_1 = require("./common-middleware-utils");
 const oba_common_1 = __importStar(require("@onebro/oba-common"));
 exports.CommonMiddleware = {
@@ -83,9 +85,9 @@ exports.CommonMiddleware = {
             }
     },
     cors: (a, o, api) => {
-        const { origins } = o, corsOpts = __rest(o, ["origins"]);
+        const { whitelist } = o, corsOpts = __rest(o, ["whitelist"]);
         const opts = Object.assign(Object.assign({}, corsOpts), { origin: (origin, done) => {
-                const allowed = (0, common_middleware_utils_1.validateCORS)({ origin, origins });
+                const allowed = (0, common_middleware_utils_1.validateCORS)(origin, whitelist);
                 return allowed ? done(null, true) : done(api.e._.cors(), false);
             } });
         a.use((0, cors_1.default)(opts));
@@ -96,15 +98,20 @@ exports.CommonMiddleware = {
     session: (a, o) => {
         const store = o.store ? connect_mongo_1.default.create(o.store) : null;
         const opts = Object.assign(o, { store });
+        //opts.genid = () => uuidv4();
+        if (a.get("env") === "production") {
+            a.set("trust proxy", 1); // trust first proxy
+            opts.cookie.secure = true;
+        }
         a.use((0, express_session_1.default)(opts));
     },
     csrf: (a, o) => {
-        const handler = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+        const csrfHandler = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
             res.cookie("XSRF-TOKEN", req.csrfToken());
             return next();
         });
         a.use((0, csurf_1.default)(o));
-        a.use(handler);
+        a.use(csrfHandler);
     },
     lusca: (a, o) => {
         const csrfCookie = o.csrf && o.csrf.cookie ? o.csrf.cookie : null;
@@ -115,12 +122,11 @@ exports.CommonMiddleware = {
                 req.body && csrf ? (req.body._csrf = csrf) : null && oba_common_1.default.trace({ csrf });
             return next();
         });
-        //OB.trace({csrfCookie});
         csrfCookie ? a.use(handler) : null;
         a.use((0, lusca_1.default)(o));
     },
-    public: (a, o) => { o.dirname ? a.use(express_1.default.static(o.dirname, o)) : null; },
-    views: (a, o) => {
+    useStatic: (a, o) => { o.dirname ? a.use(express_1.default.static(o.dirname, o)) : null; },
+    useViews: (a, o) => {
         if (o.dirname && o.engine) {
             a.set("views", o.dirname);
             a.set("view engine", o.engine);

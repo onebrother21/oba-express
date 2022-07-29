@@ -33,6 +33,7 @@
     "@onebro/oba-common": "^2.9.5",
     "@onebro/oba-core": "^2.9.13",
     "@onebro/oba-core-api": "^2.9.3",
+    "@types/uuid": "^8.3.4",
     "compression": "^1.7.4",
     "config": "^3.3.6",
     "connect-mongo": "^4.6.0",
@@ -50,7 +51,8 @@
     "morgan": "^1.10.0",
     "node-fetch": "^3.0.0",
     "pug": "^3.0.2",
-    "socket.io": "^4.3.1"
+    "socket.io": "^4.3.1",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@types/compression": "^1.7.2",
