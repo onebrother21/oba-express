@@ -26,9 +26,9 @@ export class OBAExpress<Ev = undefined,Sockets = undefined> extends Component<OB
     const serverOK = () => {
       const started = new Date();
       const {address,port} = this.server.address() || {} as any;
-      const info = OB.stringify({server:{...this.vars,address,port,started}});
-      OB.ok(`${this.vars.name.toLocaleUpperCase()} Api is running -> ${info}`);
-      this.logger.postLogMsg("info",info);
+      const server = {host:HOST,address,port,started};
+      OB.ok(`Api Server Started --> ${this.vars.name}`);
+      this.logger.postLogMsg("info",OB.stringify({server}));
     };
     const serverErr = (e:AppError) => {
       if(e.code === "EADDRINUSE"){
