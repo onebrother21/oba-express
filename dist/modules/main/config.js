@@ -8,18 +8,21 @@ const config_1 = __importDefault(require("config"));
 const oba_common_1 = __importDefault(require("@onebro/oba-common"));
 const oba_core_1 = require("@onebro/oba-core");
 const expressConfig = () => {
+    const initial = config_1.default.get("appconfig");
     const host = process.env.HOST || oba_common_1.default.appvar("_HOST");
     const port = Number(process.env.PORT || oba_common_1.default.appvar("_PORT"));
     const whitelist = oba_common_1.default.appvar("_ORIGINS");
     const providers = oba_common_1.default.appvar("_PROVIDERS");
     const consumers = oba_common_1.default.appvar("_CONSUMERS");
     const settings = { checkConn: false };
-    const initial = config_1.default.get("appconfig");
     const coreInitial = (0, oba_core_1.coreConfig)();
     const coreRuntime = oba_common_1.default.mergeObj(initial, coreInitial, false);
+    const corsAllowedHeaders = coreRuntime.middleware.common.cors.allowedHeaders;
+    const corsApiHeaders = oba_common_1.default.appvar("_CORS_ALLOWED_HEADERS");
+    const allowedHeaders = [...corsAllowedHeaders, ...corsApiHeaders];
     const atRuntime = {
         vars: { host, port, providers, consumers, settings },
-        middleware: { common: { cors: { whitelist } } },
+        middleware: { common: { cors: { whitelist, allowedHeaders } } },
     };
     const expressconfig = oba_common_1.default.mergeObj(coreRuntime, atRuntime, false);
     return expressconfig;

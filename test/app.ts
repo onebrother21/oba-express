@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import supertest from "supertest";
 import OB,{AnyBoolean} from "@onebro/oba-common";
-import {testAppApiConfig} from "../src/dev";
+import {testAppApiConfig} from "../src/dev-server";
 
 export const App = {
   refresh:async () => {

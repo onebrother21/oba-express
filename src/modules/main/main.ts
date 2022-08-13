@@ -20,6 +20,26 @@ export class OBAExpress<Ev = undefined,Sockets = undefined> extends Component<OB
   get v(){return this.vars;}
   set v(vars:OBAExpress<Ev,Sockets>["vars"]){this.vars = vars;}
   get routes():OBAExpressRouterEndpoint[]{return listEndpoints(this.app);}
+  createApp = createApp;
+  init = async (db?:AnyBoolean,server?:AnyBoolean):Promise<void> => {
+    await this.initCore(db);
+    await this.initServer(server);
+  };
+  initCore = async (start?:AnyBoolean) => {
+    const core = new OBACore<Ev>(this.config);
+    await core.init(start);
+    delete core.config;
+    Object.assign(this,core);
+  };
+  initServer = async (start?:AnyBoolean) => {
+    this.app = await this.createApp(this as any);
+    this.server = this.app?createServer(this.app):null;
+    const isSocketServer = this.config.sockets && this.server;
+    const checkConn = this.server && this.vars.settings && this.vars.settings.checkConn;
+    if(isSocketServer) this.io = OBAExpressSockets.init(this.config.sockets,this.server);
+    if(checkConn) await this.monitorServer();
+    if(start) this.startServer();
+  };
   startServer = async () => {
     const PORT = this.vars.port;
     const HOST = this.vars.host;
@@ -43,27 +63,7 @@ export class OBAExpress<Ev = undefined,Sockets = undefined> extends Component<OB
     this.server.on("error",serverErr);
     this.server.listen(PORT);
   };
-  createApp = createApp;
-  init = async (db?:AnyBoolean,server?:AnyBoolean):Promise<void> => {
-    await this.initCore(db);
-    await this.initServer(server);
-  };
-  initCore = async (start?:AnyBoolean) => {
-    const core = new OBACore<Ev>(this.config);
-    await core.init(start);
-    delete core.config;
-    Object.assign(this,core);
-  };
-  initServer = async (start?:AnyBoolean) => {
-    this.app = await this.createApp(this as any);
-    this.server = this.app?createServer(this.app):null;
-    const isSocketServer = this.config.sockets && this.server;
-    const checkConn = this.server && this.vars.settings && this.vars.settings.checkConn;
-    if(isSocketServer) this.io = OBAExpressSockets.init(this.config.sockets,this.server);
-    if(checkConn) await this.monitor();
-    if(start) this.startServer();
-  };
-  monitor = async () => {
+  monitorServer = async () => {
     const check = this.vars.settings.checkConn;
     if(check){
       let live = true;

@@ -1,6 +1,6 @@
 import {J} from "../../utils";
 import {App} from "../../app";
-import {TestAppApi} from "../../../src/dev";
+import {TestAppApi} from "../../../src/dev-server";
 
 export const OBAExpressMiddlewareInitTests = () => J.desc("AM Middleware Init",() => {
   let api:TestAppApi;

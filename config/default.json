@@ -2,11 +2,10 @@
   "appconfig":{
     "vars":{
       "name":"thisApp",
+      "env":"dev-server-live-db",
+      "version":"1.0.0",
       "host":"http://localhost",
       "port":3000,
-      "env":"dev",
-      "mode":"init",
-      "version":1.1,
       "entry":"/"
     },
     "logger":{
@@ -18,18 +17,18 @@
       "db":[
         {
           "level":"info",
-          "collection":"all_log",
+          "collection":"all_logs",
           "options":{"useUnifiedTopology":true},
           "metaKey":"meta",
           "decolorize":true,
           "tryReconnect":true,
-          "expreAfterSeconds":120
+          "expireAfterSeconds":120
         }
       ],
       "dbCustom":[
-        {"level":"error","name":"api_error_log","dateStub":"mm"},
-        {"level":"access","name":"api_access_log","dateStub":"mm"},
-        {"level":"info","name":"api_info_log","dateStub":"mm"}
+        {"level":"error","collection":"api_error_log","dateStub":"mm"},
+        {"level":"access","collection":"api_access_log","dateStub":"mm"},
+        {"level":"info","collection":"api_info_log","dateStub":"mm"}
       ]
     },
     "db":{
@@ -79,8 +78,6 @@
           "preflightContinue":false,
           "credentials":true,
           "allowedHeaders":[
-            "OBA-CLIENT-ID",
-            "OBA-CLIENT-KEY",
             "XSRF-TOKEN",
             "Authorization",
             "Content-Type"
@@ -107,7 +104,8 @@
             "stringify":true
           }
         },
-        "csrf":{"cookie":true}
+        "csrf":{"cookie":true},
+        "multer":{}
       }
     }
   }

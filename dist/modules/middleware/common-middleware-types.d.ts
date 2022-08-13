@@ -86,7 +86,9 @@ export declare type UseViewsOpts = {
     engine: string;
     dirname: string;
 };
+export declare type MulterGfsOpts = Record<"dbUrl" | "fileSlug" | "bucketName", string>;
 export declare type OBAExpressCommonMiddlewareConfig = Partial<{
+    multer: MulterGfsOpts;
     compression: AnyBoolean;
     disablePoweredBy: AnyBoolean;
     morgan: MorganOpts;

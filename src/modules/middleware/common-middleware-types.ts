@@ -62,8 +62,10 @@ export type BodyParserOpts = {
 };
 export type UseStaticOpts = {maxAge:3000000;dirname:string;};
 export type UseViewsOpts = {engine:string;dirname:string;};
+export type MulterGfsOpts = Record<"dbUrl"|"fileSlug"|"bucketName",string>;
 
 export type OBAExpressCommonMiddlewareConfig = Partial<{
+  multer:MulterGfsOpts;
   compression:AnyBoolean;
   disablePoweredBy:AnyBoolean;
   morgan:MorganOpts;

@@ -12,11 +12,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const dev_1 = require("./dev");
+const dev_server_1 = require("./dev-server");
 const oba_common_1 = __importDefault(require("@onebro/oba-common"));
 module.exports = (() => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { api } = yield (0, dev_1.testAppApiConfig)();
+        const { api } = yield (0, dev_server_1.testAppApiConfig)();
         yield api.init(1, 1);
     }
     catch (e) {

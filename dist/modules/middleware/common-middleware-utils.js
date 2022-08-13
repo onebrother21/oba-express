@@ -6,6 +6,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.readCert = exports.validateCORS = exports.morganMsgFormats = exports.morganMsgTokens = void 0;
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
+//import multer from "multer";
+//import { GridFsStorage } from "multer-gridfs-storage";
 const oba_common_1 = __importDefault(require("@onebro/oba-common"));
 exports.morganMsgTokens = {
     errLogMsg: (req) => {
@@ -42,9 +44,9 @@ const accessTokenStrs = {
     http: `"http":":http-version"`,
     method: `"method":":method"`,
     path: `"url":":url"`,
-    resStatus: `"status"::status`,
+    resStatus: `"status":":status"`,
     resSize: `"res-size":":res[content-length]"`,
-    resTime: `"res-time"::total-time`,
+    resTime: `"res-time":":total-time"`,
 };
 const accessLogMsg = "{" + Object.keys(accessTokenStrs).map(k => accessTokenStrs[k]).join(",") + "}";
 exports.morganMsgFormats = {
@@ -76,4 +78,25 @@ const readCert = () => {
     return SSLCertInfo;
 };
 exports.readCert = readCert;
+/*
+export const loadMulterGfsSingle = ({dbUrl,fileSlug,bucketName}:MulterGfsOpts,multiple?:boolean) => {
+  const {generateBytes} = GridFsStorage;
+  const storage = new GridFsStorage({
+    url:dbUrl,
+    options:{useNewUrlParser:true,useUnifiedTopology:true},
+    cache:true,
+    file:(req,file) => {
+      return new Promise(done => {
+        const fileTypes = ["image/png","image/jpeg","image/jpg"];
+        const filename = `${Date.now()}-${fileSlug}-${file.originalname}`;
+        //const filename = await generateBytes().filename + path.extname(file.originalname);
+        done(!fileTypes.includes(file.mimetype)?filename:{bucketName,filename});
+      });
+    }
+  });
+  const uploadFiles = multiple?multer({storage}).single("file"):multer({storage}).array("file",10);;
+  const uploadFilesHandler = util.promisify(uploadFiles);
+  return uploadFilesHandler;
+};
+*/ 
 //# sourceMappingURL=common-middleware-utils.js.map

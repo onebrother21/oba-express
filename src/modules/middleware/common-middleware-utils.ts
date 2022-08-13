@@ -1,8 +1,11 @@
 import {Request} from "express";
 import fs from "fs";
 import path from "path";
+import util from "util";
+//import multer from "multer";
+//import { GridFsStorage } from "multer-gridfs-storage";
 import OB,{Enum,Strings,TypedMethods} from "@onebro/oba-common";
-import { CorsOpts } from "./common-middleware-types";
+import { CorsOpts, MulterGfsOpts } from "./common-middleware-types";
 
 export type MorganLoggerTypes = "access"|"warn"|"error"|"info";
 export const morganMsgTokens:TypedMethods<Request,string> = {
@@ -40,9 +43,9 @@ const accessTokenStrs:Strings = {
   http:`"http":":http-version"`,
   method:`"method":":method"`,
   path:`"url":":url"`,
-  resStatus:`"status"::status`,
+  resStatus:`"status":":status"`,
   resSize:`"res-size":":res[content-length]"`,
-  resTime:`"res-time"::total-time`,
+  resTime:`"res-time":":total-time"`,
 };
 const accessLogMsg = "{" + Object.keys(accessTokenStrs).map(k => accessTokenStrs[k as any]).join(",") +"}";
 export const morganMsgFormats:Enum<string,undefined,MorganLoggerTypes> = {
@@ -68,3 +71,24 @@ export const readCert = () => {
   };
   return SSLCertInfo;
 };
+/*
+export const loadMulterGfsSingle = ({dbUrl,fileSlug,bucketName}:MulterGfsOpts,multiple?:boolean) => {
+  const {generateBytes} = GridFsStorage;
+  const storage = new GridFsStorage({
+    url:dbUrl,
+    options:{useNewUrlParser:true,useUnifiedTopology:true},
+    cache:true,
+    file:(req,file) => {
+      return new Promise(done => {
+        const fileTypes = ["image/png","image/jpeg","image/jpg"];
+        const filename = `${Date.now()}-${fileSlug}-${file.originalname}`;
+        //const filename = await generateBytes().filename + path.extname(file.originalname);
+        done(!fileTypes.includes(file.mimetype)?filename:{bucketName,filename});
+      });
+    }
+  });
+  const uploadFiles = multiple?multer({storage}).single("file"):multer({storage}).array("file",10);;
+  const uploadFilesHandler = util.promisify(uploadFiles);
+  return uploadFilesHandler;
+};
+*/

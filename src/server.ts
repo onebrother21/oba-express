@@ -1,4 +1,4 @@
-import {testAppApiConfig} from "./dev";
+import {testAppApiConfig} from "./dev-server";
 import OB from "@onebro/oba-common";
 
 module.exports = (async () => {

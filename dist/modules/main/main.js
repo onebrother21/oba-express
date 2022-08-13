@@ -49,6 +49,29 @@ const sockets_1 = require("../sockets");
 class OBAExpress extends oba_common_1.Component {
     constructor() {
         super(...arguments);
+        this.createApp = app_1.createApp;
+        this.init = (db, server) => __awaiter(this, void 0, void 0, function* () {
+            yield this.initCore(db);
+            yield this.initServer(server);
+        });
+        this.initCore = (start) => __awaiter(this, void 0, void 0, function* () {
+            const core = new oba_core_1.default(this.config);
+            yield core.init(start);
+            delete core.config;
+            Object.assign(this, core);
+        });
+        this.initServer = (start) => __awaiter(this, void 0, void 0, function* () {
+            this.app = yield this.createApp(this);
+            this.server = this.app ? (0, http_1.createServer)(this.app) : null;
+            const isSocketServer = this.config.sockets && this.server;
+            const checkConn = this.server && this.vars.settings && this.vars.settings.checkConn;
+            if (isSocketServer)
+                this.io = sockets_1.OBAExpressSockets.init(this.config.sockets, this.server);
+            if (checkConn)
+                yield this.monitorServer();
+            if (start)
+                this.startServer();
+        });
         this.startServer = () => __awaiter(this, void 0, void 0, function* () {
             const PORT = this.vars.port;
             const HOST = this.vars.host;
@@ -72,30 +95,7 @@ class OBAExpress extends oba_common_1.Component {
             this.server.on("error", serverErr);
             this.server.listen(PORT);
         });
-        this.createApp = app_1.createApp;
-        this.init = (db, server) => __awaiter(this, void 0, void 0, function* () {
-            yield this.initCore(db);
-            yield this.initServer(server);
-        });
-        this.initCore = (start) => __awaiter(this, void 0, void 0, function* () {
-            const core = new oba_core_1.default(this.config);
-            yield core.init(start);
-            delete core.config;
-            Object.assign(this, core);
-        });
-        this.initServer = (start) => __awaiter(this, void 0, void 0, function* () {
-            this.app = yield this.createApp(this);
-            this.server = this.app ? (0, http_1.createServer)(this.app) : null;
-            const isSocketServer = this.config.sockets && this.server;
-            const checkConn = this.server && this.vars.settings && this.vars.settings.checkConn;
-            if (isSocketServer)
-                this.io = sockets_1.OBAExpressSockets.init(this.config.sockets, this.server);
-            if (checkConn)
-                yield this.monitor();
-            if (start)
-                this.startServer();
-        });
-        this.monitor = () => __awaiter(this, void 0, void 0, function* () {
+        this.monitorServer = () => __awaiter(this, void 0, void 0, function* () {
             const check = this.vars.settings.checkConn;
             if (check) {
                 let live = true;

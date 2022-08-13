@@ -6,7 +6,8 @@ import OB from "@onebro/oba-common";
 export const init = () => J.desc("INIT",() => {
   it("Init",async () => {
     await App.refresh();
-    OB.ok("**tests started**",OB.appEnvName(),OB.env());
+    const intro = "AppName: "+OB.appEnvName()+", Environment: "+OB.env()?.toLocaleUpperCase();
+    OB.ok("**tests started**",intro);
   },1E9);
 });
 export const finalCheck = () => J.desc("INIT EXPRESS API",() => {

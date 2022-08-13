@@ -10,11 +10,11 @@ export declare class OBAExpress<Ev = undefined, Sockets = undefined> extends Com
     get v(): OBAExpress<Ev, Sockets>["vars"];
     set v(vars: OBAExpress<Ev, Sockets>["vars"]);
     get routes(): OBAExpressRouterEndpoint[];
-    startServer: () => Promise<void>;
     createApp: (api: OBAExpressType<undefined, undefined>) => Promise<express.Express>;
     init: (db?: AnyBoolean, server?: AnyBoolean) => Promise<void>;
     initCore: (start?: AnyBoolean) => Promise<void>;
     initServer: (start?: AnyBoolean) => Promise<void>;
-    monitor: () => Promise<import("rxjs").Subscription>;
+    startServer: () => Promise<void>;
+    monitorServer: () => Promise<import("rxjs").Subscription>;
 }
 export default OBAExpress;

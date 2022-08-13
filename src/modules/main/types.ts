@@ -13,13 +13,13 @@ export type OBAExpressConfigType<Sockets = undefined> = OBACoreConfig & Partial<
   sockets:OBAExpressSocketsConfig<Sockets>;
 }>;
 export type OBAExpressMethods<E,S> = {
-  monitor:() => Promise<any>;
   createApp:(api:OBAExpressType<E,S>) => Promise<express.Express>;
-  startDB:() => Promise<void>;
-  startServer:() => Promise<void>;
   initCore:(startDb?:AnyBoolean) => Promise<void>;
   initServer:(startServer?:AnyBoolean) => Promise<void>;
   init:(db?:AnyBoolean,server?:AnyBoolean) => Promise<void>;
+  startDB:() => Promise<void>;
+  startServer:() => Promise<void>;
+  monitorServer:() => Promise<any>;
 };
 export type OBAExpressBase<E> = Omit<OBACore<E>,"config">;
 export type OBAExpressType<Ev = undefined,Sockets = undefined> = OBAExpressBase<Ev> & OBAExpressMethods<Ev,Sockets> & {
