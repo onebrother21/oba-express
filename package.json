@@ -30,8 +30,8 @@
     "start-server": "npm run serve-server"
   },
   "dependencies": {
-    "@onebro/oba-common": "^2.9.19",
-    "@onebro/oba-core": "^2.9.19",
+    "@onebro/oba-common": "^2.9.22",
+    "@onebro/oba-core": "^2.9.21",
     "@types/uuid": "^8.3.4",
     "compression": "^1.7.4",
     "config": "^3.3.6",
