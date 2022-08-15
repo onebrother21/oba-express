@@ -12,3 +12,4 @@ export declare const readCert: () => {
     passphrase: string;
     ca: Buffer;
 };
+export declare const uaParser: (input: any) => any;

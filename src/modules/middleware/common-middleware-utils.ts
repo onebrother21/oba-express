@@ -92,3 +92,47 @@ export const loadMulterGfsSingle = ({dbUrl,fileSlug,bucketName}:MulterGfsOpts,mu
   return uploadFilesHandler;
 };
 */
+export const uaParser = (() => {
+  //useragent strings are just a set of phrases each optionally followed by a set of properties encapsulated in paretheses
+  const part = /\s*([^\s/]+)(\/(\S+)|)(\s+\(([^)]+)\)|)/g;
+  //these properties are delimited by semicolons
+  const delim = /;\s*/;
+  //the properties may be simple key-value pairs if;
+  const single = [
+      //it is a single comma separation,
+      /^([^,]+),\s*([^,]+)$/,
+      //it is a single space separation,
+      /^(\S+)\s+(\S+)$/,
+      //it is a single colon separation,
+      /^([^:]+):([^:]+)$/,
+      //it is a single slash separation
+      /^([^/]+)\/([^/]+)$/,
+      //or is a special string
+      /^(.NET CLR|Windows)\s+(.+)$/
+  ];
+  //otherwise it is unparsable because everyone does it differently, looking at you iPhone
+  const many = / +/;
+  //oh yeah, bots like to use links
+  const link = /^\+(.+)$/;
+  const inner = (properties:any,property:any) => {
+    let tmp;
+    if(tmp = property.match(link)){properties.link = tmp[1];}
+    else if(tmp = single.reduce((match, regex) => (match || property.match(regex)),null)){properties[tmp[1]] = tmp[2];}
+    else if(many.test(property)) {
+      if(!properties.properties) properties.properties = [];
+      properties.properties.push(property);
+    }
+    else{properties[property] = true;}
+    return properties;
+  };
+  return (input:any) => {
+    const output = {} as any;
+    for(let match;match = part.exec(input);""){
+      output[match[1]] = {
+        ...(match[5] && match[5].split(delim).reduce(inner,{})),
+        ...(match[3] && {version:match[3]}),
+      };
+    }
+    return output;
+  };
+})();
