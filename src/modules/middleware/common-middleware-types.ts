@@ -16,7 +16,7 @@ export type SessionOpts = {
   secret:string|string[];
   resave?:boolean;
   saveUninitialized?:boolean;
-  cookie?:{secure?:boolean;sameSite?:"none"|"lax";maxAge:number;};
+  cookie?:{httpOnly?:boolean;secure?:boolean;sameSite?:"none"|"lax";maxAge:number;};
   store?:MongoSessionStoreOpts;
 };
 export type CsrfOpts = {cookie:boolean;};

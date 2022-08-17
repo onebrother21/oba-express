@@ -18,6 +18,7 @@ export declare type SessionOpts = {
     resave?: boolean;
     saveUninitialized?: boolean;
     cookie?: {
+        httpOnly?: boolean;
         secure?: boolean;
         sameSite?: "none" | "lax";
         maxAge: number;
