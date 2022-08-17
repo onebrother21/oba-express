@@ -16,10 +16,29 @@ export type SessionOpts = {
   secret:string|string[];
   resave?:boolean;
   saveUninitialized?:boolean;
-  cookie?:{httpOnly?:boolean;secure?:boolean;sameSite?:"none"|"lax";maxAge:number;};
+  cookie?:{
+    path?:string;
+    signed?:boolean;
+    secure?:boolean;
+    maxAge?:number;
+    httpOnly?:boolean;
+    sameSite?:false|"strict"|"lax"|"none";
+    domain?:string;
+  };
   store?:MongoSessionStoreOpts;
 };
-export type CsrfOpts = {cookie:boolean;};
+export type CsrfOpts = {
+  cookie?:boolean|{
+    key?:string;
+    path?:string;
+    signed?:boolean;
+    secure?:boolean;
+    maxAge?:number;
+    httpOnly?:boolean;
+    sameSite?:false|"strict"|"lax"|"none";
+    domain?:string;
+  };
+};
 export type LuscaOpts = {
   csrf?:boolean|{cookie?:string|any;};
   csp?:any;

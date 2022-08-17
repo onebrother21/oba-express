@@ -18,15 +18,27 @@ export declare type SessionOpts = {
     resave?: boolean;
     saveUninitialized?: boolean;
     cookie?: {
-        httpOnly?: boolean;
+        path?: string;
+        signed?: boolean;
         secure?: boolean;
-        sameSite?: "none" | "lax";
-        maxAge: number;
+        maxAge?: number;
+        httpOnly?: boolean;
+        sameSite?: false | "strict" | "lax" | "none";
+        domain?: string;
     };
     store?: MongoSessionStoreOpts;
 };
 export declare type CsrfOpts = {
-    cookie: boolean;
+    cookie?: boolean | {
+        key?: string;
+        path?: string;
+        signed?: boolean;
+        secure?: boolean;
+        maxAge?: number;
+        httpOnly?: boolean;
+        sameSite?: false | "strict" | "lax" | "none";
+        domain?: string;
+    };
 };
 export declare type LuscaOpts = {
     csrf?: boolean | {
