@@ -18,6 +18,8 @@ export declare type SessionOpts = {
     resave?: boolean;
     saveUninitialized?: boolean;
     cookie?: {
+        secure?: boolean;
+        sameSite?: "none" | "lax";
         maxAge: number;
     };
     store?: MongoSessionStoreOpts;

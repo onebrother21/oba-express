@@ -99,10 +99,8 @@ exports.CommonMiddleware = {
         const store = o.store ? connect_mongo_1.default.create(o.store) : null;
         const opts = Object.assign(o, { store });
         //opts.genid = () => uuidv4();
-        if (a.get("env") === "production") {
+        if (oba_common_1.default.isEnv("prod"))
             a.set("trust proxy", 1); // trust first proxy
-            opts.cookie.secure = true;
-        }
         a.use((0, express_session_1.default)(opts));
     },
     csrf: (a, o) => {

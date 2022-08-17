@@ -56,10 +56,7 @@ export const CommonMiddleware:Partial<OBAExpressMiddlewareSetters> = {
     const store = o.store?MongoStore.create(o.store):null;
     const opts:SessionOptions = Object.assign(o,{store});
     //opts.genid = () => uuidv4();
-    if(a.get("env") === "production"){
-      a.set("trust proxy",1);// trust first proxy
-      opts.cookie.secure = true;
-    }
+    if(OB.isEnv("prod")) a.set("trust proxy",1);// trust first proxy
     a.use(session(opts));
   },
   csrf:(a,o) => {
