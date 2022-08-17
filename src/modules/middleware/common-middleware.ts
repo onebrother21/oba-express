@@ -62,7 +62,7 @@ export const CommonMiddleware:Partial<OBAExpressMiddlewareSetters> = {
   csrf:(a,o) => {
     const csrfHandler:Handler = async (req,res,next) => {
       res.cookie("XSRF-TOKEN",req.csrfToken(),{
-        httpOnly:true,
+        //httpOnly:true,
         secure:OB.isEnv("prod"),
         sameSite:OB.isEnv("prod")?"none":"lax"
       });
