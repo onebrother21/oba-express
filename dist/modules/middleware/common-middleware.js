@@ -106,7 +106,7 @@ exports.CommonMiddleware = {
     csrf: (a, o) => {
         const csrfHandler = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
             res.cookie("XSRF-TOKEN", req.csrfToken(), {
-                //httpOnly:true,
+                httpOnly: false,
                 secure: oba_common_1.default.isEnv("prod"),
                 sameSite: oba_common_1.default.isEnv("prod") ? "none" : "lax"
             });
