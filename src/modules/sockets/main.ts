@@ -7,8 +7,8 @@ export type OBAExpressSocketsConfig<Sockets> = OBAExpressSocketsConfigType<Socke
 
 export class OBAExpressSockets {
   static init = <Sockets>(config:OBAExpressSocketsConfig<Sockets>,httpServer:Server) => {
-    const io = new socketIo.Server(httpServer);
-    io.on("connection",(s:Socket) => {for(const k in config) s.on(k,config[k as Keys<Sockets>](io,s));});
+    const io = new socketIo.Server(httpServer,{});
+    io.on("connection",(s:Socket) => {for(const k in config) s.on(k,config.events[k as Keys<Sockets>](io,s));});
     return io;
   }
 }
