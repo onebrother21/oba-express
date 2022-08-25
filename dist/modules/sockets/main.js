@@ -10,7 +10,7 @@ class OBAExpressSockets {
 exports.OBAExpressSockets = OBAExpressSockets;
 OBAExpressSockets.init = (config, httpServer) => {
     const io = new socket_io_1.default.Server(httpServer, config.opts);
-    io.on("connection", (s) => { for (const k in config)
+    io.on("connection", (s) => { for (const k in config.events)
         s.on(k, config.events[k](io, s)); });
     return io;
 };
