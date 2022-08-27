@@ -19,26 +19,22 @@ const createSockets = (api) => __awaiter(void 0, void 0, void 0, function* () {
     const io = new socket_io_1.default.Server(server, sockets.opts);
     const socketCreators = yield sockets.events(api);
     io.on("connection", (s) => {
-        const s_ = s;
+        /*
+        const s_ = (s as any) as SocketWrapper;
         s_.listeners = {};
-        s_.on = (name, callback) => {
-            if (!s_.listeners[name]) {
-                s_.listeners[name] = [];
-            }
-            s_.listeners[name].push(callback);
+        s_.on = (name,callback) => {
+          if(!s_.listeners[name]){s_.listeners[name] = [];}
+          s_.listeners[name].push(callback);
         };
-        s_.emit = (name, data) => { if (s_.listeners[name]) {
-            s_.callListeners(s_.listeners[name], data);
-        } };
-        s_.callListeners = (listeners, data) => {
-            listeners.shift()(data);
-            if (listeners.length) {
-                s_.callListeners(listeners, data);
-            }
+        s_.emit = (name,data) => {if(s_.listeners[name]){s_.callListeners(s_.listeners[name], data);}};
+        s_.callListeners = (listeners,data) => {
+          listeners.shift()(data);
+          if(listeners.length){s_.callListeners(listeners,data);}
         };
+        */
         for (const k in socketCreators) {
             const c = socketCreators[k];
-            s_.on(k, c(io, s));
+            s.on(k, c(io, s));
         }
     });
     return io;

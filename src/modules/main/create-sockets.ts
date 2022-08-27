@@ -2,11 +2,12 @@ import {OBAExpressType} from "./types";
 import socketIo,{Socket,Server as SocketServer} from "socket.io";
 import {SocketWrapper} from "../sockets";
 
-export const createSockets = async (api:OBAExpressType):Promise<SocketServer> => {
+export const createSockets = async <S>(api:OBAExpressType<undefined,S>):Promise<SocketServer> => {
   const {server,config:{sockets}} = api;
   const io = new socketIo.Server(server,sockets.opts);
   const socketCreators = await sockets.events(api);
   io.on("connection",(s:Socket) => {
+    /*
     const s_ = (s as any) as SocketWrapper;
     s_.listeners = {};
     s_.on = (name,callback) => {
@@ -18,9 +19,10 @@ export const createSockets = async (api:OBAExpressType):Promise<SocketServer> =>
       listeners.shift()(data);
       if(listeners.length){s_.callListeners(listeners,data);}
     };
+    */
     for(const k in socketCreators){
       const c = (socketCreators as any)[k];
-      s_.on(k,c(io,s));
+      s.on(k,c(io,s));
     }
   });
   return io;

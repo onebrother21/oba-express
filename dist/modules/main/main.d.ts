@@ -11,7 +11,7 @@ export declare class OBAExpress<Ev = undefined, Sockets = undefined> extends Com
     set v(vars: OBAExpress<Ev, Sockets>["vars"]);
     get routes(): OBAExpressRouterEndpoint[];
     createApp: (api: OBAExpressType<undefined, undefined>) => Promise<express.Express>;
-    createSockets: (api: OBAExpressType<undefined, undefined>) => Promise<import("socket.io").Server<import("socket.io/dist/typed-events").DefaultEventsMap, import("socket.io/dist/typed-events").DefaultEventsMap, import("socket.io/dist/typed-events").DefaultEventsMap, any>>;
+    createSockets: <S>(api: OBAExpressType<undefined, S>) => Promise<import("socket.io").Server<import("socket.io/dist/typed-events").DefaultEventsMap, import("socket.io/dist/typed-events").DefaultEventsMap, import("socket.io/dist/typed-events").DefaultEventsMap, any>>;
     init: (db?: AnyBoolean, server?: AnyBoolean) => Promise<void>;
     initCore: (start?: AnyBoolean) => Promise<void>;
     initServer: (start?: AnyBoolean) => Promise<void>;
