@@ -1,4 +1,5 @@
 import {Enum,Keys} from "@onebro/oba-common";
+import OBACore from "@onebro/oba-core";
 import {Server,Socket,Namespace} from "socket.io";
 import { OBAExpressMiddlewareConfig } from "../middleware";
 
@@ -15,8 +16,8 @@ export type SocketWrapper = Omit<Socket,"on"|"emit"|"listeners"> & {
 export type BaseSocketEvents = Enum<SocketEventCreator<void>,"disconnecting"|"disconnect"|"error">;
 export type SocketEvents<Sockets> = {[k in Keys<Sockets>]:SocketEventCreator<Sockets[k]>;};
 
-export type OBAExpressSocketsConfigType<Sockets> = {
+export type OBAExpressSocketsConstructor<Sockets> = (app:OBACore) => Promise<SocketEvents<Sockets>>;
+export type OBAExpressSocketsConfig<Sockets> = {
   opts:{cors:OBAExpressMiddlewareConfig["common"]["cors"];};
-  events:SocketEvents<Sockets>;
+  events:OBAExpressSocketsConstructor<Sockets>;
 };
-export type OBAExpressSocketsServer = <Sockets>(o:OBAExpressSocketsConfigType<Sockets>) => Server;

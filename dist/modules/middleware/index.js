@@ -22,4 +22,5 @@ __exportStar(require("./common-handler-utils"), exports);
 __exportStar(require("./common-handlers"), exports);
 __exportStar(require("./types"), exports);
 __exportStar(require("./main"), exports);
+__exportStar(require("./send-req"), exports);
 //# sourceMappingURL=index.js.map

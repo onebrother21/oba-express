@@ -44,12 +44,13 @@ const rxjs_1 = require("rxjs");
 const operators_1 = require("rxjs/operators");
 const oba_common_1 = __importStar(require("@onebro/oba-common"));
 const oba_core_1 = __importDefault(require("@onebro/oba-core"));
-const app_1 = require("./app");
-const sockets_1 = require("../sockets");
+const create_app_1 = require("./create-app");
+const create_sockets_1 = require("./create-sockets");
 class OBAExpress extends oba_common_1.Component {
     constructor() {
         super(...arguments);
-        this.createApp = app_1.createApp;
+        this.createApp = create_app_1.createApp;
+        this.createSockets = create_sockets_1.createSockets;
         this.init = (db, server) => __awaiter(this, void 0, void 0, function* () {
             yield this.initCore(db);
             yield this.initServer(server);
@@ -66,7 +67,7 @@ class OBAExpress extends oba_common_1.Component {
             const isSocketServer = this.config.sockets && this.server;
             const checkConn = this.server && this.vars.settings && this.vars.settings.checkConn;
             if (isSocketServer)
-                this.io = yield sockets_1.OBAExpressSockets.init(this.config.sockets, this.server);
+                this.io = yield this.createSockets(this);
             if (checkConn)
                 yield this.monitorServer();
             if (start)

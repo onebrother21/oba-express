@@ -14,6 +14,7 @@ export type OBAExpressConfigType<Sockets = undefined> = OBACoreConfig & Partial<
 }>;
 export type OBAExpressMethods<E,S> = {
   createApp:(api:OBAExpressType<E,S>) => Promise<express.Express>;
+  createSockets:(api:OBAExpressType<E,S>) => Promise<SocketServer>;
   initCore:(startDb?:AnyBoolean) => Promise<void>;
   initServer:(startServer?:AnyBoolean) => Promise<void>;
   init:(db?:AnyBoolean,server?:AnyBoolean) => Promise<void>;

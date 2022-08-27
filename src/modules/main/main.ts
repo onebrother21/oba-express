@@ -8,10 +8,10 @@ import {takeWhile,tap,catchError} from "rxjs/operators";
 
 import OB,{Component,AnyBoolean,AppError} from "@onebro/oba-common";
 import OBACore from "@onebro/oba-core";
-import {createApp} from "./app";
+import {createApp} from "./create-app";
+import {createSockets} from "./create-sockets";
 import {OBAExpressConfigType,OBAExpressType} from "./types";
 import {OBAExpressRouterEndpoint} from "../middleware";
-import {OBAExpressSockets} from "../sockets";
 
 export type OBAExpressConfig<Sockets> = OBAExpressConfigType<Sockets>;
 export interface OBAExpress<Ev = undefined,Sockets = undefined> extends Component<OBAExpressConfig<Sockets>,Ev>,OBAExpressType<Ev,Sockets>{}
@@ -21,6 +21,7 @@ export class OBAExpress<Ev = undefined,Sockets = undefined> extends Component<OB
   set v(vars:OBAExpress<Ev,Sockets>["vars"]){this.vars = vars;}
   get routes():OBAExpressRouterEndpoint[]{return listEndpoints(this.app);}
   createApp = createApp;
+  createSockets = createSockets;
   init = async (db?:AnyBoolean,server?:AnyBoolean):Promise<void> => {
     await this.initCore(db);
     await this.initServer(server);
@@ -36,7 +37,7 @@ export class OBAExpress<Ev = undefined,Sockets = undefined> extends Component<OB
     this.server = this.app?createServer(this.app):null;
     const isSocketServer = this.config.sockets && this.server;
     const checkConn = this.server && this.vars.settings && this.vars.settings.checkConn;
-    if(isSocketServer) this.io = await OBAExpressSockets.init(this.config.sockets,this.server);
+    if(isSocketServer) this.io = await this.createSockets(this as any);
     if(checkConn) await this.monitorServer();
     if(start) this.startServer();
   };
