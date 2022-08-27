@@ -1,7 +1,6 @@
 import socketIo,{Socket} from "socket.io";
 import {Server} from "http";
-import {Keys} from "@onebro/oba-common";
-import {OBAExpressSocketsConfigType, Sockkkkk} from "./types";
+import {OBAExpressSocketsConfigType,SocketWrapper} from "./types";
 
 export type OBAExpressSocketsConfig<Sockets> = OBAExpressSocketsConfigType<Sockets>;
 
@@ -9,7 +8,7 @@ export class OBAExpressSockets {
   static init = async <Sockets>(config:OBAExpressSocketsConfig<Sockets>,httpServer:Server) => {
     const io = new socketIo.Server(httpServer,config.opts);
     io.on("connection",(s:Socket) => {
-      const s_ = (s as any) as Sockkkkk;
+      const s_ = (s as any) as SocketWrapper;
       s_.listeners = {};
       s_.on = (name,callback) => {
         if(!s_.listeners[name]){s_.listeners[name] = [];}

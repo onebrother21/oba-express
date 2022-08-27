@@ -1,10 +1,10 @@
 import { Enum, Keys } from "@onebro/oba-common";
 import { Server, Socket, Namespace } from "socket.io";
 import { OBAExpressMiddlewareConfig } from "../middleware";
-export declare type SocketEventPayload = void | boolean | Namespace | Sockkkkk;
+export declare type SocketEventPayload = void | boolean | Namespace | SocketWrapper;
 export declare type SocketEventListener<SocketData> = (data: SocketData) => Promise<SocketEventPayload>;
-export declare type SocketEventCreator<SocketData> = (io: Server, s?: Sockkkkk) => SocketEventListener<SocketData>;
-export declare type Sockkkkk = Omit<Socket, "on" | "emit" | "listeners"> & {
+export declare type SocketEventCreator<SocketData> = (io: Server, s?: SocketWrapper) => SocketEventListener<SocketData>;
+export declare type SocketWrapper = Omit<Socket, "on" | "emit" | "listeners"> & {
     listeners: Partial<Enum<SocketEventListener<any>[], string>>;
     on: (name: string, cb: SocketEventListener<any>) => void;
     emit: (name: string, data: any) => void;
