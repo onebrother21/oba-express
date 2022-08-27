@@ -36,7 +36,7 @@ export class OBAExpress<Ev = undefined,Sockets = undefined> extends Component<OB
     this.server = this.app?createServer(this.app):null;
     const isSocketServer = this.config.sockets && this.server;
     const checkConn = this.server && this.vars.settings && this.vars.settings.checkConn;
-    if(isSocketServer) this.io = OBAExpressSockets.init(this.config.sockets,this.server);
+    if(isSocketServer) this.io = await OBAExpressSockets.init(this.config.sockets,this.server);
     if(checkConn) await this.monitorServer();
     if(start) this.startServer();
   };

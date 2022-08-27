@@ -66,7 +66,7 @@ class OBAExpress extends oba_common_1.Component {
             const isSocketServer = this.config.sockets && this.server;
             const checkConn = this.server && this.vars.settings && this.vars.settings.checkConn;
             if (isSocketServer)
-                this.io = sockets_1.OBAExpressSockets.init(this.config.sockets, this.server);
+                this.io = yield sockets_1.OBAExpressSockets.init(this.config.sockets, this.server);
             if (checkConn)
                 yield this.monitorServer();
             if (start)
